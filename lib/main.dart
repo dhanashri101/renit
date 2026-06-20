@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'dart:async'; // Required for Future.delayed
+
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/login_screens/login_screen.dart';
+import 'package:rentit24/splash_screen/splash_screen.dart';
 import 'package:rentit24/welcomescreen.dart';
 
 // Global theme notifier
@@ -36,9 +39,11 @@ class RentItApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: currentMode,
-          home: const MainLoginScreen(),
+          // 1. Change the home widget to the SplashScreen
+          home: const SplashScreen(), 
         );
       },
     );
   }
 }
+

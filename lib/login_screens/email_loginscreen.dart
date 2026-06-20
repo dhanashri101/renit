@@ -1,8 +1,11 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/login_screens/create_account.dart';
+import 'package:rentit24/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/login_screens/login_screen.dart';
+import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 // import 'package:rentit24/core/theme.dart';
 
 class emailLoginScreen extends StatefulWidget {
@@ -107,6 +110,8 @@ class _LoginScreenState extends State<emailLoginScreen> {
           ? const Color(0xFF121212)
           : const Color(0xFFF8F9FA),
       appBar: AppBar(
+                systemOverlayStyle: SystemUiOverlayStyle.dark,
+
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -272,7 +277,12 @@ class _LoginScreenState extends State<emailLoginScreen> {
               Center(
                 child: TextButton(
                   onPressed: () {
-                    // TODO: Navigate to Forgot Password
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const ForgotPasswordScreen(),
+                      ),
+                    );
                   },
                   child: Text(
                     'Forgot password?',
@@ -318,10 +328,10 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   // Phone
-                  _buildSocialIcon(
-                    Icons.phone_android,
-                    AppTheme.primaryBlue,
-                    () {
+                  SocialIconButton(
+                    icon: Icons.phone_android,
+                    color: AppTheme.primaryBlue,
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -334,23 +344,35 @@ class _LoginScreenState extends State<emailLoginScreen> {
                   const SizedBox(width: 16),
 
                   // Google
-                  _buildSocialIcon(Icons.g_mobiledata, Colors.red, () {
-                    print("Google Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.g_mobiledata,
+                    color: Colors.red,
+                    onTap: () {
+                      print("Google Login");
+                    },
+                  ),
 
                   const SizedBox(width: 16),
 
                   // Facebook
-                  _buildSocialIcon(Icons.facebook, const Color(0xFF1877F2), () {
-                    print("Facebook Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.facebook,
+                    color: const Color(0xFF1877F2),
+                    onTap: () {
+                      print("Facebook Login");
+                    },
+                  ),
 
                   const SizedBox(width: 16),
 
                   // Apple
-                  _buildSocialIcon(Icons.apple, textColor, () {
-                    print("Apple Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.apple,
+                    color: Colors.black,
+                    onTap: () {
+                      print("Apple Login");
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 40),
@@ -397,29 +419,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-
-  // Helper widget to build the interactive social media boxes
-  Widget _buildSocialIcon(IconData icon, Color color, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 45,
-        height: 45,
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: color, size: 24),
       ),
     );
   }

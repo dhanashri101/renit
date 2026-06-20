@@ -1,6 +1,7 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rentit24/login_screens/create_account.dart';
+import 'package:rentit24/login_screens/email_loginscreen.dart';
 import 'package:rentit24/login_screens/login_screen.dart';
 
 class MainLoginScreen extends StatelessWidget {
@@ -143,10 +144,16 @@ class MainLoginScreen extends StatelessWidget {
                   ],
                 ),
                 child: ElevatedButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Navigator.push(
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) => const emailLoginScreen(),
+                      ),
+                    );
+                  },
                   style: ElevatedButton.styleFrom(
-                    backgroundColor:
-                        theme.primaryColor, // Uses AppTheme.primaryBlue
+                    backgroundColor: theme.primaryColor,
                     foregroundColor: Colors.white,
                     elevation: 0,
                     shape: RoundedRectangleBorder(

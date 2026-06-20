@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:pinput/pinput.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/login_screens/congratulationscreen.dart';
 
 class OtpVerificationScreen extends StatefulWidget {
   const OtpVerificationScreen({Key? key}) : super(key: key);
@@ -26,7 +27,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   void initState() {
     super.initState();
     _startTimer();
-    
+
     // Initialize the gesture recognizer for the RESEND text
     _resendRecognizer = TapGestureRecognizer()..onTap = _onResendTap;
   }
@@ -35,7 +36,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     setState(() {
       _remainingSeconds = 47; // Reset to your default start time
     });
-    
+
     _timer?.cancel(); // Cancel any existing timer before starting a new one
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
@@ -77,21 +78,26 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final textColor = isDark ? Colors.white : Colors.black;
 
     // Pinput Theme Configurations mapped from your requested UI
-// Pinput Theme Configurations mapped to your image
+    // Pinput Theme Configurations mapped to your image
     final defaultPinTheme = PinTheme(
       width: 40,
       height: 48,
       textStyle: const TextStyle(
-        color: Color(0xFF090726), 
-        fontSize: 18, // Increased slightly so the dot matches the size in your image
+        color: Color(0xFF090726),
+        fontSize:
+            18, // Increased slightly so the dot matches the size in your image
         fontFamily: 'Outfit',
         fontWeight: FontWeight.w400,
       ),
       decoration: BoxDecoration(
-        color: isDark ? AppTheme.darkSurface : Colors.white, // Empty state background
+        color: isDark
+            ? AppTheme.darkSurface
+            : Colors.white, // Empty state background
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isDark ? Colors.grey.shade800 : Colors.grey.shade300, // Empty state border
+          color: isDark
+              ? Colors.grey.shade800
+              : Colors.grey.shade300, // Empty state border
           width: 1,
         ),
       ),
@@ -156,7 +162,8 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   TextSpan(
                     children: [
                       const TextSpan(
-                        text: 'Please enter the six-digit code we sent to your phone at ',
+                        text:
+                            'Please enter the six-digit code we sent to your phone at ',
                         style: TextStyle(
                           color: Color(0xFF2F314D),
                           fontSize: 14,
@@ -194,12 +201,12 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
               // Dynamic Timer
               Text(
-                formattedTime, 
+                formattedTime,
                 style: TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
-                  color: _remainingSeconds > 0 
-                      ? AppTheme.primaryBlue 
+                  color: _remainingSeconds > 0
+                      ? AppTheme.primaryBlue
                       : Colors.red,
                 ),
               ),
@@ -215,7 +222,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 defaultPinTheme: defaultPinTheme,
                 focusedPinTheme: focusedPinTheme,
                 submittedPinTheme: submittedPinTheme,
-                separatorBuilder: (index) => const SizedBox(width: 20), 
+                separatorBuilder: (index) => const SizedBox(width: 20),
                 inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                 onChanged: (value) {
                   setState(() {
@@ -232,8 +239,13 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                 child: ElevatedButton(
                   onPressed: _isOtpFilled
                       ? () {
-                          // TODO: Handle OTP Verification
-                          print("Verifying OTP: ${_pinController.text}");
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CongratulationsScreen(),
+                            ),
+                          );
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -283,17 +295,17 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                       ),
                       TextSpan(
                         text: 'RESEND',
-                        recognizer: _resendRecognizer, 
+                        recognizer: _resendRecognizer,
                         style: TextStyle(
-                          color: _remainingSeconds == 0 
-                              ? const Color(0xFF4A7CE0) 
-                              : Colors.grey, 
+                          color: _remainingSeconds == 0
+                              ? const Color(0xFF4A7CE0)
+                              : Colors.grey,
                           fontSize: 14,
                           fontFamily: 'Outfit',
                           fontWeight: FontWeight.w400,
                           decoration: TextDecoration.underline,
-                          decorationColor: _remainingSeconds == 0 
-                              ? const Color(0xFF4A7CE0) 
+                          decorationColor: _remainingSeconds == 0
+                              ? const Color(0xFF4A7CE0)
                               : Colors.grey,
                           height: 1.43,
                         ),

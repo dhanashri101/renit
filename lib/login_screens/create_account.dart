@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/login_screens/congratulationscreen.dart';
 import 'package:rentit24/login_screens/login_screen.dart';
+import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class CreateAccountScreen extends StatefulWidget {
   const CreateAccountScreen({Key? key}) : super(key: key);
@@ -15,8 +16,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController = TextEditingController();
-  
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+
   final FocusNode _nameFocus = FocusNode();
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
@@ -43,7 +45,8 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
   void _validateForm() {
     setState(() {
-      _isFormValid = _nameController.text.isNotEmpty &&
+      _isFormValid =
+          _nameController.text.isNotEmpty &&
           _emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty &&
           _confirmPasswordController.text.isNotEmpty;
@@ -56,7 +59,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     _emailController.dispose();
     _passwordController.dispose();
     _confirmPasswordController.dispose();
-    
+
     _nameFocus.dispose();
     _emailFocus.dispose();
     _passwordFocus.dispose();
@@ -73,16 +76,18 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     // Adapting text colors automatically based on mode
     final textColor = isDark ? Colors.white : const Color(0xFF090726);
     final textSecondary = colorScheme.onSurface.withOpacity(0.7);
-    
+
     // UI Colors utilizing your AppTheme
     final defaultBgColor = colorScheme.surface;
-    final defaultBorderColor = isDark ? Colors.grey.shade800 : Colors.grey.shade300;
-    
+    final defaultBorderColor = isDark
+        ? Colors.grey.shade800
+        : Colors.grey.shade300;
+
     // Using your primary blue dynamically for the focused states
     final focusedBorderColor = colorScheme.primary;
-    final focusedBgColor = colorScheme.primary.withOpacity(0.1); 
+    final focusedBgColor = colorScheme.primary.withOpacity(0.1);
 
-   InputDecoration buildInputDecoration({
+    InputDecoration buildInputDecoration({
       required String hintText,
       required IconData prefixIcon,
       required bool isFocused,
@@ -118,6 +123,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
       );
     }
+
     return Scaffold(
       // Using scaffold background inherited from AppTheme
       appBar: AppBar(
@@ -154,7 +160,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 controller: _nameController,
                 focusNode: _nameFocus,
                 textCapitalization: TextCapitalization.words,
-                style: TextStyle(color: textColor, fontSize: 14, fontFamily: 'Outfit', fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14,
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w500,
+                ),
                 onChanged: (_) => _validateForm(),
                 decoration: buildInputDecoration(
                   hintText: 'Full name',
@@ -169,7 +180,12 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 controller: _emailController,
                 focusNode: _emailFocus,
                 keyboardType: TextInputType.emailAddress,
-                style: TextStyle(color: textColor, fontSize: 14, fontFamily: 'Outfit', fontWeight: FontWeight.w500),
+                style: TextStyle(
+                  color: textColor,
+                  fontSize: 14,
+                  fontFamily: 'Outfit',
+                  fontWeight: FontWeight.w500,
+                ),
                 onChanged: (_) => _validateForm(),
                 decoration: buildInputDecoration(
                   hintText: 'E-mail',
@@ -190,7 +206,10 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   fontSize: 14,
                   fontFamily: 'Outfit',
                   fontWeight: FontWeight.w500,
-                  letterSpacing: _obscurePassword && _passwordController.text.isNotEmpty ? 2 : 0,
+                  letterSpacing:
+                      _obscurePassword && _passwordController.text.isNotEmpty
+                      ? 2
+                      : 0,
                 ),
                 onChanged: (_) => _validateForm(),
                 decoration: buildInputDecoration(
@@ -199,7 +218,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   isFocused: _passwordFocus.hasFocus,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscurePassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey.shade500,
                       size: 20,
                     ),
@@ -224,7 +245,11 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   fontSize: 14,
                   fontFamily: 'Outfit',
                   fontWeight: FontWeight.w500,
-                  letterSpacing: _obscureConfirmPassword && _confirmPasswordController.text.isNotEmpty ? 2 : 0,
+                  letterSpacing:
+                      _obscureConfirmPassword &&
+                          _confirmPasswordController.text.isNotEmpty
+                      ? 2
+                      : 0,
                 ),
                 onChanged: (_) => _validateForm(),
                 decoration: buildInputDecoration(
@@ -233,7 +258,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                   isFocused: _confirmFocus.hasFocus,
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureConfirmPassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                      _obscureConfirmPassword
+                          ? Icons.visibility_off_outlined
+                          : Icons.visibility_outlined,
                       color: Colors.grey.shade500,
                       size: 20,
                     ),
@@ -287,21 +314,22 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                 onPressed: _isFormValid
-    ? () {
-        print("Logging in with: ${_emailController.text}");
+                  onPressed: _isFormValid
+                      ? () {
+                          print("Logging in with: ${_emailController.text}");
 
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (context) => const CongratulationsScreen(),
-          ),
-        );
-      }
-    : null,
-                  
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CongratulationsScreen(),
+                            ),
+                          );
+                        }
+                      : null,
+
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: focusedBorderColor, 
+                    backgroundColor: focusedBorderColor,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: isDark
                         ? Colors.grey.shade800
@@ -314,7 +342,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       side: _isFormValid
                           ? BorderSide.none
                           : BorderSide(
-                              color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
+                              color: isDark
+                                  ? Colors.grey.shade800
+                                  : Colors.grey.shade200,
                             ),
                     ),
                   ),
@@ -329,7 +359,9 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               // Divider
               Row(
                 children: [
-                  Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                  Expanded(
+                    child: Divider(color: Colors.grey.shade300, thickness: 1),
+                  ),
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16.0),
                     child: Text(
@@ -341,20 +373,21 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                       ),
                     ),
                   ),
-                  Expanded(child: Divider(color: Colors.grey.shade300, thickness: 1)),
+                  Expanded(
+                    child: Divider(color: Colors.grey.shade300, thickness: 1),
+                  ),
                 ],
               ),
               const SizedBox(height: 24),
 
               // Social Icons Row
-               Row(
+              Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Phone
-                  _buildSocialIcon(
-                    Icons.phone_android,
-                    AppTheme.primaryBlue,
-                    () {
+                  SocialIconButton(
+                    icon: Icons.phone_android,
+                    color: AppTheme.primaryBlue,
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -366,24 +399,33 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Google
-                  _buildSocialIcon(Icons.g_mobiledata, Colors.red, () {
-                    print("Google Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.g_mobiledata,
+                    color: Colors.red,
+                    onTap: () {
+                      print("Google Login");
+                    },
+                  ),
 
                   const SizedBox(width: 16),
 
-                  // Facebook
-                  _buildSocialIcon(Icons.facebook, const Color(0xFF1877F2), () {
-                    print("Facebook Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.facebook,
+                    color: const Color(0xFF1877F2),
+                    onTap: () {
+                      print("Facebook Login");
+                    },
+                  ),
 
                   const SizedBox(width: 16),
 
-                  // Apple
-                  _buildSocialIcon(Icons.apple, textColor, () {
-                    print("Apple Login");
-                  }),
+                  SocialIconButton(
+                    icon: Icons.apple,
+                    color: Colors.black,
+                    onTap: () {
+                      print("Apple Login");
+                    },
+                  ),
                 ],
               ),
               const SizedBox(height: 40),
@@ -428,26 +470,4 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
       ),
     );
   }
-
-Widget _buildSocialIcon(IconData icon, Color color, VoidCallback onTap) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(12),
-      child: Container(
-        width: 45,
-        height: 45,
-        decoration: BoxDecoration(
-          color: isDark ? AppTheme.darkSurface : Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(
-            color: isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-          ),
-        ),
-        alignment: Alignment.center,
-        child: Icon(icon, color: color, size: 24),
-      ),
-    );
-  }  
 }

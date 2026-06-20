@@ -4,6 +4,7 @@ import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/login_screens/email_loginscreen.dart';
 import 'package:rentit24/login_screens/otp_verificationscreen.dart';
+import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
   const PhoneLoginScreen({super.key});
@@ -277,10 +278,10 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  SmallSocialIcon(
+                  SocialIconButton(
                     icon: Icons.mail_outline,
                     color: isDark ? Colors.white : Colors.black87,
-                    onPressed: () {
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -289,26 +290,36 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                       );
                     },
                   ),
+
                   const SizedBox(width: 16),
 
-                  const SmallSocialIcon(
+                  SocialIconButton(
                     icon: Icons.g_mobiledata,
                     color: Colors.redAccent,
                     size: 32,
+                    onTap: () {
+                      print("Google login");
+                    },
                   ),
 
                   const SizedBox(width: 16),
 
-                  const SmallSocialIcon(
+                  SocialIconButton(
                     icon: Icons.facebook,
-                    color: Color(0xFF1877F2),
+                    color: const Color(0xFF1877F2),
+                    onTap: () {
+                      print("Facebook login");
+                    },
                   ),
 
                   const SizedBox(width: 16),
 
-                  SmallSocialIcon(
+                  SocialIconButton(
                     icon: Icons.apple,
                     color: isDark ? Colors.white : Colors.black,
+                    onTap: () {
+                      print("Apple login");
+                    },
                   ),
                 ],
               ),
@@ -350,43 +361,6 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class SmallSocialIcon extends StatelessWidget {
-  final IconData icon;
-  final Color color;
-  final double size;
-  final VoidCallback? onPressed;
-
-  const SmallSocialIcon({
-    super.key,
-    required this.icon,
-    required this.color,
-    this.size = 24,
-    this.onPressed,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
-    return Container(
-      width: 48,
-      height: 48,
-      decoration: BoxDecoration(
-        color: isDark ? const Color(0xFF2C2C2E) : Colors.white,
-        borderRadius: BorderRadius.circular(12),
-        border: Border.all(
-          color: isDark ? Colors.transparent : Colors.grey.shade300,
-          width: 1,
-        ),
-      ),
-      child: IconButton(
-        icon: Icon(icon, color: color, size: size),
-        onPressed: onPressed,
       ),
     );
   }
