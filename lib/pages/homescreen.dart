@@ -1,10 +1,12 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:rentit24/main.dart';
-import 'package:rentit24/pages/categoriscreen.dart';
-import 'package:rentit24/pages/navbar.dart';
+import 'package:rentit24/model/category_model.dart';
+import 'package:rentit24/pages/category_pages/categoriscreen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
 import 'package:rentit24/pages/searchscreen.dart';
+import 'package:rentit24/services/category_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -19,6 +21,9 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   Timer? _hintTimer;
   int _currentPage = 0;
+  final CategoryService _categoryService = CategoryService();
+
+  late Future<List<CategoryModel>> _categoriesFuture;
   int _currentHintIndex = 0;
 
   String _selectedFilter = 'All';
@@ -84,6 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
+    _categoriesFuture = _categoryService.getCategories();
+
     _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
       if (_pageController.hasClients) {
         _pageController.nextPage(
@@ -114,8 +121,9 @@ class _HomeScreenState extends State<HomeScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     return Scaffold(
-      backgroundColor:
-          isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FB),
+      backgroundColor: isDark
+          ? const Color(0xFF121212)
+          : const Color(0xFFF4F6FB),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -142,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _buildSectionHeader('Hire a Professional', 'See all', theme),
             const SizedBox(height: 16),
-            _buildProfessionalList(theme),
+_buildProfessionalList(theme, context),
             const SizedBox(height: 24),
             _buildSectionHeader('Nearby Ads', '', theme),
             const SizedBox(height: 16),
@@ -155,21 +163,20 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
       ),
-      bottomNavigationBar: CustomBottomNav(
-        currentIndex: _currentNavIndex,
-        onTap: (index) {
-          setState(() {
-            _currentNavIndex = index;
-          });
-        },
-      ),
+      // bottomNavigationBar: CustomBottomNav(
+      //   currentIndex: _currentNavIndex,
+      //   onTap: (index) {
+      //     setState(() {
+      //       _currentNavIndex = index;
+      //     });
+      //   },
+      // ),
     );
   }
 
   Widget _buildCustomAppBar(ThemeData theme, bool isDark) {
     return Container(
-      padding:
-          const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 20),
+      padding: const EdgeInsets.only(top: 60, left: 16, right: 16, bottom: 20),
       decoration: BoxDecoration(
         color: theme.appBarTheme.backgroundColor ?? theme.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -244,17 +251,17 @@ class _HomeScreenState extends State<HomeScreen> {
                             switchOutCurve: Curves.easeInQuint,
                             transitionBuilder:
                                 (Widget child, Animation<double> animation) {
-                              return SlideTransition(
-                                position: Tween<Offset>(
-                                  begin: const Offset(0.0, 0.4),
-                                  end: Offset.zero,
-                                ).animate(animation),
-                                child: FadeTransition(
-                                  opacity: animation,
-                                  child: child,
-                                ),
-                              );
-                            },
+                                  return SlideTransition(
+                                    position: Tween<Offset>(
+                                      begin: const Offset(0.0, 0.4),
+                                      end: Offset.zero,
+                                    ).animate(animation),
+                                    child: FadeTransition(
+                                      opacity: animation,
+                                      child: child,
+                                    ),
+                                  );
+                                },
                             child: Align(
                               key: ValueKey<int>(_currentHintIndex),
                               alignment: Alignment.centerLeft,
@@ -279,8 +286,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 theme,
                 isDark,
                 onTap: () {
-                  themeNotifier.value =
-                      isDark ? ThemeMode.light : ThemeMode.dark;
+                  themeNotifier.value = isDark
+                      ? ThemeMode.light
+                      : ThemeMode.dark;
                 },
               ),
               const SizedBox(width: 12),
@@ -351,8 +359,7 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16),
-      padding:
-          const EdgeInsets.only(left: 24, top: 20, bottom: 20, right: 8),
+      padding: const EdgeInsets.only(left: 24, top: 20, bottom: 20, right: 8),
       decoration: BoxDecoration(
         color: theme.colorScheme.surface,
         borderRadius: BorderRadius.circular(24),
@@ -464,225 +471,94 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildCategories(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
 
-    final List<Map<String, String>> categories = [
-      {'name': 'Vehicles', 'img': 'assets/images/categories/vehicles.png'},
-      {
-        'name': 'Transport\nServices',
-        'img': 'assets/images/categories/transportation-services.png',
-      },
-      {
-        'name': 'Electronics',
-        'img': 'assets/images/categories/electronics.png',
-      },
-      {'name': 'Furniture', 'img': 'assets/images/categories/furniture.png'},
-      {
-        'name': 'Pets Care\nServices',
-        'img': 'assets/images/categories/pets-animals.png',
-      },
-      {
-        'name': 'Agriculture',
-        'img': 'assets/images/categories/agriculture-farming.png',
-      },
-      {
-        'name': 'Appliances',
-        'img': 'assets/images/categories/appliances.png',
-      },
-      {
-        'name': 'Baby & Kids',
-        'img': 'assets/images/categories/baby-kids.png',
-      },
-      {
-        'name': 'Beauty',
-        'img': 'assets/images/categories/beauty-grooming.png',
-      },
-      {
-        'name': 'Books',
-        'img': 'assets/images/categories/books-stationery.png',
-      },
-      {
-        'name': 'Community',
-        'img': 'assets/images/categories/community-ngo.png',
-      },
-      {
-        'name': 'Construction',
-        'img':
-            'assets/images/categories/construction-heavy-machinery.png',
-      },
-      {
-        'name': 'Coworking',
-        'img': 'assets/images/categories/coworking-business.png',
-      },
-      {
-        'name': 'Logistics',
-        'img': 'assets/images/categories/delivery-logistics.png',
-      },
-      {
-        'name': 'Digital Tech',
-        'img': 'assets/images/categories/digital-tech-services.png',
-      },
-      {
-        'name': 'Education',
-        'img': 'assets/images/categories/education.png',
-      },
-      {
-        'name': 'Event Pros',
-        'img': 'assets/images/categories/event-professionals.png',
-      },
-      {
-        'name': 'Parties',
-        'img': 'assets/images/categories/events-parties.png',
-      },
-      {
-        'name': 'Fashion',
-        'img': 'assets/images/categories/fashion-dress.png',
-      },
-      {
-        'name': 'Tailoring',
-        'img': 'assets/images/categories/fashion-services.png',
-      },
-      {
-        'name': 'Festivals',
-        'img': 'assets/images/categories/festivals-celebrations.png',
-      },
-      {
-        'name': 'Catering',
-        'img': 'assets/images/categories/food-catering.png',
-      },
-      {
-        'name': 'Gaming',
-        'img': 'assets/images/categories/gaming-consoles.png',
-      },
-      {
-        'name': 'Gardening',
-        'img': 'assets/images/categories/gardening-outdoor.png',
-      },
-      {
-        'name': 'Wellness',
-        'img': 'assets/images/categories/health-wellness.png',
-      },
-      {
-        'name': 'Household',
-        'img': 'assets/images/categories/household-items.png',
-      },
-      {
-        'name': 'Medical',
-        'img': 'assets/images/categories/medical-equipment.png',
-      },
-      {
-        'name': 'Misc',
-        'img': 'assets/images/categories/miscellaneous.png',
-      },
-      {
-        'name': 'Music',
-        'img': 'assets/images/categories/musical-instruments.png',
-      },
-      {
-        'name': 'Office Eq.',
-        'img': 'assets/images/categories/office-work-equipment.png',
-      },
-      {
-        'name': 'Pro Services',
-        'img': 'assets/images/categories/professional-services.png',
-      },
-      {
-        'name': 'Real Estate',
-        'img': 'assets/images/categories/real-estate.png',
-      },
-      {
-        'name': 'Security',
-        'img': 'assets/images/categories/security-services.png',
-      },
-      {
-        'name': 'Seasonal',
-        'img': 'assets/images/categories/sesonal-needs.png',
-      },
-      {
-        'name': 'Sports',
-        'img': 'assets/images/categories/sports-fitness.png',
-      },
-      {
-        'name': 'Tools',
-        'img': 'assets/images/categories/tools-machinery.png',
-      },
-      {
-        'name': 'Hospitality',
-        'img': 'assets/images/categories/travel-hospitality.png',
-      },
-      {
-        'name': 'Outdoors',
-        'img': 'assets/images/categories/travel-outdoors.png',
-      },
-      {
-        'name': 'Photography',
-        'img': 'assets/images/categories/wedding-photography.png',
-      },
-    ];
-
     return SizedBox(
       height: 120,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          return SizedBox(
-            width: 76,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: ShapeDecoration(
-                    color: isDark ? Colors.grey[850] : Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    shadows: [
-                      BoxShadow(
-                        color: Colors.black
-                            .withOpacity(isDark ? 0.3 : 0.04),
-                        blurRadius: 8,
-                        offset: const Offset(0, 2),
+      child: FutureBuilder<List<CategoryModel>>(
+        future: _categoriesFuture,
+        builder: (context, snapshot) {
+          if (snapshot.connectionState == ConnectionState.waiting) {
+            return const Center(child: CircularProgressIndicator());
+          }
+
+          if (snapshot.hasError) {
+            return Center(
+              child: Text(
+                'Failed to load categories',
+                style: TextStyle(color: isDark ? Colors.white70 : Colors.red),
+              ),
+            );
+          }
+
+          final categories = snapshot.data ?? [];
+
+          if (categories.isEmpty) {
+            return const Center(child: Text('No categories found'));
+          }
+
+          return ListView.builder(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            itemCount: categories.length,
+            itemBuilder: (context, index) {
+              final category = categories[index];
+
+              return SizedBox(
+                width: 90,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: ShapeDecoration(
+                        color: isDark ? Colors.grey[850] : Colors.white,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        shadows: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(
+                              isDark ? 0.3 : 0.04,
+                            ),
+                            blurRadius: 8,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
                       ),
-                    ],
-                  ),
-                  child: SizedBox(
-                    width: 40,
-                    height: 40,
-                    child: Image.asset(
-                      categories[index]['img']!,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) => Icon(
-                        Icons.image_not_supported,
-                        color: Colors.grey[300],
+                      child: const SizedBox(
+                        width: 40,
+                        height: 40,
+                        child: Icon(
+                          Icons.category_outlined,
+                          color: Color(0xFF2B58E4),
+                        ),
                       ),
                     ),
-                  ),
+                    const SizedBox(height: 10),
+                    Text(
+                      category.name,
+                      textAlign: TextAlign.center,
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(
+                        fontSize: 11,
+                        fontWeight: FontWeight.w600,
+                        height: 1.2,
+                        color: isDark
+                            ? Colors.white70
+                            : const Color(0xFF2D2D3A),
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 10),
-                Text(
-                  categories[index]['name']!,
-                  textAlign: TextAlign.center,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    height: 1.2,
-                    color: isDark
-                        ? Colors.white70
-                        : const Color(0xFF2D2D3A),
-                  ),
-                ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  Widget _buildProfessionalList(ThemeData theme) {
+  Widget _buildProfessionalList(ThemeData theme, BuildContext context) { 
     final isDark = theme.brightness == Brightness.dark;
     return SizedBox(
       height: 160,
@@ -691,195 +567,215 @@ class _HomeScreenState extends State<HomeScreen> {
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 2,
         itemBuilder: (context, index) {
-          return Container(
-            width: 320,
-            margin: const EdgeInsets.only(right: 16),
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: theme.colorScheme.surface,
-              borderRadius: BorderRadius.circular(20),
-              boxShadow: [
-                BoxShadow(
-                  color:
-                      Colors.black.withOpacity(isDark ? 0.2 : 0.04),
-                  blurRadius: 15,
-                  offset: const Offset(0, 5),
+          return GestureDetector( 
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ProductDetailsScreen(
+                    adData: const {
+                      'title': 'Wood craft and wood carving',
+                      'price': '₹800/day',
+                      'rating': '4.5',
+                      'reviews': '122',
+                      'owner': 'Ravi Kumar R.',
+                      'image': 'assets/images/carpainter.jpg',
+                    },
+                  ),
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    "assets/images/carpainter.jpg",
-                    width: 120,
-                    height: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Container(
+              );
+            },
+            child: Container(
+              width: 320,
+              margin: const EdgeInsets.only(right: 16),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: theme.colorScheme.surface,
+                borderRadius: BorderRadius.circular(20),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(isDark ? 0.2 : 0.04),
+                    blurRadius: 15,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
+              ),
+              child: Row(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(20),
+                    child: Image.asset(
+                      "assets/images/carpainter.jpg",
                       width: 120,
-                      color: Colors.grey[300],
-                      child:
-                          const Icon(Icons.person, color: Colors.grey),
+                      height: double.infinity,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) => Container(
+                        width: 120,
+                        color: Colors.grey[300],
+                        child: const Icon(Icons.person, color: Colors.grey),
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.star,
-                                  color: Colors.orange, size: 16),
-                              const SizedBox(width: 4),
-                              Text(
-                                '4.5',
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 11,
-                                  color: isDark
-                                      ? Colors.white
-                                      : Colors.black,
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.star,
+                                  color: Colors.orange,
+                                  size: 16,
                                 ),
-                              ),
-                              Text(
-                                '(122)',
-                                style: TextStyle(
-                                  color: Colors.grey[500],
-                                  fontSize: 11,
+                                const SizedBox(width: 4),
+                                Text(
+                                  '4.5',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 11,
+                                    color: isDark ? Colors.white : Colors.black,
+                                  ),
                                 ),
-                              ),
-                            ],
-                          ),
-                          Icon(Icons.favorite_border,
-                              color: Colors.grey[400], size: 20),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      Row(
-                        children: [
-                          _buildTag(
-                            'Featured',
-                            theme.primaryColor,
-                            Colors.white,
-                          ),
-                          const SizedBox(width: 6),
-                          _buildTag(
-                            'Top Choice',
-                            isDark
-                                ? Colors.grey[800]!
-                                : const Color(0xFF1A1A2C),
-                            Colors.white,
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Row(
-                        children: [
-                          const CircleAvatar(
-                            radius: 10,
-                            backgroundImage: NetworkImage(
-                              'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
+                                Text(
+                                  '(122)',
+                                  style: TextStyle(
+                                    color: Colors.grey[500],
+                                    fontSize: 11,
+                                  ),
+                                ),
+                              ],
                             ),
-                          ),
-                          const SizedBox(width: 6),
-                          Text(
-                            'Ravi Kumar ',
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white
-                                  : const Color(0xFF090726),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
-                              height: 1.20,
+                            Icon(
+                              Icons.favorite_border,
+                              color: Colors.grey[400],
+                              size: 20,
                             ),
-                          ),
-                          const SizedBox(width: 4),
-                          const Icon(
-                            Icons.workspace_premium,
-                            color: Colors.black,
-                            size: 12,
-                          ),
-                          const Spacer(),
-                          Text(
-                            'Carpenter',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white70
-                                  : const Color(0x66090726),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w300,
-                              height: 1.20,
-                            ),
-                          ),
-                        ],
-                      ),
-                      const Spacer(),
-                      Text(
-                        'Any woodwork',
-                        style: TextStyle(
-                          color: isDark
-                              ? Colors.white60
-                              : const Color(0xFF2F314D),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w400,
-                          height: 1.42,
+                          ],
                         ),
-                      ),
-                      const Spacer(),
-                      Row(
-                        mainAxisAlignment:
-                            MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              const Icon(Icons.location_on_outlined,
-                                  color: Colors.grey, size: 14),
-                              Text(
-                                '1.5 km',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.white54
-                                      : const Color(0x66090726),
-                                  fontWeight: FontWeight.w300,
-                                  height: 1.20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            '₹800/day',
-                            textAlign: TextAlign.right,
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.white
-                                  : const Color(0xFF090726),
-                              fontSize: 14,
-                              fontWeight: FontWeight.w600,
-                              height: 1.43,
+                        const SizedBox(height: 6),
+                        Row(
+                          children: [
+                            _buildTag(
+                              'Featured',
+                              theme.primaryColor,
+                              Colors.white,
                             ),
+                            const SizedBox(width: 6),
+                            _buildTag(
+                              'Top Choice',
+                              isDark
+                                  ? Colors.grey[800]!
+                                  : const Color(0xFF1A1A2C),
+                              Colors.white,
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Row(
+                          children: [
+                            const CircleAvatar(
+                              radius: 10,
+                              backgroundImage: NetworkImage(
+                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            Text(
+                              'Ravi Kumar ',
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF090726),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w500,
+                                height: 1.20,
+                              ),
+                            ),
+                            const SizedBox(width: 4),
+                            const Icon(
+                              Icons.workspace_premium,
+                              color: Colors.black,
+                              size: 12,
+                            ),
+                            const Spacer(),
+                            Text(
+                              'Carpenter',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white70
+                                    : const Color(0x66090726),
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
+                                height: 1.20,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(),
+                        Text(
+                          'Any woodwork',
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF2F314D),
+                            fontSize: 12,
+                            fontWeight: FontWeight.w400,
+                            height: 1.42,
                           ),
-                        ],
-                      ),
-                    ],
+                        ),
+                        const Spacer(),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.location_on_outlined,
+                                  color: Colors.grey,
+                                  size: 14,
+                                ),
+                                Text(
+                                  '1.5 km',
+                                  style: TextStyle(
+                                    color: isDark
+                                        ? Colors.white54
+                                        : const Color(0x66090726),
+                                    fontWeight: FontWeight.w300,
+                                    height: 1.20,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            Text(
+                              '₹800/day',
+                              textAlign: TextAlign.right,
+                              style: TextStyle(
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF090726),
+                                fontSize: 14,
+                                fontWeight: FontWeight.w600,
+                                height: 1.43,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           );
         },
       ),
     );
   }
-
   Widget _buildFilterChips(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
 
@@ -902,8 +798,7 @@ class _HomeScreenState extends State<HomeScreen> {
             child: AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               margin: const EdgeInsets.only(right: 12),
-              padding: const EdgeInsets.symmetric(
-                  horizontal: 22, vertical: 8),
+              padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 8),
               decoration: BoxDecoration(
                 color: isActive
                     ? const Color(0xFF2B58E4)
@@ -919,8 +814,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ]
                     : [
                         BoxShadow(
-                          color: Colors.black
-                              .withOpacity(isDark ? 0.1 : 0.03),
+                          color: Colors.black.withOpacity(isDark ? 0.1 : 0.03),
                           blurRadius: 4,
                           offset: const Offset(0, 2),
                         ),
@@ -932,11 +826,8 @@ class _HomeScreenState extends State<HomeScreen> {
                   style: TextStyle(
                     color: isActive
                         ? Colors.white
-                        : (isDark
-                            ? Colors.grey[400]
-                            : const Color(0xFF7A7A8C)),
-                    fontWeight:
-                        isActive ? FontWeight.w600 : FontWeight.w500,
+                        : (isDark ? Colors.grey[400] : const Color(0xFF7A7A8C)),
+                    fontWeight: isActive ? FontWeight.w600 : FontWeight.w500,
                     fontSize: 14,
                   ),
                 ),
@@ -977,21 +868,20 @@ class _HomeScreenState extends State<HomeScreen> {
             onTap: () {
               Navigator.push(
                 context,
-                // ✅ FIX: smooth slide transition to product details
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
                       ProductDetailsScreen(adData: ad),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
-                    final tween = Tween(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).chain(CurveTween(curve: Curves.easeInOut));
-                    return SlideTransition(
-                      position: animation.drive(tween),
-                      child: child,
-                    );
-                  },
+                        final tween = Tween(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).chain(CurveTween(curve: Curves.easeInOut));
+                        return SlideTransition(
+                          position: animation.drive(tween),
+                          child: child,
+                        );
+                      },
                 ),
               );
             },
@@ -1062,8 +952,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     height: 104,
                     width: double.infinity,
                     color: Colors.grey[300],
-                    child:
-                        const Icon(Icons.image, color: Colors.grey),
+                    child: const Icon(Icons.image, color: Colors.grey),
                   ),
                 ),
               ),
@@ -1073,7 +962,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   left: 0,
                   child: Container(
                     padding: const EdgeInsets.symmetric(
-                        horizontal: 8, vertical: 4),
+                      horizontal: 8,
+                      vertical: 4,
+                    ),
                     decoration: const BoxDecoration(
                       color: Color(0xFF235BD6),
                       borderRadius: BorderRadius.only(
@@ -1121,8 +1012,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       Row(
                         children: [
-                          Icon(Icons.location_on,
-                              color: Colors.grey[400], size: 10),
+                          Icon(
+                            Icons.location_on,
+                            color: Colors.grey[400],
+                            size: 10,
+                          ),
                           const SizedBox(width: 4),
                           Text(
                             distance,
@@ -1139,7 +1033,9 @@ class _HomeScreenState extends State<HomeScreen> {
                       if (isTopChoice)
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 4, vertical: 2),
+                            horizontal: 4,
+                            vertical: 2,
+                          ),
                           decoration: BoxDecoration(
                             color: isDark
                                 ? Colors.grey[800]
@@ -1161,9 +1057,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     title,
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : const Color(0xFF2F314D),
+                      color: isDark ? Colors.white : const Color(0xFF2F314D),
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
                       height: 1.2,
@@ -1175,9 +1069,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   Text(
                     price,
                     style: TextStyle(
-                      color: isDark
-                          ? Colors.white
-                          : const Color(0xFF090726),
+                      color: isDark ? Colors.white : const Color(0xFF090726),
                       fontSize: 14,
                       fontWeight: FontWeight.w700,
                     ),
@@ -1209,8 +1101,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star,
-                          color: Colors.amber, size: 12),
+                      const Icon(Icons.star, color: Colors.amber, size: 12),
                       const SizedBox(width: 2),
                       Text(
                         rating,
@@ -1294,7 +1185,9 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(
-                horizontal: 16.0, vertical: 16.0),
+              horizontal: 16.0,
+              vertical: 16.0,
+            ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,

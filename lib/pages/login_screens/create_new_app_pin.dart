@@ -72,11 +72,9 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
               ),
               const SizedBox(height: 40),
               
-              // --- Custom PIN Input UI ---
               Stack(
                 alignment: Alignment.center,
                 children: [
-                  // The actual visible PIN boxes
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(4, (index) {
@@ -86,7 +84,6 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
                       );
                     }),
                   ),
-                  // The invisible TextField that captures the keyboard input
                   Opacity(
                     opacity: 0.0,
                     child: TextField(
@@ -95,9 +92,9 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       maxLength: 4,
-                      autofocus: true, // Brings up keyboard automatically
+                      autofocus: true,
                       onChanged: (value) {
-                        setState(() {}); // Triggers rebuild to update boxes
+                        setState(() {});
                       },
                     ),
                   ),
@@ -106,7 +103,6 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
               
               const SizedBox(height: 50),
               
-              // --- Continue Button ---
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -129,7 +125,6 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
     );
   }
 
-  // Draws each individual PIN box
   Widget _buildPinBox(int index, ThemeData theme) {
     bool isFilled = _pinController.text.length > index;
     bool isFocused = _pinController.text.length == index && _pinFocusNode.hasFocus;

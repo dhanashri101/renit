@@ -14,7 +14,7 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
 
-  List<String> _imagePaths = []; // simulated paths
+  List<String> _imagePaths = []; 
   String? _selectedCategory;
   String? _selectedSubCategory;
   String? _brand;
@@ -111,16 +111,13 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
       ),
       body: Column(
         children: [
-          // ── Step progress indicator ──
           _StepProgressBar(current: _currentStep, total: _totalSteps),
-          // ── Step content ──
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
               child: steps[_currentStep],
             ),
           ),
-          // ── Bottom button (sticky) ──
           _BottomButton(
             label: isLastStep ? 'Submit' : 'Continue',
             onPressed: isLastStep ? _onSubmit : _nextStep,
@@ -131,9 +128,7 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   }
 }
 
-// ─────────────────────────────────────────────
-// STEP PROGRESS BAR
-// ─────────────────────────────────────────────
+
 class _StepProgressBar extends StatelessWidget {
   final int current;
   final int total;
@@ -167,9 +162,7 @@ class _StepProgressBar extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// BOTTOM BUTTON
-// ─────────────────────────────────────────────
+
 class _BottomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -243,7 +236,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final surfaceColor = isDark
         ? const Color(0xFF1E1E1E)
-        : Colors.white; // Adjust to your AppTheme
+        : Colors.white; 
     final borderColor = isDark
         ? const Color(0xFF2C2C2C)
         : const Color(0xFFDDE3F0);
@@ -269,7 +262,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 16),
 
-        // ── Main upload area (Gallery) ──
         GestureDetector(
           onTap: _isPicking ? null : () => _pickImage(ImageSource.gallery),
           child: AnimatedContainer(
@@ -304,7 +296,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 16),
 
-        // ── Camera button ──
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -323,7 +314,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 20),
 
-        // ── Thumbnails Grid ──
         if (widget.imagePaths.isNotEmpty) ...[
           Wrap(
             spacing: 12,
@@ -414,9 +404,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   }
 }
 
-// ─────────────────────────────────────────────
-// STEP 2 – SELECT CATEGORY
-// ─────────────────────────────────────────────
+
 class _SelectCategoryStep extends StatelessWidget {
   final String? selectedCategory;
   final String? selectedSubCategory;
@@ -465,7 +453,6 @@ class _SelectCategoryStep extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
 
-    // Explicitly add the type annotation here:
     final List<_CategoryItem> subItems = selectedCategory != null
         ? (_subCategories[selectedCategory] ?? [])
         : [];
@@ -571,9 +558,7 @@ class _CategoryGrid extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// STEP 3 – SPECIFICATIONS
-// ─────────────────────────────────────────────
+
 class _SpecificationsStep extends StatefulWidget {
   final String? brand;
   final String? modelName;
@@ -733,9 +718,7 @@ class _BulletList extends StatelessWidget {
   }
 }
 
-// ─────────────────────────────────────────────
-// STEP 4 – PRODUCT DETAILS
-// ─────────────────────────────────────────────
+
 class _ProductDetailsStep extends StatefulWidget {
   final String productName;
   final String description;
@@ -836,7 +819,6 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
         const SizedBox(height: 16),
         _FormLabel('Rental Price*'),
         const SizedBox(height: 6),
-        // Price + unit row
         Row(
           children: [
             Expanded(
@@ -930,9 +912,7 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
   }
 }
 
-// ─────────────────────────────────────────────
-// SHARED WIDGETS
-// ─────────────────────────────────────────────
+
 
 class _FormLabel extends StatelessWidget {
   final String text;

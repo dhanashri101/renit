@@ -6,7 +6,6 @@ import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
-// import 'package:rentit24/core/theme.dart';
 
 class emailLoginScreen extends StatefulWidget {
   const emailLoginScreen({Key? key}) : super(key: key);
@@ -60,7 +59,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
     final textColor = isDark ? Colors.white : const Color(0xFF090726);
     final textSecondary = const Color(0xFF2F314D);
 
-    // Theme colors mapped to your design
     final defaultBgColor = isDark ? AppTheme.darkSurface : Colors.white;
     final defaultBorderColor = isDark
         ? Colors.grey.shade800
@@ -127,7 +125,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
             children: [
               const SizedBox(height: 10),
 
-              // Title
               Text(
                 'Login to your Account',
                 style: TextStyle(
@@ -140,7 +137,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Email Field
               TextField(
                 controller: _emailController,
                 focusNode: _emailFocus,
@@ -160,7 +156,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Password Field
               TextField(
                 controller: _passwordController,
                 focusNode: _passwordFocus,
@@ -199,7 +194,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Remember Me Checkbox
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -234,19 +228,17 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Sign In Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isFormValid
                       ? () {
-                          // TODO: Handle Login
                           print("Logging in with: ${_emailController.text}");
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: focusedBorderColor, // Primary blue
+                    backgroundColor: focusedBorderColor, 
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: isDark
                         ? Colors.grey.shade800
@@ -273,7 +265,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Forgot Password
               Center(
                 child: TextButton(
                   onPressed: () {
@@ -299,7 +290,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Divider
               Row(
                 children: [
                   Expanded(
@@ -323,11 +313,9 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Social Icons Row (Interactive)
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Phone
                   SocialIconButton(
                     icon: Icons.phone_android,
                     color: AppTheme.primaryBlue,
@@ -343,7 +331,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Google
                   SocialIconButton(
                     icon: Icons.g_mobiledata,
                     color: Colors.red,
@@ -354,7 +341,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Facebook
                   SocialIconButton(
                     icon: Icons.facebook,
                     color: const Color(0xFF1877F2),
@@ -365,7 +351,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
 
                   const SizedBox(width: 16),
 
-                  // Apple
                   SocialIconButton(
                     icon: Icons.apple,
                     color: Colors.black,
@@ -377,7 +362,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Footer Text
               Center(
                 child: Text.rich(
                   TextSpan(

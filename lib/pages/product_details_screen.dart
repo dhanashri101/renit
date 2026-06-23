@@ -10,35 +10,42 @@ class ProductDetailsScreen extends StatefulWidget {
 }
 
 class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
+  late PageController _pageController;
   int _currentImageIndex = 0;
   DateTime _selectedDate = DateTime.now();
   bool _isDescriptionExpanded = false;
 
   final List<String> _images = [
-    'assets/images/camera.jpg',
-    'assets/images/camera.jpg',
-    'assets/images/camera.jpg',
-    'assets/images/camera.jpg',
-    'assets/images/camera.jpg',
+    'assets/images/carpainter.jpg',
+    'assets/images/carpainter2.jpg',
+    'assets/images/carpainter3.jpg',
   ];
 
   final String _fullDescription =
-      "The Canon EOS M50 Mark II is a versatile mirrorless camera ideal for photography enthusiasts and content creators alike. It boasts a 24.1 MP APS-C sensor for exceptional image quality and vibrant colors. Featuring a Dual Pixel autofocus system, it allows for effortless capture of sharp images and smooth video.";
+      "Hari Ram is a skilled carpenter specializing in exquisite woodwork and intricate wood carving. With a passion for transforming raw timber into stunning pieces, Hari brings creativity and craftsmanship to every project. Whether it's custom furniture or detailed decorative elements, the quality is guaranteed.";
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 10000); 
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
-    // ✅ FIX 1: Use theme-aware colors instead of hardcoded dark values
     final surfaceColor = theme.colorScheme.surface;
     final primaryBlue = const Color(0xFF2B5BE4);
-    final bgColor =
-        isDark ? const Color(0xFF121212) : const Color(0xFFF2F5FF);
-    final textColor =
-        isDark ? Colors.white : const Color(0xFF1A1D26);
-    final subtitleColor =
-        isDark ? Colors.white54 : const Color(0xFF6B7280);
+    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF2F5FF);
+    final textColor = isDark ? Colors.white : const Color(0xFF1A1D26);
+    final subtitleColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -48,20 +55,15 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildImageCarousel(),
+            _buildImageCarousel(primaryBlue),
             const SizedBox(height: 12),
             _buildHeaderInfo(textColor, subtitleColor, isDark, primaryBlue),
             _buildOwnerCard(isDark, textColor, subtitleColor),
             _buildDescription(textColor, subtitleColor, primaryBlue),
-            _buildSpecifications(textColor, subtitleColor),
+            _buildDetails(textColor, subtitleColor),
             _buildAvailabilityCalendar(isDark, textColor, primaryBlue),
-            _buildReviews(
-              surfaceColor,
-              textColor,
-              subtitleColor,
-              isDark,
-              theme,
-            ),
+            _buildReviews(surfaceColor, textColor, subtitleColor, isDark, theme),
+            _buildSimilarProducts(theme, isDark, textColor),
             const SizedBox(height: 32),
           ],
         ),
@@ -72,9 +74,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   PreferredSizeWidget _buildAppBar(Color primaryBlue, bool isDark) {
     return AppBar(
       toolbarHeight: 80,
-      backgroundColor: isDark ? const Color(0xFF1E1E1E) : primaryBlue,
+      backgroundColor: primaryBlue,
       elevation: 0,
-      // ✅ FIX 2: Explicit back button with proper Navigator.pop
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
         onPressed: () => Navigator.pop(context),
@@ -82,11 +83,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       titleSpacing: 0,
       title: Padding(
         padding: const EdgeInsets.only(right: 16.0),
-        // ✅ FIX 3: GestureDetector instead of TextField so it doesn't
-        //    steal focus or intercept the back gesture
         child: GestureDetector(
           onTap: () {
-            // Optional: navigate to SearchScreen instead of pop
             Navigator.pop(context);
           },
           child: Container(
@@ -101,7 +99,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 const Icon(Icons.search, color: Colors.grey, size: 22),
                 const SizedBox(width: 8),
                 Text(
-                  'Rent a "Car"',
+                  'Rent a "Car"', 
                   style: TextStyle(color: Colors.grey[500], fontSize: 14),
                 ),
               ],
@@ -112,27 +110,25 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildImageCarousel() {
+  Widget _buildImageCarousel(Color primaryBlue) {
     return Stack(
       children: [
         SizedBox(
           height: 280,
           child: PageView.builder(
-            itemCount: _images.length,
-            onPageChanged: (index) =>
-                setState(() => _currentImageIndex = index),
+            controller: _pageController,
+            onPageChanged: (index) {
+              setState(() => _currentImageIndex = index % _images.length);
+            },
             itemBuilder: (context, index) {
+              final realIndex = index % _images.length;
               return Image.asset(
-                widget.adData['image'] ?? _images[index],
+                widget.adData['image'] ?? _images[realIndex],
                 fit: BoxFit.cover,
                 width: double.infinity,
                 errorBuilder: (context, error, stackTrace) => Container(
                   color: Colors.grey[300],
-                  child: const Icon(
-                    Icons.camera_alt,
-                    color: Colors.grey,
-                    size: 50,
-                  ),
+                  child: const Icon(Icons.handyman, color: Colors.grey, size: 50),
                 ),
               );
             },
@@ -143,7 +139,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           right: 16,
           child: Row(
             children: [
-              _buildIconCircle(Icons.favorite_border),
+              _buildIconCircle(Icons.add),
               const SizedBox(width: 8),
               _buildIconCircle(Icons.share_outlined),
             ],
@@ -151,20 +147,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         ),
         Positioned(
           bottom: 16,
-          right: 16,
-          child: Container(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.4),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Text(
-              '${_currentImageIndex + 1}/${_images.length}',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
+          left: 0,
+          right: 0,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: List.generate(
+              _images.length,
+              (index) => AnimatedContainer(
+                duration: const Duration(milliseconds: 300),
+                margin: const EdgeInsets.symmetric(horizontal: 4),
+                width: _currentImageIndex == index ? 20 : 6,
+                height: 6,
+                decoration: BoxDecoration(
+                  color: _currentImageIndex == index
+                      ? primaryBlue
+                      : Colors.white.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(4),
+                ),
               ),
             ),
           ),
@@ -195,27 +194,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // Dots Indicator
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(
-              _images.length,
-              (index) => AnimatedContainer(
-                duration: const Duration(milliseconds: 300),
-                margin: const EdgeInsets.symmetric(horizontal: 4),
-                width: _currentImageIndex == index ? 20 : 6,
-                height: 6,
-                decoration: BoxDecoration(
-                  color: _currentImageIndex == index
-                      ? primaryBlue
-                      : primaryBlue.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(4),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 16),
-          // Badges and Date/Rating
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -226,9 +204,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   const SizedBox(width: 8),
                   _buildBadge(
                     'Top Choice',
-                    isDark
-                        ? Colors.grey[800]!
-                        : const Color(0xFF090726),
+                    isDark ? Colors.grey[800]! : const Color(0xFF090726),
                   ),
                 ],
               ),
@@ -236,7 +212,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.end,
                 children: [
                   Text(
-                    'Posted on 04 AUG',
+                    'Posted on 12 Feb 2023',
                     style: TextStyle(
                       color: subtitleColor,
                       fontSize: 10,
@@ -246,11 +222,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      const Icon(Icons.star,
-                          color: Colors.amber, size: 14),
+                      const Icon(Icons.star, color: Colors.amber, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        '${widget.adData['rating']} (${widget.adData['reviews']} reviews)',
+                        '${widget.adData['rating'] ?? '4.5'} (${widget.adData['reviews'] ?? '122'} reviews)',
                         style: TextStyle(
                           color: textColor,
                           fontSize: 11,
@@ -264,48 +239,22 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ],
           ),
           const SizedBox(height: 16),
-          // Title
           Text(
-            widget.adData['title'] ??
-                'Canon EOS M50 Mark II with lenses',
+            widget.adData['title'] ?? 'Wood craft and wood carving',
             style: TextStyle(
               color: textColor,
-              fontSize: 18,
+              fontSize: 20,
               fontWeight: FontWeight.w800,
             ),
           ),
-          const SizedBox(height: 6),
-          // Location
-          Row(
-            children: [
-              Icon(Icons.location_on_outlined,
-                  color: subtitleColor, size: 14),
-              const SizedBox(width: 4),
-              Text(
-                'Kausa Tetavali, Mumbra',
-                style: TextStyle(color: subtitleColor, fontSize: 12),
-              ),
-            ],
-          ),
-          const SizedBox(height: 16),
-          // Price
+          const SizedBox(height: 12),
           Text(
-            widget.adData['price'] ?? '₹1500/day',
+            widget.adData['price'] ?? '₹800/day',
             style: TextStyle(
               color: textColor,
-              fontSize: 24,
+              fontSize: 22,
               fontWeight: FontWeight.w900,
             ),
-          ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                '+ Security Deposit ₹10,000 (Refundable) ',
-                style: TextStyle(color: subtitleColor, fontSize: 11),
-              ),
-              Icon(Icons.chevron_right, color: subtitleColor, size: 14),
-            ],
           ),
           const SizedBox(height: 16),
         ],
@@ -331,28 +280,23 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildOwnerCard(
-      bool isDark, Color textColor, Color subtitleColor) {
-    final cardColor =
-        isDark ? const Color(0x19235BD6) : const Color(0xFFDEE5F6);
+  Widget _buildOwnerCard(bool isDark, Color textColor, Color subtitleColor) {
+    final cardColor = isDark ? const Color(0x19235BD6) : const Color(0xFFDEE5F6);
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Container(
-        padding:
-            const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: cardColor,
           borderRadius: BorderRadius.circular(12),
         ),
         child: Row(
           children: [
-            CircleAvatar(
+            const CircleAvatar(
               radius: 20,
               backgroundColor: Colors.white,
-              backgroundImage: const NetworkImage(
-                'https://i.pravatar.cc/150?img=11',
-              ),
+              backgroundImage: NetworkImage('https://i.pravatar.cc/150?img=11'),
             ),
             const SizedBox(width: 12),
             Expanded(
@@ -360,15 +304,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Owner',
-                    style:
-                        TextStyle(color: subtitleColor, fontSize: 11),
+                    'Service Provider',
+                    style: TextStyle(color: subtitleColor, fontSize: 11),
                   ),
                   const SizedBox(height: 2),
                   Row(
                     children: [
                       Text(
-                        widget.adData['owner'] ?? 'Hamza',
+                        widget.adData['owner'] ?? 'Ravi Kumar R.',
                         style: TextStyle(
                           color: textColor,
                           fontSize: 14,
@@ -377,8 +320,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       const SizedBox(width: 4),
                       Icon(
-                        Icons.workspace_premium,
-                        size: 14,
+                        Icons.chevron_right,
+                        size: 16,
                         color: isDark ? Colors.white70 : Colors.black87,
                       ),
                     ],
@@ -386,7 +329,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 ],
               ),
             ),
-            Icon(Icons.chevron_right, color: subtitleColor),
           ],
         ),
       ),
@@ -400,7 +342,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   ) {
     final displayText = _isDescriptionExpanded
         ? _fullDescription
-        : "${_fullDescription.substring(0, 195)}...";
+        : "${_fullDescription.substring(0, 140)}...";
 
     return Padding(
       padding: const EdgeInsets.all(16.0),
@@ -433,14 +375,11 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     child: GestureDetector(
                       onTap: () {
                         setState(() {
-                          _isDescriptionExpanded =
-                              !_isDescriptionExpanded;
+                          _isDescriptionExpanded = !_isDescriptionExpanded;
                         });
                       },
                       child: Text(
-                        _isDescriptionExpanded
-                            ? " Show less"
-                            : " Read more",
+                        _isDescriptionExpanded ? " Show less" : " Read more",
                         style: TextStyle(
                           color: primaryBlue,
                           fontWeight: FontWeight.w700,
@@ -458,14 +397,14 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildSpecifications(Color textColor, Color subtitleColor) {
+  Widget _buildDetails(Color textColor, Color subtitleColor) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Specifications',
+            'Details',
             style: TextStyle(
               color: textColor,
               fontSize: 16,
@@ -473,46 +412,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          _buildSpecRow('Brand', 'Canon', textColor, subtitleColor),
-          _buildSpecRow('Model Name', 'EOS M50 Mark II', textColor,
-              subtitleColor),
-          _buildSpecRow('Color', 'Black', textColor, subtitleColor),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                flex: 2,
-                child: Text(
-                  'Additional',
-                  style:
-                      TextStyle(color: subtitleColor, fontSize: 12),
-                ),
-              ),
-              Expanded(
-                flex: 3,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'With camera',
-                      style: TextStyle(
-                        color: textColor,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    _buildBulletText(
-                        'Memory card 64GB', textColor, subtitleColor),
-                    _buildBulletText(
-                        '75mm & 100mm lense', textColor, subtitleColor),
-                    _buildBulletText(
-                        'Camera bag', textColor, subtitleColor),
-                  ],
-                ),
-              ),
-            ],
-          ),
+          _buildSpecRow('Profession', 'Carpenter', textColor, subtitleColor),
+          _buildSpecRow('Experience', '5 years', textColor, subtitleColor),
+          _buildSpecRow('Skills', 'Wooden/Wood work, wood carving, table making, cupboard making, custom wood work, modular work', textColor, subtitleColor),
+          _buildSpecRow('Additional', 'Some extra information needed', textColor, subtitleColor),
         ],
       ),
     );
@@ -533,17 +436,18 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             flex: 2,
             child: Text(
               label,
-              style: TextStyle(color: subtitleColor, fontSize: 12),
+              style: TextStyle(color: subtitleColor, fontSize: 13),
             ),
           ),
           Expanded(
-            flex: 3,
+            flex: 4,
             child: Text(
               value,
               style: TextStyle(
                 color: textColor,
-                fontSize: 12,
+                fontSize: 13,
                 fontWeight: FontWeight.w500,
+                height: 1.4,
               ),
             ),
           ),
@@ -552,30 +456,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildBulletText(
-      String text, Color textColor, Color subtitleColor) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 4.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('• ', style: TextStyle(color: subtitleColor, fontSize: 12)),
-          Expanded(
-            child: Text(
-              text,
-              style: TextStyle(color: subtitleColor, fontSize: 12),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildAvailabilityCalendar(
-    bool isDark,
-    Color textColor,
-    Color primaryBlue,
-  ) {
+  Widget _buildAvailabilityCalendar(bool isDark, Color textColor, Color primaryBlue) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -592,10 +473,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
           const SizedBox(height: 16),
           Container(
             decoration: BoxDecoration(
-              // ✅ FIX 4: Theme-aware calendar card background
-              color: isDark
-                  ? const Color(0xFF1E1E1E)
-                  : Colors.white,
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 if (!isDark)
@@ -624,11 +502,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               ),
               child: CalendarDatePicker(
                 initialDate: _selectedDate,
-                firstDate: DateTime.now(),
-                lastDate:
-                    DateTime.now().add(const Duration(days: 365)),
-                onDateChanged: (date) =>
-                    setState(() => _selectedDate = date),
+                firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                lastDate: DateTime.now().add(const Duration(days: 365)),
+                onDateChanged: (date) => setState(() => _selectedDate = date),
               ),
             ),
           ),
@@ -663,30 +539,28 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                     ),
                   ),
                   const SizedBox(width: 8),
-                  const Icon(Icons.star,
-                      color: Colors.amber, size: 14),
+                  const Icon(Icons.star, color: Colors.amber, size: 14),
                   Text(
-                    ' 4.2 (135 reviews)',
-                    style:
-                        TextStyle(color: subtitleColor, fontSize: 12),
+                    ' 4.8 (122 reviews)',
+                    style: TextStyle(color: subtitleColor, fontSize: 12),
                   ),
                 ],
               ),
               Text(
                 'See all',
                 style: TextStyle(
-                  color: theme.primaryColor,
+                  color: subtitleColor,
                   fontSize: 12,
-                  fontWeight: FontWeight.bold,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           _buildReviewCard(
-            'Albert Flores',
-            'Oct 15, 2025',
-            'Amazing product, just like new!',
+            'Royalties',
+            'Mar 23, 2023',
+            'Fantastic craftsmanship! The carpentry work transformed my space and feels brand new.',
             '4',
             surfaceColor,
             textColor,
@@ -694,9 +568,9 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             isDark,
           ),
           _buildReviewCard(
-            'Kathryn Murphy',
-            'Sep 22, 2025',
-            'Worked perfectly, great service.',
+            'Bessie Cooper',
+            'Aug 19, 2023',
+            'The carpenter did an amazing job! The service was top-notch and everything was accurate.',
             '5',
             surfaceColor,
             textColor,
@@ -704,10 +578,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             isDark,
           ),
           _buildReviewCard(
-            'Ralph Edwards',
-            'Sep 12, 2025',
-            'Smooth handover and return process.',
-            '4',
+            'Wade Warren',
+            'Aug 08, 2023',
+            'I recently had a carpenter upgrade my home, and I\'m thrilled with the results! The process was smooth, and they left no leftover materials/waste. Highly recommend this service for anyone looking to enhance their living space!',
+            '5',
             surfaceColor,
             textColor,
             subtitleColor,
@@ -720,23 +594,19 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               onPressed: () {},
               style: OutlinedButton.styleFrom(
                 side: BorderSide(
-                  color: isDark
-                      ? Colors.grey[800]!
-                      : Colors.blue.withOpacity(0.2),
+                  color: isDark ? Colors.grey[800]! : Colors.blue.withOpacity(0.2),
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
                 padding: const EdgeInsets.symmetric(vertical: 14),
-                backgroundColor: isDark
-                    ? const Color(0xFF1E1E1E)
-                    : Colors.blue.withOpacity(0.05),
+                backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.blue.withOpacity(0.05),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    'Show More',
+                    'Show more',
                     style: TextStyle(
                       color: theme.primaryColor,
                       fontWeight: FontWeight.bold,
@@ -771,7 +641,6 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        // ✅ FIX 5: surfaceColor is now theme-aware (white in light mode)
         color: surfaceColor,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
@@ -807,24 +676,21 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       ),
                       Text(
                         date,
-                        style: TextStyle(
-                            color: subtitleColor, fontSize: 10),
+                        style: TextStyle(color: subtitleColor, fontSize: 10),
                       ),
                     ],
                   ),
                 ],
               ),
               Container(
-                padding: const EdgeInsets.symmetric(
-                    horizontal: 8, vertical: 4),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                 decoration: BoxDecoration(
                   color: const Color(0xFF2B58E4),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Row(
                   children: [
-                    const Icon(Icons.star,
-                        color: Colors.white, size: 12),
+                    const Icon(Icons.star, color: Colors.white, size: 12),
                     const SizedBox(width: 4),
                     Text(
                       rating,
@@ -840,9 +706,136 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             ],
           ),
           const SizedBox(height: 12),
-          Text(comment,
-              style:
-                  TextStyle(color: subtitleColor, fontSize: 13)),
+          Text(comment, style: TextStyle(color: subtitleColor, fontSize: 13, height: 1.4)),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSimilarProducts(ThemeData theme, bool isDark, Color textColor) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0, bottom: 8.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16.0),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Similar Products',
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                Text(
+                  'See all',
+                  style: TextStyle(
+                    color: theme.primaryColor,
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 160,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              itemCount: 3,
+              itemBuilder: (context, index) {
+                return Container(
+                  width: 320,
+                  margin: const EdgeInsets.only(right: 16),
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: theme.colorScheme.surface,
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: isDark ? Colors.transparent : Colors.grey[200]!),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(isDark ? 0.2 : 0.02),
+                        blurRadius: 15,
+                        offset: const Offset(0, 5),
+                      ),
+                    ],
+                  ),
+                  child: Row(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: Image.asset(
+                          "assets/images/carpainter.jpg",
+                          width: 120,
+                          height: double.infinity,
+                          fit: BoxFit.cover,
+                          errorBuilder: (context, error, stackTrace) => Container(
+                            width: 120,
+                            color: Colors.grey[300],
+                            child: const Icon(Icons.person, color: Colors.grey),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                          children: [
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                _buildBadge('Featured', theme.primaryColor),
+                                Icon(Icons.favorite_border, color: Colors.grey[400], size: 20),
+                              ],
+                            ),
+                            Text(
+                              'Wood carving expert',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                            Text(
+                              '₹800/day',
+                              style: TextStyle(
+                                color: textColor,
+                                fontSize: 14,
+                                fontWeight: FontWeight.w900,
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                const Icon(Icons.star, color: Colors.orange, size: 14),
+                                const SizedBox(width: 4),
+                                Text(
+                                  '4.5 (112)',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white70 : Colors.black87,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                );
+              },
+            ),
+          ),
         ],
       ),
     );
@@ -850,10 +843,8 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
 
   Widget _buildBottomBar(Color primaryBlue, bool isDark) {
     return Container(
-      padding:
-          const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
-        // ✅ FIX 6: Theme-aware bottom bar background
         color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
         boxShadow: [
           BoxShadow(

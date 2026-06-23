@@ -59,7 +59,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               const SizedBox(height: 30),
 
-              // --- Selection Cards ---
               _buildOptionCard(
                 index: 0,
                 icon: Icons.chat_bubble_outline_rounded,
@@ -76,7 +75,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
 
               const Spacer(),
 
-              // --- Bottom Button ---
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -115,7 +113,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
     );
   }
 
-  // --- Helper Widget for Option Cards (Updated with your UI code) ---
   Widget _buildOptionCard({
     required int index,
     required IconData icon,
@@ -149,17 +146,14 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
-          // Using spacing if your Flutter version supports it (Flutter 3.24+).
-          // Otherwise, replace with a SizedBox(width: 12) inside children.
-          // spacing: 12,
+
           children: [
             AnimatedContainer(
               duration: const Duration(milliseconds: 250),
               padding: const EdgeInsets.all(12),
               decoration: ShapeDecoration(
-                // Toggles icon background color when selected
                 color: isSelected
-                    ? const Color(0x26235BD6) /* primary-bgExtraLight */
+                    ? const Color(0x26235BD6) 
                     : const Color(0xFFF2F6FF),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(52),
@@ -184,7 +178,7 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 ],
               ),
             ),
-            const SizedBox(width: 12), // Fallback for 'spacing: 12' on Row
+            const SizedBox(width: 12),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -197,7 +191,6 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                       title,
                       style: const TextStyle(
                         color: Color(0x66090726),
-                        /* disabled-main */
                         fontSize: 12,
                         fontFamily: 'Outfit',
                         fontWeight: FontWeight.w400,
@@ -207,14 +200,13 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                   ),
                   const SizedBox(
                     height: 4,
-                  ), // Fallback for 'spacing: 12' on Column
+                  ), 
                   SizedBox(
                     width: 243,
                     child: Text(
                       subtitle,
                       style: const TextStyle(
                         color: Color(0xFF2F314D),
-                        /* text-secondary */
                         fontSize: 14,
                         fontFamily: 'Outfit',
                         fontWeight: FontWeight.w400,

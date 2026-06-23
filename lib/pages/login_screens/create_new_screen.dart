@@ -11,7 +11,6 @@ class CreateNewPasswordScreen extends StatefulWidget {
 }
 
 class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
-  // State variables for interactivity
   bool _obscureNewPassword = true;
   bool _obscureConfirmPassword = true;
   bool _rememberMe = false;
@@ -22,18 +21,16 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    final primaryColor = colorScheme.primary; // Uses your 0xFF235BD6
+    final primaryColor = colorScheme.primary; 
     final textColor = colorScheme.onSurface; 
     final textSecondary = colorScheme.onSurface.withOpacity(0.6);
-    final surfaceColor = colorScheme.surface; // White in light mode, Dark Surface in dark mode
+    final surfaceColor = colorScheme.surface; 
 
     return Scaffold(
-      // Uses lightBackground (0xFFF8F9FA) or darkBackground (0xFF121212)
       backgroundColor: theme.scaffoldBackgroundColor, 
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        // Automatically switch status bar icons based on your theme's brightness
         systemOverlayStyle: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark, 
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
@@ -48,18 +45,16 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
             children: [
               const SizedBox(height: 20),
               
-              // --- Title ---
               Text(
                 'Create New Password',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
-                  color: textColor, // Adapts to light/dark mode
+                  color: textColor, 
                 ),
               ),
               const SizedBox(height: 40),
               
-              // --- New Password Field ---
               _buildPasswordField(
                 context: context,
                 hintText: 'New Password',
@@ -72,7 +67,6 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
               ),
               const SizedBox(height: 16),
               
-              // --- Re-type Password Field ---
               _buildPasswordField(
                 context: context,
                 hintText: 'Re-type New Password',
@@ -85,7 +79,6 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
               ),
               const SizedBox(height: 24),
               
-              // --- Remember Me Checkbox ---
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -120,7 +113,6 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
               ),
               const SizedBox(height: 32),
               
-              // --- Confirm Button ---
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -154,7 +146,6 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
     );
   }
 
-  // --- Helper Widget updated to accept context for Theme access ---
   Widget _buildPasswordField({
     required BuildContext context,
     required String hintText,
@@ -166,10 +157,10 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
     
     return Container(
       decoration: BoxDecoration(
-        color: theme.colorScheme.surface, // Uses your Card Theme Surface Color
+        color: theme.colorScheme.surface, 
         borderRadius: BorderRadius.circular(16),
         boxShadow: [
-          if (!isDark) // Only show shadow in light mode for cleaner UI
+          if (!isDark) 
             BoxShadow(
               color: Colors.black.withOpacity(0.03),
               blurRadius: 10,

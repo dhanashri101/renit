@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:rentit24/pages/category_ad_list_screen.dart'; 
+import 'package:rentit24/pages/category_pages/category_ad_list_screen.dart'; 
 
 class CategoryListScreen extends StatefulWidget {
   const CategoryListScreen({super.key});
@@ -19,14 +19,13 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     {'icon': Icons.handyman, 'name': 'Tools &\nMachinery'},
   ];
 
-  // 1. Create a Map to hold different subcategories for each main tab index
   final Map<int, List<Map<String, dynamic>>> _allSubCategories = {
-    0: [ // Baby Kids (Index 0)
+    0: [ 
       {'icon': Icons.toys, 'name': 'Toys'},
       {'icon': Icons.stroller, 'name': 'Strollers'},
       {'icon': Icons.crib, 'name': 'Cribs'},
     ],
-    1: [ // Electronics (Index 1)
+    1: [ 
       {'icon': Icons.laptop, 'name': 'Laptop'},
       {'icon': Icons.smartphone, 'name': 'Mobile'},
       {'icon': Icons.tablet_mac, 'name': 'Tablet'},
@@ -34,16 +33,16 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       {'icon': Icons.videocam, 'name': 'Projector'},
       {'icon': Icons.camera_alt, 'name': 'Camera'},
     ],
-    2: [ // Furniture (Index 2)
+    2: [ 
       {'icon': Icons.chair_alt, 'name': 'Chairs'},
       {'icon': Icons.bed, 'name': 'Beds'},
       {'icon': Icons.table_restaurant, 'name': 'Tables'},
     ],
-    3: [ // Event Professionals (Index 3)
+    3: [ 
       {'icon': Icons.camera_front, 'name': 'Photographers'},
       {'icon': Icons.music_note, 'name': 'DJs'},
     ],
-    4: [ // Tools & Machinery (Index 4)
+    4: [ 
       {'icon': Icons.plumbing, 'name': 'Plumbing'},
       {'icon': Icons.carpenter, 'name': 'Woodwork'},
     ],
@@ -56,8 +55,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FB);
     final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
-    // 2. Fetch the correct list of subcategories based on the active top tab!
-    // If it's empty or null, we just provide an empty list []
+
     final currentSubCategories = _allSubCategories[_selectedMainCategory] ?? [];
 
     return Scaffold(
@@ -80,7 +78,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       ),
       body: Column(
         children: [
-          // Main Categories Tab Bar
           Container(
             color: surfaceColor,
             height: 90,
@@ -91,7 +88,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
               itemBuilder: (context, index) {
                 final isActive = _selectedMainCategory == index;
                 return GestureDetector(
-                  // FIX APPLIED HERE: Makes the entire empty space clickable
                   behavior: HitTestBehavior.opaque, 
                   
                   onTap: () => setState(() => _selectedMainCategory = index),
@@ -99,7 +95,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                     duration: const Duration(milliseconds: 300),
                     curve: Curves.easeOutQuint,
                     margin: const EdgeInsets.only(right: 24, top: 10),
-                    // Optional extra safeguard: giving the container a transparent background
                     color: Colors.transparent, 
                     child: Column(
                       children: [
@@ -141,7 +136,6 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
             ),
           ),
           const SizedBox(height: 24),
-          // Sub Categories Grid
           Expanded(
             child: GridView.builder(
               padding: const EdgeInsets.symmetric(horizontal: 24),
@@ -151,11 +145,10 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                 mainAxisSpacing: 24,
                 childAspectRatio: 0.8,
               ),
-              itemCount: currentSubCategories.length, // 3. Use dynamic length
+              itemCount: currentSubCategories.length, 
               itemBuilder: (context, index) {
                 return GestureDetector(
                   onTap: () {
-                    // 4. Removed the "if (isCamera)" restriction! Now ANY tap navigates.
                     Navigator.push(
                       context,
                       PageRouteBuilder(
@@ -173,18 +166,18 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                         duration: const Duration(milliseconds: 200),
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: Colors.transparent, // Removed hardcoded highlight
+                          color: Colors.transparent,
                           borderRadius: BorderRadius.circular(16),
                         ),
                         child: Icon(
-                          currentSubCategories[index]['icon'], // 5. Use dynamic icon
+                          currentSubCategories[index]['icon'],
                           color: theme.primaryColor,
                           size: 32,
                         ),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        currentSubCategories[index]['name'], // 6. Use dynamic name
+                        currentSubCategories[index]['name'], 
                         style: TextStyle(
                           fontSize: 12,
                           color: isDark ? Colors.white70 : Colors.black87,

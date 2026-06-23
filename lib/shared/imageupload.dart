@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:rentit24/core/theme.dart'; // Ensure this matches your project structure
+import 'package:rentit24/core/theme.dart'; 
 
 class _UploadImageStep extends StatefulWidget {
   final List<String> imagePaths;
@@ -32,7 +32,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
     try {
       final XFile? image = await _picker.pickImage(
         source: source,
-        imageQuality: 80, // Compress slightly for better performance
+        imageQuality: 80, 
       );
 
       if (image != null) {
@@ -49,7 +49,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white; // Adjust to your AppTheme
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final borderColor = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDDE3F0);
     final hintColor = isDark ? Colors.grey[500] : Colors.grey[400];
     final primaryColor = Theme.of(context).colorScheme.primary;
@@ -73,7 +73,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 16),
         
-        // ── Main upload area (Gallery) ──
         GestureDetector(
           onTap: _isPicking ? null : () => _pickImage(ImageSource.gallery),
           child: AnimatedContainer(
@@ -108,7 +107,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 16),
         
-        // ── Camera button ──
         SizedBox(
           width: double.infinity,
           child: OutlinedButton.icon(
@@ -127,7 +125,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 20),
         
-        // ── Thumbnails Grid ──
         if (widget.imagePaths.isNotEmpty) ...[
           Wrap(
             spacing: 12,

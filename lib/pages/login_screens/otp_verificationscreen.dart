@@ -18,7 +18,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
   final String _phoneNumber = "+91 123-456-7890";
   bool _isOtpFilled = false;
 
-  // Timer Variables
   Timer? _timer;
   int _remainingSeconds = 47;
   late TapGestureRecognizer _resendRecognizer;
@@ -28,16 +27,15 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     super.initState();
     _startTimer();
 
-    // Initialize the gesture recognizer for the RESEND text
     _resendRecognizer = TapGestureRecognizer()..onTap = _onResendTap;
   }
 
   void _startTimer() {
     setState(() {
-      _remainingSeconds = 47; // Reset to your default start time
+      _remainingSeconds = 47; 
     });
 
-    _timer?.cancel(); // Cancel any existing timer before starting a new one
+    _timer?.cancel(); 
     _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       if (_remainingSeconds > 0) {
         setState(() {
@@ -51,13 +49,11 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   void _onResendTap() {
     if (_remainingSeconds == 0) {
-      // TODO: Add actual API call to resend OTP here
       print("Resending OTP...");
       _startTimer();
     }
   }
 
-  // Helper method to format seconds into MM:SS
   String get formattedTime {
     int minutes = _remainingSeconds ~/ 60;
     int seconds = _remainingSeconds % 60;
@@ -66,9 +62,9 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
 
   @override
   void dispose() {
-    _timer?.cancel(); // Always cancel timers to prevent memory leaks
+    _timer?.cancel(); 
     _pinController.dispose();
-    _resendRecognizer.dispose(); // Dispose the recognizer
+    _resendRecognizer.dispose(); 
     super.dispose();
   }
 
@@ -77,46 +73,43 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final textColor = isDark ? Colors.white : Colors.black;
 
-    // Pinput Theme Configurations mapped from your requested UI
-    // Pinput Theme Configurations mapped to your image
+
     final defaultPinTheme = PinTheme(
       width: 40,
       height: 48,
       textStyle: const TextStyle(
         color: Color(0xFF090726),
         fontSize:
-            18, // Increased slightly so the dot matches the size in your image
+            18, 
         fontFamily: 'Outfit',
         fontWeight: FontWeight.w400,
       ),
       decoration: BoxDecoration(
         color: isDark
             ? AppTheme.darkSurface
-            : Colors.white, // Empty state background
+            : Colors.white, 
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
           color: isDark
               ? Colors.grey.shade800
-              : Colors.grey.shade300, // Empty state border
+              : Colors.grey.shade300, 
           width: 1,
         ),
       ),
     );
 
-    // When the box is actively selected
     final focusedPinTheme = defaultPinTheme.copyDecorationWith(
-      color: const Color(0x19235BD6), // The exact light blue tint
+      color: const Color(0x19235BD6), 
       border: Border.all(
-        color: const Color(0xFF235BD6), // The exact solid blue border
+        color: const Color(0xFF235BD6),
         width: 1,
       ),
     );
 
-    // When the box is filled (This creates the look in your screenshot)
     final submittedPinTheme = defaultPinTheme.copyDecorationWith(
-      color: const Color(0x19235BD6), // Keeps the light blue tint
+      color: const Color(0x19235BD6), 
       border: Border.all(
-        color: const Color(0xFF235BD6), // Keeps the solid blue border
+        color: const Color(0xFF235BD6), 
         width: 1,
       ),
     );
@@ -138,7 +131,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
             children: [
               const SizedBox(height: 20),
 
-              // Title
               SizedBox(
                 width: 328,
                 child: const Text(
@@ -155,7 +147,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Subtitle
               SizedBox(
                 width: 328,
                 child: Text.rich(
@@ -199,7 +190,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Dynamic Timer
               Text(
                 formattedTime,
                 style: TextStyle(
@@ -212,8 +202,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 32),
 
-              // OTP Input Fields
-              // OTP Input Fields
               Pinput(
                 length: 6,
                 controller: _pinController,
@@ -232,7 +220,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Continue Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -277,7 +264,6 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Resend Text
               SizedBox(
                 width: 360,
                 child: Text.rich(

@@ -10,10 +10,8 @@ class FillYourProfileScreen extends StatefulWidget {
 }
 
 class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
-  // 1. Form Key for validation
   final _formKey = GlobalKey<FormState>();
 
-  // 2. Controllers for all text fields
   final _firstNameController = TextEditingController();
   final _lastNameController = TextEditingController();
   final _dobMonthController = TextEditingController();
@@ -23,13 +21,11 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
   final _phoneController = TextEditingController();
   final _addressController = TextEditingController();
 
-  // 3. State for the Country Code Dropdown
   String _selectedCountryFlag = '🇮🇳';
   final List<String> _countryFlags = ['🇮🇳', '🇺🇸', '🇬🇧', '🇨🇦', '🇦🇺'];
 
   @override
   void dispose() {
-    // 4. Dispose controllers to prevent memory leaks
     _firstNameController.dispose();
     _lastNameController.dispose();
     _dobMonthController.dispose();
@@ -41,7 +37,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
     super.dispose();
   }
 
-  // Submit function
  void _submitForm() {
   if (_formKey.currentState!.validate()) {
     final profileData = {
@@ -64,11 +59,10 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
       ),
     );
 
-    // Navigate to next screen
     Navigator.push(
       context,
       MaterialPageRoute(
-        builder: (context) => const CreateAppPinScreen(), // Your screen here
+        builder: (context) => const CreateAppPinScreen(),
       ),
     );
   }
@@ -102,7 +96,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              // Handle Skip
               print("Skipped Profile Fill");
             },
             child: Text(
@@ -120,13 +113,12 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0),
           child: Form(
-            key: _formKey, // Attach the form key
+            key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const SizedBox(height: 20),
 
-                // --- Profile Picture Avatar ---
                 Center(
                   child: Stack(
                     children: [
@@ -141,7 +133,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                         right: 4,
                         child: GestureDetector(
                           onTap: () {
-                            // TODO: Implement Image Picker
                             print("Open Image Picker");
                           },
                           child: Container(
@@ -162,7 +153,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                 ),
                 const SizedBox(height: 30),
 
-                // --- Form Fields ---
                 _buildLabel('First Name*'),
                 StyledTextField(
                   hintText: 'ex. John',
@@ -231,7 +221,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Functional Country Code Dropdown
                     Container(
                       height: 56,
                       padding: const EdgeInsets.symmetric(horizontal: 12),
@@ -268,7 +257,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    // Phone Input
                     Expanded(
                       child: StyledTextField(
                         hintText: '(000) 000 0000',
@@ -291,12 +279,11 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                 ),
                 const SizedBox(height: 40),
 
-                // --- Continue Button ---
                 SizedBox(
                   width: double.infinity,
                   height: 56,
                   child: ElevatedButton(
-                    onPressed: _submitForm, // Call the submit function
+                    onPressed: _submitForm,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: theme.primaryColor,
                       foregroundColor: Colors.white,
@@ -335,9 +322,6 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
   }
 }
 
-// ============================================================================
-// CUSTOM TEXT FIELD WIDGET (Upgraded with Controllers & Validation)
-// ============================================================================
 class StyledTextField extends StatefulWidget {
   final String hintText;
   final IconData? prefixIcon;
@@ -400,7 +384,6 @@ class _StyledTextFieldState extends State<StyledTextField> {
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
-      // Removed fixed height so it can expand if validation error text appears
       constraints: const BoxConstraints(minHeight: 56), 
       decoration: BoxDecoration(
         color: backgroundColor,
@@ -415,7 +398,6 @@ class _StyledTextFieldState extends State<StyledTextField> {
             ),
         ],
       ),
-      // Upgraded to TextFormField for Form validation
       child: TextFormField(
         controller: widget.controller,
         focusNode: _focusNode,

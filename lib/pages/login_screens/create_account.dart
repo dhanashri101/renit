@@ -32,7 +32,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   @override
   void initState() {
     super.initState();
-    // Listen to focus changes to trigger the active blue background effect
     _nameFocus.addListener(_onFocusChange);
     _emailFocus.addListener(_onFocusChange);
     _passwordFocus.addListener(_onFocusChange);
@@ -40,7 +39,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
   }
 
   void _onFocusChange() {
-    setState(() {}); // Rebuild to update field colors when user taps a field
+    setState(() {}); 
   }
 
   void _validateForm() {
@@ -73,17 +72,14 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     final colorScheme = theme.colorScheme;
     final isDark = theme.brightness == Brightness.dark;
 
-    // Adapting text colors automatically based on mode
     final textColor = isDark ? Colors.white : const Color(0xFF090726);
     final textSecondary = colorScheme.onSurface.withOpacity(0.7);
 
-    // UI Colors utilizing your AppTheme
     final defaultBgColor = colorScheme.surface;
     final defaultBorderColor = isDark
         ? Colors.grey.shade800
         : Colors.grey.shade300;
 
-    // Using your primary blue dynamically for the focused states
     final focusedBorderColor = colorScheme.primary;
     final focusedBgColor = colorScheme.primary.withOpacity(0.1);
 
@@ -102,7 +98,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
         ),
         prefixIcon: Icon(
           prefixIcon,
-          color: focusedBorderColor, // <--- CHANGED: Always uses primary blue!
+          color: focusedBorderColor, 
           size: 20,
         ),
         suffixIcon: suffixIcon,
@@ -125,7 +121,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     }
 
     return Scaffold(
-      // Using scaffold background inherited from AppTheme
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -142,7 +137,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
             children: [
               const SizedBox(height: 10),
 
-              // Title
+              
               Text(
                 'Create your Account',
                 style: TextStyle(
@@ -155,7 +150,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 32),
 
-              // Full Name Field
               TextField(
                 controller: _nameController,
                 focusNode: _nameFocus,
@@ -175,7 +169,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Email Field
               TextField(
                 controller: _emailController,
                 focusNode: _emailFocus,
@@ -195,7 +188,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Password Field
               TextField(
                 controller: _passwordController,
                 focusNode: _passwordFocus,
@@ -234,7 +226,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Re-type Password Field
               TextField(
                 controller: _confirmPasswordController,
                 focusNode: _confirmFocus,
@@ -274,7 +265,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 16),
 
-              // Remember Me Checkbox
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -309,7 +299,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Sign Up Button
               SizedBox(
                 width: double.infinity,
                 height: 50,
@@ -349,14 +338,13 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                     ),
                   ),
                   child: const Text(
-                    "Sign up", // Using Sign up to match standard behavior and first 2 screens
+                    "Sign up", 
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
               ),
               const SizedBox(height: 32),
 
-              // Divider
               Row(
                 children: [
                   Expanded(
@@ -380,7 +368,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 24),
 
-              // Social Icons Row
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -430,7 +417,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
               ),
               const SizedBox(height: 40),
 
-              // Footer Text
               Center(
                 child: Text.rich(
                   TextSpan(
@@ -447,7 +433,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                         text: 'Sign in',
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            // TODO: Navigate back to Sign In
                             Navigator.pop(context);
                           },
                         style: TextStyle(

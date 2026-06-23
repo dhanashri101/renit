@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rentit24/pages/homescreen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 enum BiometricType { faceId, fingerprint }
 
@@ -68,11 +69,9 @@ class BiometricAuthScreen extends StatelessWidget {
             children: [
               const Spacer(),
 
-              // --- Main Icon ---
               Icon(mainIcon, size: 100, color: theme.primaryColor),
               const SizedBox(height: 40),
 
-              // --- Subtitle Text ---
               Text(
                 'If you enable $touchText, you don\'t\nneed to enter your password when\nyou login.',
                 textAlign: TextAlign.center,
@@ -85,7 +84,6 @@ class BiometricAuthScreen extends StatelessWidget {
 
               const Spacer(),
 
-              // --- Continue Button ---
               SizedBox(
                 width: double.infinity,
                 height: 56,
@@ -103,7 +101,7 @@ class BiometricAuthScreen extends StatelessWidget {
                     } else {
                       Navigator.pushReplacement(
                         context,
-                        MaterialPageRoute(builder: (_) => const HomeScreen()),
+                        MaterialPageRoute(builder: (_) => const NavigationWrapper()),
                       );
                     }
                   },
@@ -128,7 +126,6 @@ class BiometricAuthScreen extends StatelessWidget {
     );
   }
 
-  // --- Recreates the 'allowing-permission' overlay ---
   void _showPermissionBottomSheet(
     BuildContext context,
     ThemeData theme,
@@ -175,7 +172,6 @@ class BiometricAuthScreen extends StatelessWidget {
               ),
               const SizedBox(height: 32),
 
-              // Depending on Face vs Touch, the design shows either two buttons or a center icon
               if (authType == BiometricType.faceId)
                 Row(
                   children: [

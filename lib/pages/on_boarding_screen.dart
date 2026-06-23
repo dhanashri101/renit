@@ -1,9 +1,10 @@
-import 'dart:async'; // 1. Import dart:async for the Timer
+import 'dart:async'; 
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/homescreen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
-// import 'app_theme.dart';
+
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({Key? key}) : super(key: key);
@@ -15,7 +16,7 @@ class OnboardingScreen extends StatefulWidget {
 class _OnboardingScreenState extends State<OnboardingScreen> {
   final PageController _pageController = PageController();
   int _currentPage = 0;
-  Timer? _timer; // 2. Declare a Timer variable
+  Timer? _timer; 
 
   final List<Map<String, String>> onboardingData = [
     {
@@ -41,7 +42,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     },
   ];
 
-  // 3. Initialize the Timer in initState
+
   @override
   void initState() {
     super.initState();
@@ -56,13 +57,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           curve: Curves.easeIn,
         );
       } else {
-        // Stop the timer when it reaches the last page
+        
         _timer?.cancel();
       }
     });
   }
 
-  // 4. ALWAYS cancel the timer and dispose the controller to prevent memory leaks
   @override
   void dispose() {
     _timer?.cancel();
@@ -75,7 +75,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     return Scaffold(
       body: Stack(
         children: [
-          // 1. FULL SCREEN PAGE VIEW
           PageView.builder(
             controller: _pageController,
             onPageChanged: (value) {
@@ -89,12 +88,10 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             },
           ),
 
-          // 2. STATIC UI CONTROLS
           SafeArea(
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                // Top Right: SKIP Button
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24.0,
@@ -109,7 +106,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         Navigator.pushReplacement(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => const HomeScreen(),
+                            builder: (context) => const NavigationWrapper(),
                           ),
                         );
                       },
@@ -127,7 +124,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                 ),
 
-                // Bottom: Indicators and Next Button
                 Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: 24.0,
@@ -135,7 +131,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Page Indicators
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: List.generate(
@@ -145,7 +140,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       ),
                       const SizedBox(height: 32),
 
-                      // Next / Done Button
                       ElevatedButton(
                         onPressed: () {
                           if (_currentPage == onboardingData.length - 1) {

@@ -1,24 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'dart:async'; // Required for Future.delayed
+import 'dart:async'; 
 
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
 import 'package:rentit24/pages/splash_screen/splash_screen.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
 
-// Global theme notifier
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Status bar styling
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(
       statusBarColor: Colors.transparent,
-      statusBarIconBrightness: Brightness.dark, // Android
-      statusBarBrightness: Brightness.light, // iOS
+      statusBarIconBrightness: Brightness.dark, 
+      statusBarBrightness: Brightness.light, 
     ),
   );
 
@@ -39,7 +37,6 @@ class RentItApp extends StatelessWidget {
           theme: AppTheme.lightTheme,
           darkTheme: AppTheme.darkTheme,
           themeMode: currentMode,
-          // 1. Change the home widget to the SplashScreen
           home: const SplashScreen(), 
         );
       },

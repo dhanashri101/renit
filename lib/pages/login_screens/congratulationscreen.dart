@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Don't forget to import this!
+import 'package:flutter/services.dart'; 
 
 class CongratulationsScreen extends StatelessWidget {
   const CongratulationsScreen({Key? key}) : super(key: key);
@@ -15,9 +15,7 @@ class CongratulationsScreen extends StatelessWidget {
 
     final primaryBlue = colorScheme.primary;
 
-    // --- We wrap the Scaffold in an AnnotatedRegion ---
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      // Automatically switch icon colors based on Light/Dark mode
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: Scaffold(
         body: SafeArea(
@@ -26,7 +24,7 @@ class CongratulationsScreen extends StatelessWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const SizedBox(height: 40), // Changed to const for performance
+                const SizedBox(height: 40),
                 Container(
                   width: 289,
                   height: 289,
@@ -40,7 +38,7 @@ class CongratulationsScreen extends StatelessWidget {
 
                 const SizedBox(height: 48),
 
-                // Title
+              
                 Text(
                   'Congratulations!',
                   textAlign: TextAlign.center,
@@ -54,7 +52,6 @@ class CongratulationsScreen extends StatelessWidget {
                 ),
                 const SizedBox(height: 16),
 
-                // Subtitle
                 Text(
                   "Let's explore how we can meet your needs!",
                   textAlign: TextAlign.center,
@@ -67,9 +64,8 @@ class CongratulationsScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 40), // Changed to const
+                const SizedBox(height: 40), 
 
-                // Get Started Button
                 SizedBox(
                   width: double.infinity,
                   height: 50,
@@ -85,7 +81,7 @@ class CongratulationsScreen extends StatelessWidget {
                         borderRadius: BorderRadius.circular(25),
                       ),
                     ),
-                    child: const Row( // Added const here
+                    child: const Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       mainAxisSize: MainAxisSize.min,
                       children: [

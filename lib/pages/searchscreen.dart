@@ -19,7 +19,6 @@ class _SearchScreenState extends State<SearchScreen> {
   @override
   void initState() {
     super.initState();
-    // Auto-focus the search bar when the page opens
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
@@ -54,13 +53,11 @@ class _SearchScreenState extends State<SearchScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header / Input Area
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
               color: bgColor,
               child: Column(
                 children: [
-                  // Search Input
                   Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -100,7 +97,6 @@ class _SearchScreenState extends State<SearchScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Location Input
                   Container(
                     height: 50,
                     decoration: BoxDecoration(
@@ -197,7 +193,6 @@ else
   Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      // const SizedBox(height: 24),
 
       Text(
         'Popular Categories',
@@ -208,7 +203,6 @@ else
         ),
       ),
 
-      // const SizedBox(height: 12),
 
       _buildPopularCategoriesGrid(
         isDark,
@@ -332,10 +326,10 @@ else
             shrinkWrap: true,
             physics: const NeverScrollableScrollPhysics(),
             gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 4,      // Guarantees exactly 4 items per line
-              crossAxisSpacing: 12,   // Exact horizontal spacing from your design
-              mainAxisSpacing: 12,    // Exact vertical spacing from your design
-              childAspectRatio: 0.65, // Adjusts height to ensure the text doesn't clip
+              crossAxisCount: 4,      
+              crossAxisSpacing: 12,  
+              mainAxisSpacing: 12,   
+              childAspectRatio: 0.65, 
             ),
             itemCount: popularCategories.length,
             itemBuilder: (context, index) {
@@ -359,7 +353,7 @@ else
                       decoration: BoxDecoration(
                         image: DecorationImage(
                           image: AssetImage(category['img']!),
-                          fit: BoxFit.contain, // contain prevents image cropping
+                          fit: BoxFit.contain, 
                         ),
                       ),
                     ),

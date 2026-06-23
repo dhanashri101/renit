@@ -4,6 +4,7 @@ import 'package:rentit24/pages/homescreen.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/email_loginscreen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 class MainLoginScreen extends StatelessWidget {
   const MainLoginScreen({super.key});
@@ -27,7 +28,7 @@ class MainLoginScreen extends StatelessWidget {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => const HomeScreen(),
+                        builder: (context) => const NavigationWrapper(),
                       ),
                     );
                   },
@@ -137,7 +138,6 @@ class MainLoginScreen extends StatelessWidget {
 
               const SizedBox(height: 32),
 
-              // Sign in with password button
               Container(
                 width: double.infinity,
                 height: 56,
@@ -177,7 +177,6 @@ class MainLoginScreen extends StatelessWidget {
 
               const SizedBox(height: 24),
 
-              // Footer text
               RichText(
                 text: TextSpan(
                   text: 'Ready to join us? ',
@@ -214,7 +213,6 @@ class MainLoginScreen extends StatelessWidget {
     );
   }
 
-  // Helper method updated to adapt to Dark Mode using Theme.of(context)
   Widget _buildSocialButton({
     required BuildContext context,
     required String text,
@@ -232,12 +230,11 @@ class MainLoginScreen extends StatelessWidget {
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          // In Light Mode, it uses white. In Dark Mode, it utilizes your AppTheme.darkSurface
           backgroundColor: theme.colorScheme.surface,
           foregroundColor: isDark
               ? Colors.white
-              : const Color(0xFF1A1A2E), // Text color
-          elevation: isDark ? 0 : 0.5, // Slight shadow in light mode if desired
+              : const Color(0xFF1A1A2E), 
+          elevation: isDark ? 0 : 0.5, 
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(28),
             side: isDark
