@@ -3,9 +3,9 @@ import 'package:flutter/services.dart';
 import 'dart:async'; // Required for Future.delayed
 
 import 'package:rentit24/core/theme.dart';
-import 'package:rentit24/login_screens/login_screen.dart';
-import 'package:rentit24/splash_screen/splash_screen.dart';
-import 'package:rentit24/welcomescreen.dart';
+import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/pages/splash_screen/splash_screen.dart';
+import 'package:rentit24/pages/welcomescreen.dart';
 
 // Global theme notifier
 final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
