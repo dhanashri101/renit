@@ -1,12 +1,27 @@
 import 'package:dio/dio.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class ApiService {
-  final Dio dio = Dio(
-    BaseOptions(
+  late Dio dio;
+
+  ApiService() {
+    dio = Dio(BaseOptions(
       baseUrl: 'https://rentit24.com',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    ),
-  );
+    ));
+
+    dio.interceptors.add(
+      InterceptorsWrapper(
+        onRequest: (options, handler) async {
+          final prefs = await SharedPreferences.getInstance();
+          final token = prefs.getString('auth_token');
+
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+
+          return handler.next(options); 
+        },
+      ),
+    );
+  }
 }

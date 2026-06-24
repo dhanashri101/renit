@@ -1,10 +1,8 @@
 import 'package:flutter/material.dart';
 
 class AppTheme {
-  static const Color primaryBlue = Color(
-    0xFF235BD6,
-  ); 
-  static const Color lightBackground = Color(0xFFF8F9FA);
+  static const Color primaryBlue = Color(0xFF235BD6);
+  static const Color lightBackground = Color(0xFFEAF1FD);
   static const Color darkBackground = Color(0xFF121212);
   static const Color darkSurface = Color(0xFF1E1E1E);
 
@@ -65,4 +63,15 @@ class AppTheme {
       useMaterial3: true,
     );
   }
+}
+
+class ActivityColors {
+  static const Color pendingBg = Color(0xFFFEF3C7);
+  static const Color pendingText = Color(0xFFD97706);
+  static const Color approvedBg = Color(0xFFD1FAE5);
+  static const Color approvedText = Color(0xFF059669);
+  static const Color rejectedBg = Color(0xFFFEE2E2);
+  static const Color rejectedText = Color(0xFFDC2626);
+  static const Color inactiveBg = Color(0xFFF3F4F6);
+  static const Color inactiveText = Color(0xFF4B5563);
 }

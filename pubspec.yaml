@@ -17,6 +17,11 @@ dependencies:
   pinput: ^5.0.1
   image_picker: ^1.2.2
   dio: ^5.9.2
+  
+  shared_preferences: ^2.5.5
+  google_sign_in: ^7.2.0
+  flutter_facebook_auth: ^7.1.7
+  sign_in_with_apple: ^8.1.0
 dev_dependencies:
   flutter_test:
     sdk: flutter

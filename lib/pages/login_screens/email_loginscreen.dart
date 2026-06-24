@@ -5,7 +5,9 @@ import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/services/auth_service.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
+import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 
 class emailLoginScreen extends StatefulWidget {
   const emailLoginScreen({Key? key}) : super(key: key);
@@ -20,6 +22,9 @@ class _LoginScreenState extends State<emailLoginScreen> {
 
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
+
+  final AuthService _authService = AuthService();
+  bool _isLoading = false;
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
@@ -108,8 +113,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
           ? const Color(0xFF121212)
           : const Color(0xFFF8F9FA),
       appBar: AppBar(
-                systemOverlayStyle: SystemUiOverlayStyle.dark,
-
+        systemOverlayStyle: SystemUiOverlayStyle.dark,
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -227,14 +231,42 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 ],
               ),
               const SizedBox(height: 24),
-
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isFormValid
-                      ? () {
-                          print("Logging in with: ${_emailController.text}");
+                  onPressed: (_isFormValid && !_isLoading)
+                      ? () async {
+                          setState(() {
+                            _isLoading = true;
+                          });
+                          final success = await _authService.loginWithEmail(
+                            _emailController.text,
+                            _passwordController.text,
+                          );
+                          if (mounted) {
+                            setState(() {
+                              _isLoading = false;
+                            });
+                          }
+
+                          if (success && mounted) {
+
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const CongratulationsScreen(),
+                              ),
+                            );
+                          } else if (mounted) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Invalid email or password. Please try again.'),
+                                backgroundColor: Colors.red,
+                                behavior: SnackBarBehavior.floating,
+                              ),
+                            );
+                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
@@ -257,12 +289,19 @@ class _LoginScreenState extends State<emailLoginScreen> {
                             ),
                     ),
                   ),
-                  child: const Text(
-                    "Sign in",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  child: _isLoading 
+                    ? const SizedBox(
+                        height: 24, 
+                        width: 24, 
+                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
+                      )
+                    : const Text(
+                        "Sign in",
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                      ),
                 ),
               ),
+              
               const SizedBox(height: 16),
 
               Center(

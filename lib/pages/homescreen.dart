@@ -150,7 +150,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 24),
             _buildSectionHeader('Hire a Professional', 'See all', theme),
             const SizedBox(height: 16),
-_buildProfessionalList(theme, context),
+            _buildProfessionalList(theme, context),
             const SizedBox(height: 24),
             _buildSectionHeader('Nearby Ads', '', theme),
             const SizedBox(height: 16),
@@ -558,7 +558,7 @@ _buildProfessionalList(theme, context),
     );
   }
 
-  Widget _buildProfessionalList(ThemeData theme, BuildContext context) { 
+  Widget _buildProfessionalList(ThemeData theme, BuildContext context) {
     final isDark = theme.brightness == Brightness.dark;
     return SizedBox(
       height: 160,
@@ -567,7 +567,7 @@ _buildProfessionalList(theme, context),
         padding: const EdgeInsets.symmetric(horizontal: 16),
         itemCount: 2,
         itemBuilder: (context, index) {
-          return GestureDetector( 
+          return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
@@ -776,6 +776,7 @@ _buildProfessionalList(theme, context),
       ),
     );
   }
+
   Widget _buildFilterChips(ThemeData theme) {
     final isDark = theme.brightness == Brightness.dark;
 

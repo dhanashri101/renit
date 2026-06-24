@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rentit24/pages/activity.dart';
 import 'package:rentit24/pages/chat_screens/chat_list.dart';
 import 'package:rentit24/pages/form/product_listing_form.dart';
 import 'package:rentit24/pages/homescreen.dart';
@@ -17,7 +18,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     const HomeScreen(),
     const ChatListScreen(),
     const ProductListingFlow(),
-    const HomeScreen(),
+    const MyActivityPage(),
     const HomeScreen(),
   ];
 

@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/chat_screens/chat_details_screen.dart';
-
-
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
 
@@ -66,48 +64,52 @@ class _ChatListScreenState extends State<ChatListScreen> {
               children: [
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                  child: Container(
+                  child: SizedBox(
                     height: 40,
-                    decoration: BoxDecoration(
-                      color: isDark
-                          ? const Color(0xFF2A2A2A)
-                          : const Color(0xFFF3F4F6),
-                      borderRadius: BorderRadius.circular(8),
-                      border: Border.all(
-                        color: isDark ? Colors.grey[800]! : Colors.grey[200]!,
-                      ),
-                    ),
                     child: TabBar(
-                      indicatorSize: TabBarIndicatorSize.tab,
+                      indicatorSize: TabBarIndicatorSize.label,
                       dividerColor: Colors.transparent,
-                      labelPadding: EdgeInsets.zero,
-                      indicator: BoxDecoration(
-                        borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 4,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
+                      indicator: UnderlineTabIndicator(
+                        borderSide: BorderSide(
+                          color: primaryBlue,
+                          width: 4.0,
+                        ),
+                        borderRadius: const BorderRadius.only(
+                          topLeft: Radius.circular(8),
+                          topRight: Radius.circular(8),
+                        ),
                       ),
-                      labelColor: primaryBlue,
-                      unselectedLabelColor: isDark
-                          ? Colors.grey[400]
-                          : const Color(0xFF6B7280),
+                      labelColor: isDark ? Colors.white : const Color(0xFF1F2937),
+                      unselectedLabelColor: isDark ? Colors.grey[500] : const Color(0xFF9CA3AF),
                       labelStyle: const TextStyle(
                         fontWeight: FontWeight.w600,
-                        fontSize: 13,
+                        fontSize: 16,
                       ),
                       unselectedLabelStyle: const TextStyle(
                         fontWeight: FontWeight.w500,
-                        fontSize: 13,
+                        fontSize: 16,
                       ),
+                      splashFactory: NoSplash.splashFactory,
+                      overlayColor: WidgetStateProperty.all(Colors.transparent),
                       tabs: const [
-                        Tab(text: 'All'),
-                        Tab(text: 'Rent IN'),
-                        Tab(text: 'Rent OUT'),
+                        Tab(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 4.0),
+                            child: Text('All'),
+                          ),
+                        ),
+                        Tab(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 4.0),
+                            child: Text('Rent IN'),
+                          ),
+                        ),
+                        Tab(
+                          child: Padding(
+                            padding: EdgeInsets.only(bottom: 4.0),
+                            child: Text('Rent OUT'),
+                          ),
+                        ),
                       ],
                     ),
                   ),
