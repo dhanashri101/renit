@@ -2,12 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
-import 'package:rentit24/services/auth_service.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
-import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 
 class emailLoginScreen extends StatefulWidget {
   const emailLoginScreen({Key? key}) : super(key: key);
@@ -22,9 +21,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
 
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
-
-  final AuthService _authService = AuthService();
-  bool _isLoading = false;
 
   bool _obscurePassword = true;
   bool _rememberMe = false;
@@ -114,6 +110,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
           : const Color(0xFFF8F9FA),
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
+
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -231,53 +228,31 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 ],
               ),
               const SizedBox(height: 24),
+
               SizedBox(
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: (_isFormValid && !_isLoading)
-                      ? () async {
-                          setState(() {
-                            _isLoading = true;
-                          });
-                          final success = await _authService.loginWithEmail(
-                            _emailController.text,
-                            _passwordController.text,
+                  onPressed: _isFormValid
+                      ? () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  const CongratulationsScreen(),
+                            ),
                           );
-                          if (mounted) {
-                            setState(() {
-                              _isLoading = false;
-                            });
-                          }
-
-                          if (success && mounted) {
-
-                            Navigator.pushReplacement(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => const CongratulationsScreen(),
-                              ),
-                            );
-                          } else if (mounted) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Invalid email or password. Please try again.'),
-                                backgroundColor: Colors.red,
-                                behavior: SnackBarBehavior.floating,
-                              ),
-                            );
-                          }
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: focusedBorderColor, 
+                    backgroundColor: focusedBorderColor,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: isDark
                         ? Colors.grey.shade800
                         : Colors.white,
                     disabledForegroundColor: Colors.grey.shade400,
                     elevation: _isFormValid ? 4 : 0,
-                    shadowColor: focusedBorderColor.withOpacity(0.4),
+                    shadowColor: focusedBorderColor.withValues(alpha: 0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                       side: _isFormValid
@@ -289,19 +264,12 @@ class _LoginScreenState extends State<emailLoginScreen> {
                             ),
                     ),
                   ),
-                  child: _isLoading 
-                    ? const SizedBox(
-                        height: 24, 
-                        width: 24, 
-                        child: CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                      )
-                    : const Text(
-                        "Sign in",
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                      ),
+                  child: const Text(
+                    "Sign in",
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
                 ),
               ),
-              
               const SizedBox(height: 16),
 
               Center(

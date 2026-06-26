@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/main.dart';
 import 'package:rentit24/model/category_model.dart';
 import 'package:rentit24/pages/category_pages/categoriscreen.dart';
@@ -122,8 +123,8 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: isDark
-          ? const Color(0xFF121212)
-          : const Color(0xFFF4F6FB),
+          ? AppTheme.darkBackground 
+          : AppTheme.lightBackground,
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,

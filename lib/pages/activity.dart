@@ -127,20 +127,22 @@ class _MyActivityPageState extends State<MyActivityPage>
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-
-    final bgColor = theme.scaffoldBackgroundColor;
-    final surfaceColor = theme.colorScheme.surface;
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final textSecondary = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
 
     return Scaffold(
-      backgroundColor: AppTheme.lightBackground,
+      backgroundColor: isDark
+          ? AppTheme.darkBackground
+          : const Color(0xFFEFF6FF),
       appBar: AppBar(
         backgroundColor: isDark
             ? AppTheme.darkSurface
-            : AppTheme.lightBackground,
+            : const Color(0xFFEFF6FF),
         elevation: 0,
         surfaceTintColor: Colors.transparent,
+        shape: Border(
+   
+  ),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context),
@@ -154,11 +156,12 @@ class _MyActivityPageState extends State<MyActivityPage>
             fontWeight: FontWeight.bold,
           ),
         ),
+        
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(100),
           child: Column(
             children: [
-              Container(
+              SizedBox(
                 width: double.infinity,
                 child: TabBar(
                   controller: _mainTabController,
@@ -212,7 +215,6 @@ class _MyActivityPageState extends State<MyActivityPage>
                 ),
               ),
               const SizedBox(height: 12),
-
               SizedBox(
                 height: 32,
                 child: ListView.builder(
@@ -225,7 +227,6 @@ class _MyActivityPageState extends State<MyActivityPage>
                       padding: const EdgeInsets.only(right: 8),
                       child: ChoiceChip(
                         showCheckmark: false,
-
                         label: Text(
                           '${_filters[index]} (${_filterCounts[index]})',
                           style: TextStyle(
@@ -238,8 +239,9 @@ class _MyActivityPageState extends State<MyActivityPage>
                         ),
                         selected: isSelected,
                         onSelected: (selected) {
-                          if (selected)
+                          if (selected) {
                             setState(() => _selectedFilterIndex = index);
+                          }
                         },
                         backgroundColor: isDark
                             ? const Color(0xFF2A2A2A)
@@ -249,8 +251,8 @@ class _MyActivityPageState extends State<MyActivityPage>
                           color: isSelected
                               ? AppTheme.primaryBlue
                               : (isDark
-                                    ? Colors.transparent
-                                    : const Color(0xFFE5E7EB)),
+                                  ? Colors.transparent
+                                  : const Color(0xFFE5E7EB)),
                         ),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(20),
@@ -342,172 +344,242 @@ class AdCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final surfaceColor = theme.colorScheme.surface;
-    final borderColor = isDark
-        ? const Color(0xFF333333)
-        : const Color(0xFFE5E7EB);
-    final textColor = isDark ? Colors.white : const Color(0xFF111827);
-    final textSecondary = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
-
     return Container(
+      width: double.infinity,
       margin: const EdgeInsets.only(bottom: 16),
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: borderColor),
+      padding: const EdgeInsets.all(12),
+      decoration: ShapeDecoration(
+        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(24),
+        ),
+        shadows: [
+          if (!isDark)
+            BoxShadow(
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+        ],
       ),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisSize: MainAxisSize.min,
         children: [
-          Padding(
-            padding: const EdgeInsets.all(12),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.network(
-                    ad.imageUrl,
-                    width: 80,
-                    height: 80,
-                    fit: BoxFit.cover,
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                width: 100,
+                height: 120,
+                clipBehavior: Clip.antiAlias,
+                decoration: ShapeDecoration(
+                  color: const Color(0xFFBAB9B9),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(16),
                   ),
                 ),
-                const SizedBox(width: 12),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
+                child: Image.network(
+                  ad.imageUrl,
+                  fit: BoxFit.cover,
+                  width: double.infinity,
+                  height: double.infinity,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.start,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           Text(
                             'Posted on ${ad.date}',
                             style: TextStyle(
+                              color: isDark
+                                  ? Colors.grey[400]
+                                  : const Color(0xFF090726),
                               fontSize: 10,
-                              color: textSecondary,
+                              fontFamily: 'Outfit',
+                              fontWeight: FontWeight.w300,
+                              height: 1.20,
+                              letterSpacing: 0.20,
                             ),
                           ),
                           _buildMenuButton(context, isDark),
                         ],
                       ),
-                      const SizedBox(height: 4),
-                      Row(
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: double.infinity,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          _buildStatusBadge(ad.status, isDark),
-                          if (ad.status == AdStatus.inactive &&
-                              ad.type == AdType.product) ...[
+                          _buildStatusBadge(ad.status),
+                          if (ad.status == AdStatus.inactive) ...[
                             const SizedBox(width: 4),
-                            _buildInactiveBadge(isDark),
+                            _buildInactiveBadge(),
                           ],
                         ],
                       ),
-                      const SizedBox(height: 6),
-                      if (ad.category.isNotEmpty)
-                        Text(
+                    ),
+                    const SizedBox(height: 8),
+                    if (ad.category.isNotEmpty)
+                      SizedBox(
+                        width: 196,
+                        child: Text(
                           ad.category,
-                          style: TextStyle(fontSize: 10, color: textSecondary),
+                          style: TextStyle(
+                            color: isDark
+                                ? Colors.grey[500]
+                                : const Color(0x66090726),
+                            fontSize: 10,
+                            fontFamily: 'Outfit',
+                            fontWeight: FontWeight.w300,
+                            height: 1.20,
+                            letterSpacing: 0.20,
+                          ),
                         ),
-                      Text(
+                      ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 196,
+                      child: Text(
                         ad.title,
-                        style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w600,
-                          color: textColor,
-                        ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        ad.price,
                         style: TextStyle(
-                          fontSize: 14,
-                          fontWeight: FontWeight.bold,
-                          color: textColor,
+                          color:
+                              isDark ? Colors.white : const Color(0xFF2F314D),
+                          fontSize: 12,
+                          fontFamily: 'Outfit',
+                          fontWeight: FontWeight.w400,
+                          height: 1.42,
                         ),
                       ),
-                      const SizedBox(height: 6),
-                      Row(
+                    ),
+                    const SizedBox(height: 4),
+                    SizedBox(
+                      width: 196,
+                      child: Text(
+                        ad.price,
+                        style: TextStyle(
+                          color:
+                              isDark ? Colors.white : const Color(0xFF090726),
+                          fontSize: 14,
+                          fontFamily: 'Outfit',
+                          fontWeight: FontWeight.w600,
+                          height: 1.43,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    SizedBox(
+                      height: 12,
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        mainAxisAlignment: MainAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          if (ad.rating != null) ...[
-                            const Icon(
-                              Icons.star,
-                              color: Colors.amber,
-                              size: 12,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '${ad.rating} ',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: textColor,
-                                fontWeight: FontWeight.w500,
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.star,
+                                color: Color(0xFFF59E0B),
+                                size: 10,
                               ),
-                            ),
-                            Text(
-                              '(${ad.saves})',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: textSecondary,
+                              const SizedBox(width: 2),
+                              Text(
+                                '${ad.rating ?? 0}',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey[300]
+                                      : const Color(0xFF2F314D),
+                                  fontSize: 11,
+                                  fontFamily: 'Outfit',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.18,
+                                ),
                               ),
-                            ),
-                            const SizedBox(width: 8),
-                          ] else ...[
-                            const Icon(
-                              Icons.star_border,
-                              color: Colors.grey,
-                              size: 12,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              '0 ',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: textColor,
-                                fontWeight: FontWeight.w500,
+                              Text(
+                                ' (${ad.saves})',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey[500]
+                                      : const Color(0x66090726),
+                                  fontSize: 10,
+                                  fontFamily: 'Outfit',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.20,
+                                  letterSpacing: 0.20,
+                                ),
                               ),
-                            ),
-                            Text(
-                              '(0)',
-                              style: TextStyle(
-                                fontSize: 10,
-                                color: textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                          ],
-                          const Icon(
-                            Icons.visibility_outlined,
-                            size: 12,
-                            color: Colors.grey,
+                            ],
                           ),
-                          const SizedBox(width: 2),
-                          Text(
-                            'Views ',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: textColor,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          Text(
-                            '(${ad.views})',
-                            style: TextStyle(
-                              fontSize: 10,
-                              color: textSecondary,
-                            ),
+                          const SizedBox(width: 8),
+                          Row(
+                            mainAxisSize: MainAxisSize.min,
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            crossAxisAlignment: CrossAxisAlignment.center,
+                            children: [
+                              Icon(
+                                Icons.visibility_outlined,
+                                size: 10,
+                                color: isDark
+                                    ? Colors.grey[400]
+                                    : const Color(0xFF6B7280),
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                'Views',
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey[300]
+                                      : const Color(0xFF2F314D),
+                                  fontSize: 11,
+                                  fontFamily: 'Outfit',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.18,
+                                ),
+                              ),
+                              Text(
+                                ' (${ad.views})',
+                                style: TextStyle(
+                                  color: isDark
+                                      ? Colors.grey[500]
+                                      : const Color(0x66090726),
+                                  fontSize: 10,
+                                  fontFamily: 'Outfit',
+                                  fontWeight: FontWeight.w400,
+                                  height: 1.20,
+                                  letterSpacing: 0.20,
+                                ),
+                              ),
+                            ],
                           ),
                         ],
                       ),
-                    ],
-                  ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+            ],
           ),
-
           if (ad.status == AdStatus.rejected && ad.rejectionReason != null)
             _buildRejectionSection(ad.rejectionReason!, isDark),
         ],
@@ -515,62 +587,65 @@ class AdCard extends StatelessWidget {
     );
   }
 
-  Widget _buildStatusBadge(AdStatus status, bool isDark) {
-    Color bgColor;
-    Color textColor;
-    String text;
+  Widget _buildStatusBadge(AdStatus status) {
+    Color statusBgColor;
+    String statusText;
 
     switch (status) {
       case AdStatus.pending:
-        bgColor = ActivityColors.pendingBg;
-        textColor = ActivityColors.pendingText;
-        text = 'Pending';
+        statusBgColor = const Color(0xFFEF6C00);
+        statusText = 'Pending';
         break;
       case AdStatus.approved:
-      case AdStatus.inactive:
-        bgColor = ActivityColors.approvedBg;
-        textColor = ActivityColors.approvedText;
-        text = 'Approved';
+        statusBgColor = const Color(0xFF2E7D32);
+        statusText = 'Approved';
         break;
       case AdStatus.rejected:
-        bgColor = ActivityColors.rejectedBg;
-        textColor = ActivityColors.rejectedText;
-        text = 'Rejected';
+        statusBgColor = const Color(0xFFD32F2F);
+        statusText = 'Rejected';
+        break;
+      case AdStatus.inactive:
+        statusBgColor = const Color(0xFF2E7D32);
+        statusText = 'Approved';
         break;
     }
 
-    if (isDark) bgColor = bgColor.withOpacity(0.2);
-
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: bgColor,
-        borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: ShapeDecoration(
+        color: statusBgColor,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       ),
       child: Text(
-        text,
-        style: TextStyle(
-          color: textColor,
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
+        statusText,
+        style: const TextStyle(
+          color: Colors.white,
+          fontSize: 10,
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w400,
+          height: 1.20,
+          letterSpacing: 0.20,
         ),
       ),
     );
   }
 
-  Widget _buildInactiveBadge(bool isDark) {
+  Widget _buildInactiveBadge() {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-      decoration: BoxDecoration(
-        color: isDark ? Colors.grey[800] : ActivityColors.inactiveBg,
-        borderRadius: BorderRadius.circular(4),
+      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+      decoration: ShapeDecoration(
+        color: const Color(0xFF8E8E93),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
       ),
-      child: Text(
+      child: const Text(
         'Inactive',
         style: TextStyle(
-          color: isDark ? Colors.grey[300] : ActivityColors.inactiveText,
-          fontSize: 9,
-          fontWeight: FontWeight.bold,
+          color: Colors.white,
+          fontSize: 10,
+          fontFamily: 'Outfit',
+          fontWeight: FontWeight.w400,
+          height: 1.20,
+          letterSpacing: 0.20,
         ),
       ),
     );
@@ -578,14 +653,25 @@ class AdCard extends StatelessWidget {
 
   Widget _buildMenuButton(BuildContext context, bool isDark) {
     return SizedBox(
-      width: 24,
-      height: 24,
+      width: 16,
+      height: 16,
       child: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
-        icon: Icon(
-          Icons.more_horiz,
-          size: 16,
-          color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
+        icon: Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isDark ? Colors.grey[600]! : const Color(0xFF090726),
+              width: 1.0,
+            ),
+          ),
+          child: Center(
+            child: Icon(
+              Icons.more_horiz,
+              size: 10,
+              color: isDark ? Colors.grey[400] : const Color(0xFF090726),
+            ),
+          ),
         ),
         color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
@@ -608,36 +694,39 @@ class AdCard extends StatelessWidget {
   }
 
   Widget _buildRejectionSection(String reason, bool isDark) {
-    return Column(
-      children: [
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          color: isDark
-              ? const Color(0xFF3F1D1D)
-              : const Color(0xFFFEE2E2).withOpacity(0.5),
-          child: Text(
-            reason,
-            style: TextStyle(
-              color: isDark
-                  ? const Color(0xFFFCA5A5)
-                  : ActivityColors.rejectedText,
-              fontSize: 10,
-              height: 1.3,
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Column(
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: isDark ? const Color(0xFF3F1D1D) : const Color(0xFFFCE8E8),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Text(
+              reason,
+              style: TextStyle(
+                color: isDark
+                    ? const Color(0xFFFCA5A5)
+                    : const Color(0xFF374151),
+                fontSize: 11,
+                fontFamily: 'Outfit',
+                height: 1.4,
+              ),
             ),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(12, 8, 12, 12),
-          child: SizedBox(
+          const SizedBox(height: 12),
+          SizedBox(
             width: double.infinity,
-            height: 36,
+            height: 40,
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.primaryBlue,
+                backgroundColor: const Color(0xFF2563EB),
                 shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(18),
+                  borderRadius: BorderRadius.circular(20),
                 ),
                 elevation: 0,
               ),
@@ -648,18 +737,23 @@ class AdCard extends StatelessWidget {
                     'Edit Now',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
+                      fontSize: 14,
+                      fontFamily: 'Outfit',
+                      fontWeight: FontWeight.w500,
                     ),
                   ),
-                  SizedBox(width: 4),
-                  Icon(Icons.arrow_forward, color: Colors.white, size: 14),
+                  SizedBox(width: 8),
+                  Icon(
+                    Icons.arrow_forward,
+                    color: Colors.white,
+                    size: 16,
+                  ),
                 ],
               ),
             ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

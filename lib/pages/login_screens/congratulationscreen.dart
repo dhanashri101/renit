@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
+import 'package:rentit24/pages/homescreen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 class CongratulationsScreen extends StatelessWidget {
   const CongratulationsScreen({Key? key}) : super(key: key);
@@ -38,7 +40,6 @@ class CongratulationsScreen extends StatelessWidget {
 
                 const SizedBox(height: 48),
 
-              
                 Text(
                   'Congratulations!',
                   textAlign: TextAlign.center,
@@ -64,13 +65,19 @@ class CongratulationsScreen extends StatelessWidget {
                   ),
                 ),
 
-                const SizedBox(height: 40), 
+                const SizedBox(height: 40),
 
                 SizedBox(
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
                     onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const NavigationWrapper(),
+                        ),
+                      );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryBlue,

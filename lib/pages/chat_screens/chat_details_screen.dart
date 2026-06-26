@@ -1,6 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:rentit24/core/theme.dart';
+import 'package:intl/intl.dart';
 
-class ChatDetailScreen extends StatelessWidget {
+class ChatMessage {
+  final String text;
+  final String time;
+  final bool isMe;
+  final bool isRead;
+
+  ChatMessage({required this.text, required this.time, required this.isMe, this.isRead = false});
+}
+
+class ChatDetailScreen extends StatefulWidget {
   final String userName;
   final String avatar;
 
@@ -11,15 +22,96 @@ class ChatDetailScreen extends StatelessWidget {
   });
 
   @override
+  State<ChatDetailScreen> createState() => _ChatDetailScreenState();
+}
+
+class _ChatDetailScreenState extends State<ChatDetailScreen> {
+  final TextEditingController _messageController = TextEditingController();
+  final ScrollController _scrollController = ScrollController();
+  bool _isRecording = false;
+
+  List<ChatMessage> messages = [
+    ChatMessage(text: "Hi, is the wheelchair available?", time: "13:05", isMe: false),
+    ChatMessage(text: "for 15 days", time: "13:05", isMe: false),
+    ChatMessage(text: "Yes it is available", time: "13:15", isMe: true, isRead: true),
+    ChatMessage(text: "cool", time: "13:05", isMe: false),
+    ChatMessage(text: "Is the wheelchair working properly?", time: "13:05", isMe: false),
+    ChatMessage(text: "wheelchair is working properly, not used since 3 months", time: "13:25", isMe: true, isRead: true),
+    ChatMessage(text: "all the wheels are in good condition?", time: "13:15", isMe: false),
+    ChatMessage(text: "The wheelchair is in good condition", time: "13:25", isMe: true, isRead: true),
+  ];
+
+  void _sendMessage() {
+    if (_messageController.text.trim().isEmpty) return;
+
+    final now = DateTime.now();
+    final timeString = DateFormat('HH:mm').format(now);
+
+    setState(() {
+      messages.add(
+        ChatMessage(text: _messageController.text.trim(), time: timeString, isMe: true)
+      );
+    });
+
+    _messageController.clear();
+    _scrollToBottom();
+  }
+
+  void _handleAttachment() {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text("Opening file picker...")),
+    );
+  }
+
+  void _toggleRecording() {
+    setState(() {
+      _isRecording = !_isRecording;
+    });
+    
+    if (_isRecording) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text("Recording started... Tap again to send.")),
+      );
+    } else {
+      final timeString = DateFormat('HH:mm').format(DateTime.now());
+      setState(() {
+        messages.add(
+          ChatMessage(text: "🎤 Voice Message (0:05)", time: timeString, isMe: true)
+        );
+      });
+      _scrollToBottom();
+    }
+  }
+
+  void _scrollToBottom() {
+    Future.delayed(const Duration(milliseconds: 100), () {
+      if (_scrollController.hasClients) {
+        _scrollController.animateTo(
+          _scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _messageController.dispose();
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final primaryBlue = const Color(0xFF2563EB);
 
     return Scaffold(
-      backgroundColor: isDark ? theme.colorScheme.surface : Colors.white,
+      backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF3F4F6),
       appBar: AppBar(
-        backgroundColor: isDark ? theme.colorScheme.surface : Colors.white,
+        backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF3F4F6),
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 40,
@@ -30,39 +122,27 @@ class ChatDetailScreen extends StatelessWidget {
         titleSpacing: 0,
         title: Row(
           children: [
-            CircleAvatar(radius: 18, backgroundImage: NetworkImage(avatar)),
+            CircleAvatar(radius: 18, backgroundImage: NetworkImage(widget.avatar)),
             const SizedBox(width: 10),
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  userName,
+                  widget.userName,
                   style: TextStyle(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w600),
                 ),
                 Text(
                   "Online",
-                  style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF6B7280), fontSize: 12, fontWeight: FontWeight.w400),
+                  style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF4B5563), fontSize: 12, fontWeight: FontWeight.w400),
                 ),
               ],
             ),
           ],
         ),
-        actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_horiz, color: isDark ? Colors.white : const Color(0xFF111827)),
-            color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-              const PopupMenuItem<String>(value: '1', child: Text('Mark as important')),
-              const PopupMenuItem<String>(value: '2', child: Text('View contact')),
-              const PopupMenuItem<String>(value: '3', child: Text('Select all')),
-              const PopupMenuItem<String>(value: '4', child: Text('Delete chat')),
-              const PopupMenuItem<String>(value: '5', child: Text('Report user')),
-              const PopupMenuItem<String>(value: '6', child: Text('Safety tips')),
-              const PopupMenuItem<String>(value: '7', child: Text('Block user')),
-            ],
-          ),
-        ],
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1.0),
+          child: Container(color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB), height: 1.0),
+        ),
       ),
       body: Column(
         children: [
@@ -70,8 +150,7 @@ class ChatDetailScreen extends StatelessWidget {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF9FAFB),
-              border: Border.all(color: isDark ? Colors.grey[800]! : const Color(0xFFE5E7EB)),
+              color: isDark ? const Color(0xFF1E1E1E) : Colors.white.withValues(alpha: 0.60),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
@@ -90,18 +169,22 @@ class ChatDetailScreen extends StatelessWidget {
           ),
           
           Expanded(
-            child: ListView(
+            child: ListView.builder(
+              controller: _scrollController,
               padding: const EdgeInsets.symmetric(horizontal: 16),
-              children: [
-                _buildMessageBubble(context, "Hi, is the wheelchair available?", "13:05", false, isDark, primaryBlue),
-                _buildMessageBubble(context, "for 15 days", "13:05", false, isDark, primaryBlue),
-                _buildMessageBubble(context, "Yes it is available", "13:15", true, isDark, primaryBlue, isRead: true),
-                _buildMessageBubble(context, "cool", "13:05", false, isDark, primaryBlue), 
-                _buildMessageBubble(context, "Is the wheelchair working properly?", "13:05", false, isDark, primaryBlue),
-                _buildMessageBubble(context, "wheelchair is working properly, not used since 3 months", "13:25", true, isDark, primaryBlue, isRead: true),
-                _buildMessageBubble(context, "all the wheels are in good condition?", "13:15", false, isDark, primaryBlue),
-                _buildMessageBubble(context, "The wheelchair is in good condition", "13:25", true, isDark, primaryBlue, isRead: true),
-              ],
+              itemCount: messages.length,
+              itemBuilder: (context, index) {
+                final msg = messages[index];
+                return _buildMessageBubble(
+                  context, 
+                  msg.text, 
+                  msg.time, 
+                  msg.isMe, 
+                  isDark, 
+                  primaryBlue, 
+                  isRead: msg.isRead
+                );
+              },
             ),
           ),
           _buildMessageComposer(context, isDark, primaryBlue),
@@ -111,9 +194,9 @@ class ChatDetailScreen extends StatelessWidget {
   }
 
   Widget _buildMessageBubble(BuildContext context, String message, String time, bool isMe, bool isDark, Color primaryBlue, {bool isRead = false}) {
-    final bgColor = isMe 
-        ? (isDark ? const Color(0xFF1E3A8A) : const Color(0xFFE0E7FF)) 
-        : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6));
+     final bgColor = isMe 
+        ? (isDark ? const Color(0xFF1E3A8A) : const Color(0x19235BD6)) 
+        : (isDark ? const Color(0xFF2A2A2A) : const Color.fromARGB(255, 255, 255, 255));
     
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
 
@@ -160,33 +243,66 @@ class ChatDetailScreen extends StatelessWidget {
   Widget _buildMessageComposer(BuildContext context, bool isDark, Color primaryBlue) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      decoration: BoxDecoration(
-        color: isDark ? Theme.of(context).colorScheme.surface : Colors.white,
-        border: Border(top: BorderSide(color: isDark ? Colors.grey[800]! : Colors.grey[200]!)),
-      ),
+      color: isDark ? Theme.of(context).colorScheme.surface : const Color(0xFFF3F4F6),
       child: SafeArea(
         child: Row(
           children: [
-            Icon(Icons.mic_none, color: isDark ? Colors.grey[400] : primaryBlue, size: 26),
-            const SizedBox(width: 12),
             Expanded(
-              child: TextField(
-                style: TextStyle(color: isDark ? Colors.white : Colors.black),
-                decoration: InputDecoration(
-                  hintText: "Message",
-                  hintStyle: TextStyle(color: isDark ? Colors.grey[600] : Colors.grey[400], fontSize: 14),
-                  border: InputBorder.none,
-                  isDense: true,
-                  contentPadding: EdgeInsets.zero,
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                decoration: BoxDecoration(
+                  color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                  borderRadius: BorderRadius.circular(30),
+                  border: _isRecording ? Border.all(color: Colors.redAccent) : null,
+                ),
+                child: Row(
+                  children: [
+                    GestureDetector(
+                      onTap: _toggleRecording,
+                      child: Icon(
+                        _isRecording ? Icons.stop_circle : Icons.mic_none, 
+                        color: _isRecording ? Colors.red : primaryBlue, 
+                        size: 24
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TextField(
+                        controller: _messageController,
+                        style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                        decoration: InputDecoration(
+                          hintText: _isRecording ? "Recording..." : "Message",
+                          hintStyle: TextStyle(
+                            color: _isRecording ? Colors.redAccent : (isDark ? Colors.grey[600] : const Color(0xFF9CA3AF)), 
+                            fontSize: 15
+                          ),
+                          border: InputBorder.none,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 4),
+                        ),
+                        onSubmitted: (_) => _sendMessage(),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    GestureDetector(
+                      onTap: _handleAttachment,
+                      child: Icon(Icons.attach_file, color: primaryBlue, size: 22),
+                    ),
+                  ],
                 ),
               ),
             ),
-            Icon(Icons.attach_file, color: isDark ? Colors.grey[400] : primaryBlue, size: 24),
             const SizedBox(width: 12),
-            Container(
-              padding: const EdgeInsets.all(10),
-              decoration: BoxDecoration(color: primaryBlue, shape: BoxShape.circle),
-              child: const Icon(Icons.send, color: Colors.white, size: 18),
+            GestureDetector(
+              onTap: _sendMessage,
+              child: Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: primaryBlue, 
+                  shape: BoxShape.circle
+                ),
+                child: const Icon(Icons.send_outlined, color: Colors.white, size: 20),
+              ),
             ),
           ],
         ),
