@@ -14,7 +14,7 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
 
-  List<String> _imagePaths = []; 
+  List<String> _imagePaths = [];
   String? _selectedCategory;
   String? _selectedSubCategory;
   String? _brand;
@@ -34,9 +34,11 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
     }
   }
 
-  void _prevStep() {
+void _prevStep() {
     if (_currentStep > 0) {
       setState(() => _currentStep--);
+    } else {
+      Navigator.of(context).pop(); 
     }
   }
 
@@ -98,20 +100,59 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
     ];
 
     final isLastStep = _currentStep == _totalSteps - 1;
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Scaffold(
-      appBar: AppBar(
-        leading: _currentStep > 0
-            ? IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _prevStep,
-              )
-            : null,
-        title: Text(stepTitles[_currentStep]),
+      appBar: PreferredSize(
+        preferredSize: const Size.fromHeight(60),
+        child: AppBar(
+          automaticallyImplyLeading: false,
+          elevation: 0,
+          scrolledUnderElevation: 0,
+          surfaceTintColor: Colors.transparent,
+          backgroundColor: isDark
+              ? AppTheme.darkBackground
+              : AppTheme.lightBackground,
+
+          leading: IconButton(
+            icon: Icon(
+              Icons.arrow_back,
+              color: isDark ? Colors.white : Colors.black,
+            ),
+            onPressed: _prevStep,
+          ),
+
+          titleSpacing: 0,
+          title: Text(
+            stepTitles[_currentStep],
+            style: TextStyle(
+              color: isDark ? Colors.white : Colors.black,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(4),
+            child: Row(
+              children: List.generate(_totalSteps, (index) {
+                return Expanded(
+                  child: Container(
+                    height: 4,
+                    color: index <= _currentStep
+                        ? const Color(0xFF2F6BFF)
+                        : (isDark
+                              ? const Color(0xFF2D2D2D)
+                              : const Color(0xFFDCE5F8)),
+                  ),
+                );
+              }),
+            ),
+          ),
+        ),
       ),
       body: Column(
         children: [
-          _StepProgressBar(current: _currentStep, total: _totalSteps),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
@@ -127,41 +168,6 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
     );
   }
 }
-
-
-class _StepProgressBar extends StatelessWidget {
-  final int current;
-  final int total;
-
-  const _StepProgressBar({required this.current, required this.total});
-
-  @override
-  Widget build(BuildContext context) {
-    final blue = Theme.of(context).colorScheme.primary;
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final inactive = isDark ? const Color(0xFF2C2C2C) : const Color(0xFFDDE3F0);
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: List.generate(total, (i) {
-          final isActive = i <= current;
-          return Expanded(
-            child: Container(
-              margin: EdgeInsets.only(right: i < total - 1 ? 4 : 0),
-              height: 4,
-              decoration: BoxDecoration(
-                color: isActive ? blue : inactive,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          );
-        }),
-      ),
-    );
-  }
-}
-
 
 class _BottomButton extends StatelessWidget {
   final String label;
@@ -234,9 +240,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark
-        ? const Color(0xFF1E1E1E)
-        : Colors.white; 
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
     final borderColor = isDark
         ? const Color(0xFF2C2C2C)
         : const Color(0xFFDDE3F0);
@@ -404,7 +408,6 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   }
 }
 
-
 class _SelectCategoryStep extends StatelessWidget {
   final String? selectedCategory;
   final String? selectedSubCategory;
@@ -557,7 +560,6 @@ class _CategoryGrid extends StatelessWidget {
     );
   }
 }
-
 
 class _SpecificationsStep extends StatefulWidget {
   final String? brand;
@@ -717,7 +719,6 @@ class _BulletList extends StatelessWidget {
     );
   }
 }
-
 
 class _ProductDetailsStep extends StatefulWidget {
   final String productName;
@@ -911,8 +912,6 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
     return months[m];
   }
 }
-
-
 
 class _FormLabel extends StatelessWidget {
   final String text;

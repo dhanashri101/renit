@@ -15,23 +15,13 @@ class _SplashScreenState extends State<SplashScreen>
   late Animation<double> _logoOpacity;
   late Animation<double> _textOpacity;
 
-  @override
+ @override
   void initState() {
     super.initState();
 
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 2500),
-    );
-
-    _logoOpacity = Tween<double>(
-      begin: 0.0,
-      end: 1.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.4, curve: Curves.easeIn),
-      ),
     );
 
     _logoScale = Tween<double>(
@@ -43,6 +33,18 @@ class _SplashScreenState extends State<SplashScreen>
         curve: Curves.elasticOut,
       ),
     );
+
+    // 👇 ADD THIS BLOCK 👇
+    _logoOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(0.0, 0.5, curve: Curves.easeIn), // Fades in during the first half
+      ),
+    );
+    // 👆 ADD THIS BLOCK 👆
 
     _textOpacity = Tween<double>(
       begin: 0.0,
@@ -66,7 +68,6 @@ class _SplashScreenState extends State<SplashScreen>
       });
     });
   }
-
   @override
   void dispose() {
     _controller.dispose();

@@ -3,6 +3,7 @@ import 'package:rentit24/pages/activity.dart';
 import 'package:rentit24/pages/chat_screens/chat_list.dart';
 import 'package:rentit24/pages/form/product_listing_form.dart';
 import 'package:rentit24/pages/homescreen.dart';
+import 'package:rentit24/pages/profile_screen.dart';
 
 class NavigationWrapper extends StatefulWidget {
   const NavigationWrapper({super.key});
@@ -19,7 +20,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     const ChatListScreen(),
     const ProductListingFlow(),
     const MyActivityPage(),
-    const HomeScreen(),
+    const ProfileScreen(),
   ];
 
   @override

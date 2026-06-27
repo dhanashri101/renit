@@ -23,36 +23,45 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   GoogleSignInAccount? _googleUser;
 
-  @override
-  void initState() {
-    super.initState();
-    _googleSignIn.initialize().then((_) {
-      _googleSignIn.authenticationEvents.listen((event) {
-        if (!mounted) return;
-        setState(() {
-          _googleUser = switch (event) {
-            GoogleSignInAuthenticationEventSignIn() => event.user,
-            _ => null,
-          };
-        });
-      });
-      _googleSignIn.attemptLightweightAuthentication();
-    });
-  }
+@override
+void initState() {
+  super.initState();
+  _initializeGoogleSignIn();
+}
 
-  // --- GOOGLE SIGN IN (v7 API) ---
+Future<void> _initializeGoogleSignIn() async {
+  try {
+    await _googleSignIn.initialize(
+      serverClientId:
+          '672213207103-93tuhrddf4dtkhh6k94fns48f9b165fo.apps.googleusercontent.com',
+    );
+
+    _googleSignIn.authenticationEvents.listen((event) {
+      if (!mounted) return;
+
+      setState(() {
+        _googleUser = switch (event) {
+          GoogleSignInAuthenticationEventSignIn() => event.user,
+          _ => null,
+        };
+      });
+    });
+
+    await _googleSignIn.attemptLightweightAuthentication();
+  } catch (e) {
+    debugPrint("Google Sign-In initialization failed: $e");
+  }
+}
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
       if (_googleSignIn.supportsAuthenticate()) {
         final GoogleSignInAccount account = await _googleSignIn.authenticate();
 
-        // ✅ Correct v7 way to get idToken
         final String? idToken = account.authentication.idToken;
 
         if (idToken != null) {
           print("Google Token Received: $idToken");
-          // TODO: Send idToken to your backend (e.g., /auth/google)
           _showSuccess("Google login successful! (Backend integration pending)");
         } else {
           _showError("Google Sign-In failed: could not retrieve ID token.");
@@ -69,7 +78,6 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
     }
   }
 
-  // --- FACEBOOK SIGN IN ---
   Future<void> _signInWithFacebook() async {
     setState(() => _isLoading = true);
     try {
@@ -77,10 +85,8 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
 
       if (result.status == LoginStatus.success) {
         final AccessToken accessToken = result.accessToken!;
-        // ✅ Correct v6+ way: use .tokenString instead of .token
         final String tokenString = accessToken.tokenString;
         print("Facebook Token Received: $tokenString");
-        // TODO: Send tokenString to your backend (e.g., /auth/facebook)
         _showSuccess("Facebook login successful! (Backend integration pending)");
       } else if (result.status == LoginStatus.cancelled) {
         _showError("Facebook Sign-In cancelled.");
@@ -94,7 +100,6 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
     }
   }
 
-  // --- APPLE SIGN IN ---
   Future<void> _signInWithApple() async {
     setState(() => _isLoading = true);
     try {
@@ -108,7 +113,6 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
       final String? identityToken = credential.identityToken;
       if (identityToken != null) {
         print("Apple Token Received: $identityToken");
-        // TODO: Send identityToken to your backend (e.g., /auth/apple)
         _showSuccess("Apple login successful! (Backend integration pending)");
       }
     } catch (error) {
