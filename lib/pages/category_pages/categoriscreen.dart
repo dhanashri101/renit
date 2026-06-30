@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/category_pages/category_ad_list_screen.dart'; 
 
 class CategoryListScreen extends StatefulWidget {
@@ -53,7 +54,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FB);
-    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final surfaceColor = isDark ?AppTheme.darkBackground : AppTheme.lightBackground;
 
 
     final currentSubCategories = _allSubCategories[_selectedMainCategory] ?? [];
@@ -79,7 +80,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
       body: Column(
         children: [
           Container(
-            color: surfaceColor,
+            color: Colors.white,
             height: 90,
             child: ListView.builder(
               scrollDirection: Axis.horizontal,

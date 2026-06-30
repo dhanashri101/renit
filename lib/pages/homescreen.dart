@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/main.dart';
 import 'package:rentit24/model/category_model.dart';
+import 'package:rentit24/model/listing_model.dart'; // Added ListingModel
 import 'package:rentit24/pages/category_pages/categoriscreen.dart';
 import 'package:rentit24/wrapper/navbar.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
 import 'package:rentit24/pages/searchscreen.dart';
 import 'package:rentit24/services/category_services.dart';
+import 'package:rentit24/services/listing_services.dart'; // Added ListingService
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -22,9 +24,13 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   Timer? _hintTimer;
   int _currentPage = 0;
+  
   final CategoryService _categoryService = CategoryService();
+  final ListingService _listingService = ListingService(); // Initialize ListingService
 
   late Future<List<CategoryModel>> _categoriesFuture;
+  late Future<List<ListingModel>> _feedFuture; // Future for the feed
+
   int _currentHintIndex = 0;
 
   String _selectedFilter = 'All';
@@ -36,37 +42,6 @@ class _HomeScreenState extends State<HomeScreen> {
     'Camera',
     'Projector',
     'Guitar',
-  ];
-
-  final List<Map<String, dynamic>> _adsData = [
-    {
-      'title': 'Wheelchair',
-      'price': '₹200/day',
-      'distance': '0.5 km',
-      'owner': 'Sachin Jadhav',
-      'ownerAvatar':
-          'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100',
-      'image': 'assets/images/wheelchair.jpg',
-      'rating': '4.2',
-      'reviews': '52',
-      'isFeatured': true,
-      'isTopChoice': true,
-      'isVerified': true,
-    },
-    {
-      'title': 'Canon EOS M50 Mark II...',
-      'price': '₹1500/day',
-      'distance': '2 km',
-      'owner': 'Hamza',
-      'ownerAvatar':
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.0',
-      'reviews': '10',
-      'isFeatured': false,
-      'isTopChoice': false,
-      'isVerified': false,
-    },
   ];
 
   final List<Map<String, String>> _bannerData = [
@@ -91,6 +66,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void initState() {
     super.initState();
     _categoriesFuture = _categoryService.getCategories();
+    _feedFuture = _listingService.getFeed(); // Fetch live feed
 
     _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
       if (_pageController.hasClients) {
@@ -149,29 +125,64 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             _buildCategories(theme),
             const SizedBox(height: 24),
-            _buildSectionHeader('Hire a Professional', 'See all', theme),
-            const SizedBox(height: 16),
-            _buildProfessionalList(theme, context),
-            const SizedBox(height: 24),
-            _buildSectionHeader('Nearby Ads', '', theme),
-            const SizedBox(height: 16),
-            _buildFilterChips(theme),
-            const SizedBox(height: 16),
-            _buildNearbyAdsGrid(theme),
+            
+            // Replaced static lists with FutureBuilder to handle API data
+            FutureBuilder<List<ListingModel>>(
+              future: _feedFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Padding(
+                    padding: EdgeInsets.symmetric(vertical: 40),
+                    child: Center(child: CircularProgressIndicator()),
+                  );
+                }
+
+              if (snapshot.hasError) {
+  // Print to the debug console for good measure
+  debugPrint('Feed Error: ${snapshot.error}'); 
+  
+  return Padding(
+    padding: const EdgeInsets.all(16.0),
+    child: Center(
+      child: Text(
+        'Error: ${snapshot.error}', // <-- This will show the actual error on screen
+        style: TextStyle(color: isDark ? Colors.white70 : Colors.red),
+        textAlign: TextAlign.center,
+      ),
+    ),
+  );
+}
+                final allListings = snapshot.data ?? [];
+                
+                // Separate data into services and products based on listingType
+                final services = allListings.where((l) => l.listingType == 'Service').toList();
+                final products = allListings.where((l) => l.listingType == 'Product').toList();
+
+                return Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSectionHeader('Hire a Professional', 'See all', theme),
+                    const SizedBox(height: 16),
+                    _buildProfessionalList(theme, context, services),
+                    
+                    const SizedBox(height: 24),
+                    
+                    _buildSectionHeader('Nearby Ads', '', theme),
+                    const SizedBox(height: 16),
+                    _buildFilterChips(theme),
+                    const SizedBox(height: 16),
+                    _buildNearbyAdsGrid(theme, products),
+                  ],
+                );
+              },
+            ),
+
             const SizedBox(height: 16),
             _buildPromoBanner(),
             const SizedBox(height: 30),
           ],
         ),
       ),
-      // bottomNavigationBar: CustomBottomNav(
-      //   currentIndex: _currentNavIndex,
-      //   onTap: (index) {
-      //     setState(() {
-      //       _currentNavIndex = index;
-      //     });
-      //   },
-      // ),
     );
   }
 
@@ -559,30 +570,44 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProfessionalList(ThemeData theme, BuildContext context) {
+  Widget _buildProfessionalList(ThemeData theme, BuildContext context, List<ListingModel> services) {
     final isDark = theme.brightness == Brightness.dark;
+
+    if (services.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16.0),
+        child: Text(
+          'No professionals available right now.',
+          style: TextStyle(color: isDark ? Colors.white60 : Colors.black54),
+        ),
+      );
+    }
+
     return SizedBox(
       height: 160,
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        itemCount: 2,
+        itemCount: services.length,
         itemBuilder: (context, index) {
+          final service = services[index];
+          
           return GestureDetector(
             onTap: () {
+              // Creating a fallback map since ProductDetailsScreen currently expects a Map
+              final Map<String, dynamic> adDataMap = {
+                'title': service.title,
+                'price': '₹${service.rentalPrice.toStringAsFixed(0)}/${service.priceUnit}',
+                'rating': service.rating.toStringAsFixed(1),
+                'reviews': service.reviewCount.toString(),
+                'owner': 'User ${service.ownerId}', // Mapping ID to generic name for now
+                'image': 'assets/images/carpainter.jpg', // Placeholder
+              };
+
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProductDetailsScreen(
-                    adData: const {
-                      'title': 'Wood craft and wood carving',
-                      'price': '₹800/day',
-                      'rating': '4.5',
-                      'reviews': '122',
-                      'owner': 'Ravi Kumar R.',
-                      'image': 'assets/images/carpainter.jpg',
-                    },
-                  ),
+                  builder: (context) => ProductDetailsScreen(adData: adDataMap),
                 ),
               );
             },
@@ -606,7 +631,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(20),
                     child: Image.asset(
-                      "assets/images/carpainter.jpg",
+                      "assets/images/carpainter.jpg", // Replace with network image once model supports it
                       width: 120,
                       height: double.infinity,
                       fit: BoxFit.cover,
@@ -634,7 +659,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
-                                  '4.5',
+                                  service.rating.toStringAsFixed(1),
                                   style: TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 11,
@@ -642,7 +667,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   ),
                                 ),
                                 Text(
-                                  '(122)',
+                                  '(${service.reviewCount})',
                                   style: TextStyle(
                                     color: Colors.grey[500],
                                     fontSize: 11,
@@ -660,74 +685,72 @@ class _HomeScreenState extends State<HomeScreen> {
                         const SizedBox(height: 6),
                         Row(
                           children: [
-                            _buildTag(
-                              'Featured',
-                              theme.primaryColor,
-                              Colors.white,
-                            ),
-                            const SizedBox(width: 6),
-                            _buildTag(
-                              'Top Choice',
-                              isDark
-                                  ? Colors.grey[800]!
-                                  : const Color(0xFF1A1A2C),
-                              Colors.white,
-                            ),
+                            if (service.isFeatured)
+                              _buildTag('Featured', theme.primaryColor, Colors.white),
+                            if (service.isFeatured) const SizedBox(width: 6),
+                            if (service.isTopChoice)
+                              _buildTag(
+                                'Top Choice',
+                                isDark ? Colors.grey[800]! : const Color(0xFF1A1A2C),
+                                Colors.white,
+                              ),
                           ],
                         ),
                         const Spacer(),
                         Row(
                           children: [
-                            const CircleAvatar(
+                            CircleAvatar(
                               radius: 10,
                               backgroundImage: NetworkImage(
-                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
+                                'https://ui-avatars.com/api/?name=User+${service.ownerId}&background=random',
                               ),
                             ),
                             const SizedBox(width: 6),
-                            Text(
-                              'Ravi Kumar ',
-                              style: TextStyle(
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF090726),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w500,
-                                height: 1.20,
+                            Expanded(
+                              child: Text(
+                                'User ${service.ownerId}',
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF090726),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.20,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
+                            if (service.isVerified) ...[
+                              const SizedBox(width: 4),
+                              const Icon(Icons.workspace_premium, color: Colors.blue, size: 12),
+                            ],
                             const SizedBox(width: 4),
-                            const Icon(
-                              Icons.workspace_premium,
-                              color: Colors.black,
-                              size: 12,
-                            ),
-                            const Spacer(),
-                            Text(
-                              'Carpenter',
-                              textAlign: TextAlign.right,
-                              style: TextStyle(
-                                color: isDark
-                                    ? Colors.white70
-                                    : const Color(0x66090726),
-                                fontSize: 10,
-                                fontWeight: FontWeight.w300,
-                                height: 1.20,
+                            Expanded(
+                              child: Text(
+                                service.profession,
+                                textAlign: TextAlign.right,
+                                style: TextStyle(
+                                  color: isDark ? Colors.white70 : const Color(0x66090726),
+                                  fontSize: 10,
+                                  fontWeight: FontWeight.w300,
+                                  height: 1.20,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                           ],
                         ),
                         const Spacer(),
                         Text(
-                          'Any woodwork',
+                          service.title,
                           style: TextStyle(
-                            color: isDark
-                                ? Colors.white60
-                                : const Color(0xFF2F314D),
+                            color: isDark ? Colors.white60 : const Color(0xFF2F314D),
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             height: 1.42,
                           ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
                         ),
                         const Spacer(),
                         Row(
@@ -741,11 +764,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                   size: 14,
                                 ),
                                 Text(
-                                  '1.5 km',
+                                  '1.5 km', // Placeholder for actual distance logic
                                   style: TextStyle(
-                                    color: isDark
-                                        ? Colors.white54
-                                        : const Color(0x66090726),
+                                    color: isDark ? Colors.white54 : const Color(0x66090726),
                                     fontWeight: FontWeight.w300,
                                     height: 1.20,
                                   ),
@@ -753,12 +774,10 @@ class _HomeScreenState extends State<HomeScreen> {
                               ],
                             ),
                             Text(
-                              '₹800/day',
+                              '₹${service.rentalPrice.toStringAsFixed(0)}/${service.priceUnit.split(' ').last}',
                               textAlign: TextAlign.right,
                               style: TextStyle(
-                                color: isDark
-                                    ? Colors.white
-                                    : const Color(0xFF090726),
+                                color: isDark ? Colors.white : const Color(0xFF090726),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 height: 1.43,
@@ -841,14 +860,27 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildNearbyAdsGrid(ThemeData theme) {
-    final filteredAds = _adsData.where((ad) {
+  Widget _buildNearbyAdsGrid(ThemeData theme, List<ListingModel> products) {
+    // Filter the API products based on the selected chip
+    final filteredAds = products.where((ad) {
       if (_selectedFilter == 'All') return true;
-      if (_selectedFilter == 'Featured') return ad['isFeatured'] == true;
-      if (_selectedFilter == 'Top Choice') return ad['isTopChoice'] == true;
-      if (_selectedFilter == 'Verified') return ad['isVerified'] == true;
+      if (_selectedFilter == 'Featured') return ad.isFeatured;
+      if (_selectedFilter == 'Top Choice') return ad.isTopChoice;
+      if (_selectedFilter == 'Verified') return ad.isVerified;
       return true;
     }).toList();
+
+    if (filteredAds.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.all(32.0),
+        child: Center(
+          child: Text(
+            'No ads found for this filter.',
+            style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white60 : Colors.black54),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -865,14 +897,29 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: filteredAds.length,
         itemBuilder: (context, index) {
           final ad = filteredAds[index];
-
+          
           return GestureDetector(
             onTap: () {
+              // Creating a fallback map since ProductDetailsScreen currently expects a Map
+              final Map<String, dynamic> adMap = {
+                'title': ad.title,
+                'price': '₹${ad.rentalPrice.toStringAsFixed(0)}/${ad.priceUnit.split(' ').last}',
+                'distance': '1.5 km',
+                'owner': 'User ${ad.ownerId}',
+                'ownerAvatar': 'https://ui-avatars.com/api/?name=User+${ad.ownerId}',
+                'image': 'assets/images/camera.jpg', // Placeholder
+                'rating': ad.rating.toStringAsFixed(1),
+                'reviews': ad.reviewCount.toString(),
+                'isFeatured': ad.isFeatured,
+                'isTopChoice': ad.isTopChoice,
+                'isVerified': ad.isVerified,
+              };
+
               Navigator.push(
                 context,
                 PageRouteBuilder(
                   pageBuilder: (context, animation, secondaryAnimation) =>
-                      ProductDetailsScreen(adData: ad),
+                      ProductDetailsScreen(adData: adMap),
                   transitionsBuilder:
                       (context, animation, secondaryAnimation, child) {
                         final tween = Tween(
@@ -888,17 +935,17 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             child: _buildAdCard(
-              ad['title'],
-              ad['price'],
-              ad['distance'],
-              ad['owner'],
-              ad['image'],
-              ad['ownerAvatar'],
-              ad['rating'],
-              ad['reviews'],
-              ad['isFeatured'],
-              ad['isTopChoice'],
-              ad['isVerified'],
+              ad.title,
+              '₹${ad.rentalPrice.toStringAsFixed(0)}/${ad.priceUnit.split(' ').last}',
+              '1.5 km', // Placeholder for actual distance calculation
+              'User ${ad.ownerId}',
+              'assets/images/camera.jpg', // Placeholder
+              'https://ui-avatars.com/api/?name=User+${ad.ownerId}&background=random',
+              ad.rating.toStringAsFixed(1),
+              ad.reviewCount.toString(),
+              ad.isFeatured,
+              ad.isTopChoice,
+              ad.isVerified,
               theme,
             ),
           );
@@ -1098,6 +1145,8 @@ class _HomeScreenState extends State<HomeScreen> {
                           overflow: TextOverflow.ellipsis,
                         ),
                       ),
+                      if (isVerified)
+                         const Icon(Icons.verified, color: Colors.blue, size: 10),
                     ],
                   ),
                   const SizedBox(height: 4),
@@ -1207,7 +1256,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 const SizedBox(height: 6),
-                SizedBox(
+                const SizedBox(
                   width: 150,
                   child: Text(
                     'The real taste of italian pizza is here..',

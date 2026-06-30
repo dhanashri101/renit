@@ -19,7 +19,6 @@ class MainLoginScreen extends StatefulWidget {
 class _MainLoginScreenState extends State<MainLoginScreen> {
   bool _isLoading = false;
 
-  // v7 singleton instance
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   GoogleSignInAccount? _googleUser;
 
@@ -341,7 +340,6 @@ Future<void> _initializeGoogleSignIn() async {
               ),
             ),
 
-            // Loading Overlay
             if (_isLoading)
               Container(
                 color: Colors.black.withOpacity(0.4),

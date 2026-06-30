@@ -218,11 +218,51 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   final ImagePicker _picker = ImagePicker();
   bool _isPicking = false;
 
-  Future<void> _pickImage(ImageSource source) async {
+ Future<void> _pickGalleryImages() async {
+    if (widget.imagePaths.length >= 10) {
+      _showLimitMessage();
+      return;
+    }
+
+    setState(() => _isPicking = true);
+    try {
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 80);
+
+      if (images.isNotEmpty) {
+        final availableSlots = 10 - widget.imagePaths.length;
+        
+        final selectedPaths = images.take(availableSlots).map((e) => e.path).toList();
+        final updated = List<String>.from(widget.imagePaths)..addAll(selectedPaths);
+        
+        widget.onChanged(updated);
+
+        if (images.length > availableSlots && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Maximum 10 images allowed. Extra images were discarded.'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking images: $e');
+    } finally {
+      setState(() => _isPicking = false);
+    }
+  }
+
+  Future<void> _pickCameraImage() async {
+    if (widget.imagePaths.length >= 10) {
+      _showLimitMessage();
+      return;
+    }
+
     setState(() => _isPicking = true);
     try {
       final XFile? image = await _picker.pickImage(
-        source: source,
+        source: ImageSource.camera,
         imageQuality: 80,
       );
 
@@ -237,6 +277,15 @@ class _UploadImageStepState extends State<_UploadImageStep> {
     }
   }
 
+  void _showLimitMessage() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You can only upload up to 10 images.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
@@ -261,13 +310,13 @@ class _UploadImageStepState extends State<_UploadImageStep> {
         ),
         const SizedBox(height: 4),
         Text(
-          'Add photos of your item — you can add a maximum of 5 photos.',
+          'Add your product images here. You can add a maximum of 10 files. Please add clear photos.',
           style: TextStyle(fontSize: 12, color: hintColor),
         ),
         const SizedBox(height: 16),
 
         GestureDetector(
-          onTap: _isPicking ? null : () => _pickImage(ImageSource.gallery),
+          onTap: _isPicking ? null : () => _pickGalleryImages(),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             width: double.infinity,
@@ -302,17 +351,18 @@ class _UploadImageStepState extends State<_UploadImageStep> {
 
         SizedBox(
           width: double.infinity,
-          child: OutlinedButton.icon(
-            onPressed: _isPicking ? null : () => _pickImage(ImageSource.camera),
-            icon: const Icon(Icons.camera_alt_outlined, size: 18),
+          height: 48,
+          child: ElevatedButton.icon(
+            onPressed: _isPicking ? null : () => _pickCameraImage(),
+            icon: const Icon(Icons.camera_alt_outlined, size: 20),
             label: const Text('Open Camera & Take Photo'),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: primaryColor,
-              side: BorderSide(color: primaryColor),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: AppTheme.primaryBlue,
+              foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
+                borderRadius: BorderRadius.circular(25), 
               ),
-              padding: const EdgeInsets.symmetric(vertical: 12),
+              elevation: 0,
             ),
           ),
         ),

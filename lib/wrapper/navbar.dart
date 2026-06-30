@@ -4,6 +4,7 @@ import 'package:rentit24/pages/chat_screens/chat_list.dart';
 import 'package:rentit24/pages/form/product_listing_form.dart';
 import 'package:rentit24/pages/homescreen.dart';
 import 'package:rentit24/pages/profile_screen.dart';
+import 'package:rentit24/pages/rentit_page.dart';
 
 class NavigationWrapper extends StatefulWidget {
   const NavigationWrapper({super.key});
@@ -18,7 +19,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   final pages = [
     const HomeScreen(),
     const ChatListScreen(),
-    const ProductListingFlow(),
+    const RentItScreen(),
     const MyActivityPage(),
     const ProfileScreen(),
   ];

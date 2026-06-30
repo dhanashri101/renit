@@ -1,6 +1,7 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:rentit24/core/theme.dart';
 
 
 class ServiceUploadFlow extends StatefulWidget {
@@ -14,20 +15,16 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
 
-  // Step 1: Images
   List<String> _imagePaths = [];
   
-  // Step 2: Categories
   String? _selectedCategory = 'Professional Services';
   String? _selectedSubCategory = 'Carpenter';
 
-  // Step 3: Details
   String _profession = '';
   String _experience = '';
   String _skills = '';
   String _additionalDetails = '';
 
-  // Step 4: Service Details
   String _productTitle = '';
   String _description = '';
   String _rentalPrice = '';
@@ -119,8 +116,7 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
     final isLastStep = _currentStep == _totalSteps - 1;
     final isDark = Theme.of(context).brightness == Brightness.dark;
     
-    // Replace with AppTheme.darkBackground / lightBackground if needed
-    final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF8F9FA);
+    final bgColor = isDark ?  AppTheme.darkBackground  :  AppTheme.lightBackground ;
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -157,7 +153,7 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
                     duration: const Duration(milliseconds: 300),
                     height: 4,
                     color: index <= _currentStep
-                        ? const Color(0xFF2F6BFF)
+                        ? AppTheme.primaryBlue
                         : (isDark
                             ? const Color(0xFF2D2D2D)
                             : const Color(0xFFDCE5F8)),
@@ -173,7 +169,6 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
-              // Smooth transition between steps
               child: AnimatedSwitcher(
                 duration: const Duration(milliseconds: 400),
                 switchInCurve: Curves.easeOut,
@@ -203,9 +198,6 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
     );
   }
 }
-
-// --- SHARED WIDGETS ---
-
 class _BottomButton extends StatelessWidget {
   final String label;
   final VoidCallback onPressed;
@@ -222,10 +214,10 @@ class _BottomButton extends StatelessWidget {
           height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2F6BFF),
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25), // Pill shape as per UI
+                borderRadius: BorderRadius.circular(25), 
               ),
               elevation: 0,
             ),
@@ -326,7 +318,6 @@ class _InputField extends StatelessWidget {
   }
 }
 
-// --- STEP 1: IMAGE UPLOAD ---
 
 class _ServiceImageStep extends StatefulWidget {
   final List<String> imagePaths;
@@ -342,11 +333,55 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
   final ImagePicker _picker = ImagePicker();
   bool _isPicking = false;
 
-  Future<void> _pickImage(ImageSource source) async {
+Future<void> _pickGalleryImages() async {
+    if (widget.imagePaths.length >= 10) {
+      _showLimitMessage();
+      return;
+    }
+
     setState(() => _isPicking = true);
     try {
-      final XFile? image = await _picker.pickImage(source: source, imageQuality: 80);
-      if (image != null && widget.imagePaths.length < 10) {
+      final List<XFile> images = await _picker.pickMultiImage(imageQuality: 80);
+
+      if (images.isNotEmpty) {
+        final availableSlots = 10 - widget.imagePaths.length;
+        
+        final selectedPaths = images.take(availableSlots).map((e) => e.path).toList();
+        final updated = List<String>.from(widget.imagePaths)..addAll(selectedPaths);
+        
+        widget.onChanged(updated);
+
+        if (images.length > availableSlots && mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Maximum 10 images allowed. Extra images were discarded.'),
+              behavior: SnackBarBehavior.floating,
+              backgroundColor: Colors.orange,
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error picking images: $e');
+    } finally {
+      setState(() => _isPicking = false);
+    }
+  }
+
+  Future<void> _pickCameraImage() async {
+    if (widget.imagePaths.length >= 10) {
+      _showLimitMessage();
+      return;
+    }
+
+    setState(() => _isPicking = true);
+    try {
+      final XFile? image = await _picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+
+      if (image != null) {
         final updated = List<String>.from(widget.imagePaths)..add(image.path);
         widget.onChanged(updated);
       }
@@ -357,11 +392,20 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
     }
   }
 
+  void _showLimitMessage() {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('You can only upload up to 10 images.'),
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+  }
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hintColor = isDark ? Colors.grey[400] : Colors.grey[600];
-    final dashColor = isDark ? const Color(0xFF2F6BFF).withOpacity(0.5) : const Color(0xFF2F6BFF).withOpacity(0.3);
+    final dashColor = isDark ? AppTheme.primaryBlue.withOpacity(0.5) : AppTheme.primaryBlue.withOpacity(0.3);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -374,17 +418,16 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
         ),
         const SizedBox(height: 24),
         
-        // Dashed dropzone simulation
+
         GestureDetector(
-          onTap: _isPicking ? null : () => _pickImage(ImageSource.gallery),
+          onTap: _isPicking ? null : () => _pickGalleryImages(),
           child: Container(
             width: double.infinity,
             height: 140,
             decoration: BoxDecoration(
               color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF8FAFC),
               borderRadius: BorderRadius.circular(8),
-              // Note: Using a solid border here to avoid needing external packages like dotted_border. 
-              // To get true dashes, use `dotted_border` package in your pubspec.
+
               border: Border.all(color: dashColor, width: 1.5), 
             ),
             child: Column(
@@ -416,14 +459,14 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
           width: double.infinity,
           height: 48,
           child: ElevatedButton.icon(
-            onPressed: _isPicking ? null : () => _pickImage(ImageSource.camera),
+            onPressed: _isPicking ? null : () => _pickCameraImage(),
             icon: const Icon(Icons.camera_alt_outlined, size: 20),
             label: const Text('Open Camera & Take Photo'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF2F6BFF),
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25), // Pill shape
+                borderRadius: BorderRadius.circular(25), 
               ),
               elevation: 0,
             ),
@@ -480,7 +523,6 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
   }
 }
 
-// --- STEP 2: CATEGORY ---
 
 class _SelectServiceCategoryStep extends StatelessWidget {
   final String? selectedCategory;
@@ -501,16 +543,16 @@ class _SelectServiceCategoryStep extends StatelessWidget {
     {'label': 'Electronics', 'icon': Icons.devices},
     {'label': 'Furniture', 'icon': Icons.chair_alt},
     {'label': 'Professional\nServices', 'icon': Icons.engineering},
-    {'label': 'Trading/\nMachinery', 'icon': Icons.precision_manufacturing},
+    {'label': 'Tools/\nMachinery', 'icon': Icons.precision_manufacturing},
   ];
 
   static const List<Map<String, dynamic>> _subCategories = [
     {'label': 'Doctor', 'icon': Icons.local_hospital},
     {'label': 'Nurse', 'icon': Icons.medical_services},
-    {'label': 'CA', 'icon': Icons.calculate},
-    {'label': 'Teacher', 'icon': Icons.school},
-    {'label': 'Carpenter', 'icon': Icons.handyman},
-    {'label': 'Driver', 'icon': Icons.directions_car},
+    {'label': 'CA', 'icon': Icons.person}, // Adjusted to match generic person in mockup
+    {'label': 'Teacher', 'icon': Icons.cast_for_education},
+    {'label': 'Carpenter', 'icon': Icons.handyman}, // Icons.carpenter if using newer flutter SDK
+    {'label': 'Driver', 'icon': Icons.drive_eta},
     {'label': 'Plumber', 'icon': Icons.plumbing},
     {'label': 'Electrician', 'icon': Icons.electrical_services},
   ];
@@ -518,80 +560,84 @@ class _SelectServiceCategoryStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final blue = const Color(0xFF2F6BFF);
+    final blue = AppTheme.primaryBlue;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Horizontal Main Categories
-        SizedBox(
-          height: 90,
-          child: ListView.separated(
+        // Main Categories Tab Bar
+        Container(
+          height: 95,
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: ListView.builder(
             scrollDirection: Axis.horizontal,
             itemCount: _mainCategories.length,
-            separatorBuilder: (context, index) => const SizedBox(width: 12),
             itemBuilder: (context, index) {
               final cat = _mainCategories[index];
               final isSelected = selectedCategory == cat['label'].replaceAll('\n', ' ');
               
               return GestureDetector(
                 onTap: () => onCategoryChanged(cat['label'].replaceAll('\n', ' ')),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Container(
-                      width: 50,
-                      height: 50,
-                      decoration: BoxDecoration(
+                child: Container(
+                  width: 85,
+                  padding: const EdgeInsets.only(top: 12),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    children: [
+                      Icon(
+                        cat['icon'],
+                        size: 26,
+                        // Using a colored icon for the selected state to mimic the mockup's illustration
                         color: isSelected 
-                            ? blue.withOpacity(0.1) 
-                            : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: isSelected ? blue : Colors.transparent,
-                          width: 1.5,
+                            ? (isDark ? Colors.orange[300] : Colors.orange) 
+                            : (isDark ? Colors.grey[500] : Colors.grey[400]),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        cat['label'],
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                          color: isSelected 
+                              ? (isDark ? Colors.white : Colors.black87) 
+                              : (isDark ? Colors.grey[400] : Colors.grey[500]),
+                          height: 1.2,
                         ),
                       ),
-                      child: Icon(
-                        cat['icon'],
-                        color: isSelected 
-                            ? blue 
-                            : (isDark ? Colors.grey[400] : Colors.grey[600]),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      cat['label'],
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 11,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-                        color: isSelected 
-                            ? blue 
-                            : (isDark ? Colors.grey[400] : Colors.black87),
-                      ),
-                    ),
-                  ],
+                      const Spacer(),
+                      // The exact blue underline indicator from the Figma frame
+                      if (isSelected)
+                        Container(
+                          height: 3,
+                          width: 32,
+                          decoration: BoxDecoration(
+                            color: blue,
+                            borderRadius: const BorderRadius.vertical(top: Radius.circular(3)),
+                          ),
+                        ),
+                    ],
+                  ),
                 ),
               );
             },
           ),
         ),
         
-        const Padding(
-          padding: EdgeInsets.symmetric(vertical: 16),
-          child: Divider(height: 1, color: Colors.grey),
-        ),
+        const SizedBox(height: 24),
 
-        // Subcategories Grid
+        // Sub Categories Grid
         GridView.builder(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
             crossAxisCount: 4,
-            crossAxisSpacing: 12,
-            mainAxisSpacing: 16,
-            childAspectRatio: 0.8,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 20,
+            childAspectRatio: 0.75, // Gives enough vertical space for text
           ),
           itemCount: _subCategories.length,
           itemBuilder: (context, index) {
@@ -602,31 +648,28 @@ class _SelectServiceCategoryStep extends StatelessWidget {
               onTap: () => onSubCategoryChanged(sub['label']),
               child: Container(
                 decoration: BoxDecoration(
+                  // The exact soft blue background for the selected item
                   color: isSelected 
-                      ? blue.withOpacity(0.15) 
-                      : (isDark ? const Color(0xFF1E1E1E) : Colors.white),
+                      ? (isDark ? blue.withOpacity(0.2) : const Color(0xFFDFE6F9))
+                      : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
-                  border: Border.all(
-                    color: isSelected ? blue : Colors.transparent,
-                    width: 1.5,
-                  ),
                 ),
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Icon(
                       sub['icon'],
-                      size: 28,
-                      color: isSelected 
-                          ? blue 
-                          : (isDark ? Colors.blue[200] : blue), // Based on UI screenshot
+                      size: 32,
+                      // The deep rich blue used in the Figma mockup
+                      color: isDark ? Colors.blue[300] : const Color(0xFF1F54D3),
                     ),
                     const SizedBox(height: 8),
                     Text(
                       sub['label'],
+                      textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                        fontSize: 11,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
                         color: isDark ? Colors.white : Colors.black87,
                       ),
                     ),
@@ -641,7 +684,6 @@ class _SelectServiceCategoryStep extends StatelessWidget {
   }
 }
 
-// --- STEP 3: DETAILS ---
 
 class _ProfessionalDetailsStep extends StatefulWidget {
   final String profession;
@@ -739,7 +781,6 @@ class _ProfessionalDetailsStepState extends State<_ProfessionalDetailsStep> {
   }
 }
 
-// --- STEP 4: SERVICE DETAILS ---
 
 class _FinalServiceDetailsStep extends StatefulWidget {
   final String productTitle;
@@ -802,7 +843,7 @@ class _FinalServiceDetailsStepState extends State<_FinalServiceDetailsStep> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final blue = const Color(0xFF2F6BFF);
+
     
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -840,7 +881,7 @@ class _FinalServiceDetailsStepState extends State<_FinalServiceDetailsStep> {
             ),
             const SizedBox(width: 12),
             Container(
-              height: 48, // Match input field height
+              height: 48, 
               decoration: BoxDecoration(
                 color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
                 borderRadius: BorderRadius.circular(8),
@@ -865,7 +906,6 @@ class _FinalServiceDetailsStepState extends State<_FinalServiceDetailsStep> {
         ),
         const SizedBox(height: 24),
         
-        // Custom Checkboxes to match UI precisely
         _AgreementCheckbox(
           value: widget.agreedToTerms,
           onChanged: widget.onTermsChanged,
@@ -909,7 +949,7 @@ class _AgreementCheckbox extends StatelessWidget {
           child: Checkbox(
             value: value,
             onChanged: onChanged,
-            activeColor: const Color(0xFF2F6BFF),
+            activeColor: AppTheme.primaryBlue,
             side: BorderSide(
               color: isDark ? Colors.grey[600]! : Colors.grey[400]!,
               width: 1.5,
@@ -930,7 +970,7 @@ class _AgreementCheckbox extends StatelessWidget {
                 TextSpan(
                   text: linkText,
                   style: const TextStyle(
-                    color: Color(0xFF2F6BFF),
+                    color: AppTheme.primaryBlue,
                     decoration: TextDecoration.underline,
                   ),
                 ),

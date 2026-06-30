@@ -60,7 +60,6 @@ class _ProfileScreenState extends State<ProfileScreen>
       clipBehavior: Clip.none,
       alignment: Alignment.bottomCenter,
       children: [
-        // Background Curved App Bar
         Container(
           padding: const EdgeInsets.only(
             top: 60,
@@ -104,7 +103,6 @@ class _ProfileScreenState extends State<ProfileScreen>
                 ],
               ),
               const SizedBox(height: 24),
-              // User Info
               Row(
                 children: [
                   Container(
@@ -184,7 +182,6 @@ class _ProfileScreenState extends State<ProfileScreen>
             ],
           ),
         ),
-        // Overlapping Stats Card
         Positioned(
           bottom: -25,
           child: Container(
@@ -452,7 +449,6 @@ class _ProfileScreenState extends State<ProfileScreen>
               itemBuilder: (context, index) {
                 final item = menuItems[index];
 
-                // Staggered Slide & Fade Animation for Menu Items
                 final slideAnimation =
                     Tween<Offset>(
                       begin: const Offset(0, 0.5),
