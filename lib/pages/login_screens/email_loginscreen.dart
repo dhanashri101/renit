@@ -6,6 +6,7 @@ import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/services/auth_service.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class emailLoginScreen extends StatefulWidget {
@@ -18,6 +19,9 @@ class emailLoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<emailLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  
+  // Instantiate your auth service
+  final AuthService _authService = AuthService();
 
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
@@ -25,6 +29,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
   bool _isFormValid = false;
+  bool _isLoading = false; // Added to track API call state
 
   @override
   void initState() {
@@ -43,6 +48,42 @@ class _LoginScreenState extends State<emailLoginScreen> {
           _emailController.text.isNotEmpty &&
           _passwordController.text.isNotEmpty;
     });
+  }
+
+  // Handle the login process
+  Future<void> _handleLogin() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    final success = await _authService.loginWithEmail(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
+    if (!mounted) return;
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      // Used pushReplacement so the user can't hit 'back' to return to login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CongratulationsScreen(),
+        ),
+      );
+    } else {
+      // Show error snackbar on failure
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Login failed. Please check your credentials.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override
@@ -110,7 +151,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
           : const Color(0xFFF8F9FA),
       appBar: AppBar(
         systemOverlayStyle: SystemUiOverlayStyle.dark,
-
         backgroundColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -233,17 +273,8 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  onPressed: _isFormValid
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const CongratulationsScreen(),
-                            ),
-                          );
-                        }
-                      : null,
+                  // Disable the button if the form is invalid or currently loading
+                  onPressed: (_isFormValid && !_isLoading) ? _handleLogin : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: focusedBorderColor,
                     foregroundColor: Colors.white,
@@ -252,7 +283,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
                         : Colors.white,
                     disabledForegroundColor: Colors.grey.shade400,
                     elevation: _isFormValid ? 4 : 0,
-                    shadowColor: focusedBorderColor.withValues(alpha: 0.4),
+                    shadowColor: focusedBorderColor.withOpacity(0.4),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(25),
                       side: _isFormValid
@@ -264,10 +295,20 @@ class _LoginScreenState extends State<emailLoginScreen> {
                             ),
                     ),
                   ),
-                  child: const Text(
-                    "Sign in",
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-                  ),
+                  // Show progress indicator while loading, otherwise show text
+                  child: _isLoading 
+                      ? const SizedBox(
+                          height: 20,
+                          width: 20,
+                          child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 2,
+                          ),
+                        )
+                      : const Text(
+                          "Sign in",
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+                        ),
                 ),
               ),
               const SizedBox(height: 16),

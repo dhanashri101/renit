@@ -24,9 +24,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Timer? _timer;
   Timer? _hintTimer;
   int _currentPage = 0;
-  
+
   final CategoryService _categoryService = CategoryService();
-  final ListingService _listingService = ListingService(); // Initialize ListingService
+  final ListingService _listingService =
+      ListingService(); // Initialize ListingService
 
   late Future<List<CategoryModel>> _categoriesFuture;
   late Future<List<ListingModel>> _feedFuture; // Future for the feed
@@ -99,7 +100,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Scaffold(
       backgroundColor: isDark
-          ? AppTheme.darkBackground 
+          ? AppTheme.darkBackground
           : AppTheme.lightBackground,
       body: SingleChildScrollView(
         child: Column(
@@ -125,7 +126,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 16),
             _buildCategories(theme),
             const SizedBox(height: 24),
-            
+
             // Replaced static lists with FutureBuilder to handle API data
             FutureBuilder<List<ListingModel>>(
               future: _feedFuture,
@@ -137,36 +138,46 @@ class _HomeScreenState extends State<HomeScreen> {
                   );
                 }
 
-              if (snapshot.hasError) {
-  // Print to the debug console for good measure
-  debugPrint('Feed Error: ${snapshot.error}'); 
-  
-  return Padding(
-    padding: const EdgeInsets.all(16.0),
-    child: Center(
-      child: Text(
-        'Error: ${snapshot.error}', // <-- This will show the actual error on screen
-        style: TextStyle(color: isDark ? Colors.white70 : Colors.red),
-        textAlign: TextAlign.center,
-      ),
-    ),
-  );
-}
+                if (snapshot.hasError) {
+                  // Print to the debug console for good measure
+                  debugPrint('Feed Error: ${snapshot.error}');
+
+                  return Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Center(
+                      child: Text(
+                        'Error: ${snapshot.error}', // <-- This will show the actual error on screen
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.red,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ),
+                  );
+                }
                 final allListings = snapshot.data ?? [];
-                
+
                 // Separate data into services and products based on listingType
-                final services = allListings.where((l) => l.listingType == 'Service').toList();
-                final products = allListings.where((l) => l.listingType == 'Product').toList();
+                final services = allListings
+                    .where((l) => l.listingType == 'Service')
+                    .toList();
+                final products = allListings
+                    .where((l) => l.listingType == 'Product')
+                    .toList();
 
                 return Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildSectionHeader('Hire a Professional', 'See all', theme),
+                    _buildSectionHeader(
+                      'Hire a Professional',
+                      'See all',
+                      theme,
+                    ),
                     const SizedBox(height: 16),
                     _buildProfessionalList(theme, context, services),
-                    
+
                     const SizedBox(height: 24),
-                    
+
                     _buildSectionHeader('Nearby Ads', '', theme),
                     const SizedBox(height: 16),
                     _buildFilterChips(theme),
@@ -570,7 +581,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  Widget _buildProfessionalList(ThemeData theme, BuildContext context, List<ListingModel> services) {
+  Widget _buildProfessionalList(
+    ThemeData theme,
+    BuildContext context,
+    List<ListingModel> services,
+  ) {
     final isDark = theme.brightness == Brightness.dark;
 
     if (services.isEmpty) {
@@ -591,16 +606,18 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: services.length,
         itemBuilder: (context, index) {
           final service = services[index];
-          
+
           return GestureDetector(
             onTap: () {
               // Creating a fallback map since ProductDetailsScreen currently expects a Map
               final Map<String, dynamic> adDataMap = {
                 'title': service.title,
-                'price': '₹${service.rentalPrice.toStringAsFixed(0)}/${service.priceUnit}',
+                'price':
+                    '₹${service.rentalPrice.toStringAsFixed(0)}/${service.priceUnit}',
                 'rating': service.rating.toStringAsFixed(1),
                 'reviews': service.reviewCount.toString(),
-                'owner': 'User ${service.ownerId}', // Mapping ID to generic name for now
+                'owner':
+                    'User ${service.ownerId}', // Mapping ID to generic name for now
                 'image': 'assets/images/carpainter.jpg', // Placeholder
               };
 
@@ -686,12 +703,18 @@ class _HomeScreenState extends State<HomeScreen> {
                         Row(
                           children: [
                             if (service.isFeatured)
-                              _buildTag('Featured', theme.primaryColor, Colors.white),
+                              _buildTag(
+                                'Featured',
+                                theme.primaryColor,
+                                Colors.white,
+                              ),
                             if (service.isFeatured) const SizedBox(width: 6),
                             if (service.isTopChoice)
                               _buildTag(
                                 'Top Choice',
-                                isDark ? Colors.grey[800]! : const Color(0xFF1A1A2C),
+                                isDark
+                                    ? Colors.grey[800]!
+                                    : const Color(0xFF1A1A2C),
                                 Colors.white,
                               ),
                           ],
@@ -710,7 +733,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               child: Text(
                                 'User ${service.ownerId}',
                                 style: TextStyle(
-                                  color: isDark ? Colors.white : const Color(0xFF090726),
+                                  color: isDark
+                                      ? Colors.white
+                                      : const Color(0xFF090726),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w500,
                                   height: 1.20,
@@ -721,7 +746,11 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             if (service.isVerified) ...[
                               const SizedBox(width: 4),
-                              const Icon(Icons.workspace_premium, color: Colors.blue, size: 12),
+                              const Icon(
+                                Icons.workspace_premium,
+                                color: Colors.blue,
+                                size: 12,
+                              ),
                             ],
                             const SizedBox(width: 4),
                             Expanded(
@@ -729,7 +758,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 service.profession,
                                 textAlign: TextAlign.right,
                                 style: TextStyle(
-                                  color: isDark ? Colors.white70 : const Color(0x66090726),
+                                  color: isDark
+                                      ? Colors.white70
+                                      : const Color(0x66090726),
                                   fontSize: 10,
                                   fontWeight: FontWeight.w300,
                                   height: 1.20,
@@ -744,7 +775,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         Text(
                           service.title,
                           style: TextStyle(
-                            color: isDark ? Colors.white60 : const Color(0xFF2F314D),
+                            color: isDark
+                                ? Colors.white60
+                                : const Color(0xFF2F314D),
                             fontSize: 12,
                             fontWeight: FontWeight.w400,
                             height: 1.42,
@@ -766,7 +799,9 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Text(
                                   '1.5 km', // Placeholder for actual distance logic
                                   style: TextStyle(
-                                    color: isDark ? Colors.white54 : const Color(0x66090726),
+                                    color: isDark
+                                        ? Colors.white54
+                                        : const Color(0x66090726),
                                     fontWeight: FontWeight.w300,
                                     height: 1.20,
                                   ),
@@ -777,7 +812,9 @@ class _HomeScreenState extends State<HomeScreen> {
                               '₹${service.rentalPrice.toStringAsFixed(0)}/${service.priceUnit.split(' ').last}',
                               textAlign: TextAlign.right,
                               style: TextStyle(
-                                color: isDark ? Colors.white : const Color(0xFF090726),
+                                color: isDark
+                                    ? Colors.white
+                                    : const Color(0xFF090726),
                                 fontSize: 14,
                                 fontWeight: FontWeight.w600,
                                 height: 1.43,
@@ -876,7 +913,11 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Center(
           child: Text(
             'No ads found for this filter.',
-            style: TextStyle(color: theme.brightness == Brightness.dark ? Colors.white60 : Colors.black54),
+            style: TextStyle(
+              color: theme.brightness == Brightness.dark
+                  ? Colors.white60
+                  : Colors.black54,
+            ),
           ),
         ),
       );
@@ -897,16 +938,18 @@ class _HomeScreenState extends State<HomeScreen> {
         itemCount: filteredAds.length,
         itemBuilder: (context, index) {
           final ad = filteredAds[index];
-          
+
           return GestureDetector(
             onTap: () {
               // Creating a fallback map since ProductDetailsScreen currently expects a Map
               final Map<String, dynamic> adMap = {
                 'title': ad.title,
-                'price': '₹${ad.rentalPrice.toStringAsFixed(0)}/${ad.priceUnit.split(' ').last}',
+                'price':
+                    '₹${ad.rentalPrice.toStringAsFixed(0)}/${ad.priceUnit.split(' ').last}',
                 'distance': '1.5 km',
                 'owner': 'User ${ad.ownerId}',
-                'ownerAvatar': 'https://ui-avatars.com/api/?name=User+${ad.ownerId}',
+                'ownerAvatar':
+                    'https://ui-avatars.com/api/?name=User+${ad.ownerId}',
                 'image': 'assets/images/camera.jpg', // Placeholder
                 'rating': ad.rating.toStringAsFixed(1),
                 'reviews': ad.reviewCount.toString(),
@@ -1146,7 +1189,11 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
                       ),
                       if (isVerified)
-                         const Icon(Icons.verified, color: Colors.blue, size: 10),
+                        const Icon(
+                          Icons.verified,
+                          color: Colors.blue,
+                          size: 10,
+                        ),
                     ],
                   ),
                   const SizedBox(height: 4),

@@ -565,7 +565,6 @@ class _SelectServiceCategoryStep extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Main Categories Tab Bar
         Container(
           height: 95,
           decoration: BoxDecoration(

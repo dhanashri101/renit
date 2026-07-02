@@ -8,13 +8,16 @@ class AuthService {
 
   Future<bool> loginWithEmail(String email, String password) async {
     try {
-      final response = await _dio.post(
-        '$baseUrl/auth/login',
-        data: {
-          'email': email,
-          'password': password,
-        },
-      );
+final response = await _dio.post(
+  '$baseUrl/auth/login',
+  data: {
+    "email": email,
+    "password": password,
+  },
+);
+
+print("Status Code: ${response.statusCode}");
+print("Response Data: ${response.data}");
 
       // Adjust 'token' if your backend uses a different key (like 'accessToken' or 'data.token')
       if (response.statusCode == 200 && response.data['token'] != null) {
