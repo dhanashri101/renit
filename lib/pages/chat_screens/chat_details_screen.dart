@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:intl/intl.dart';
+import 'package:rentit24/pages/chat_screens/profile.dart';
 
 class ChatMessage {
   final String text;
@@ -95,6 +96,89 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     });
   }
 
+  void _openProfile() {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => ProfileScreenchat(
+          userName: widget.userName,
+          avatar: widget.avatar,
+        ),
+      ),
+    );
+  }
+
+  void _handleMenuSelection(String value) {
+    switch (value) {
+      case 'important':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Marked as important")),
+        );
+        break;
+      case 'contact':
+        _openProfile();
+        break;
+      case 'select_all':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("All messages selected")),
+        );
+        break;
+      case 'delete':
+        _confirmDeleteChat();
+        break;
+      case 'report':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("User reported")),
+        );
+        break;
+      case 'safety':
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Opening safety tips...")),
+        );
+        break;
+      case 'block':
+        _confirmBlockUser();
+        break;
+    }
+  }
+
+  void _confirmDeleteChat() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text("Delete chat"),
+        content: const Text("Are you sure you want to delete this chat? This action cannot be undone."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              setState(() => messages.clear());
+            },
+            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _confirmBlockUser() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text("Block ${widget.userName}"),
+        content: const Text("Blocked users won't be able to message you or view your ads."),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text("Block", style: TextStyle(color: Colors.red)),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   void dispose() {
     _messageController.dispose();
@@ -109,9 +193,9 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     final primaryBlue = const Color(0xFF2563EB);
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF3F4F6),
+      backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? AppTheme.darkBackground : const Color(0xFFF3F4F6),
+        backgroundColor: isDark ? AppTheme.darkBackground :  AppTheme.lightBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 40,
@@ -120,25 +204,46 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
-        title: Row(
-          children: [
-            CircleAvatar(radius: 18, backgroundImage: NetworkImage(widget.avatar)),
-            const SizedBox(width: 10),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  widget.userName,
-                  style: TextStyle(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w600),
-                ),
-                Text(
-                  "Online",
-                  style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF4B5563), fontSize: 12, fontWeight: FontWeight.w400),
-                ),
-              ],
-            ),
-          ],
+        title: GestureDetector(
+          onTap: _openProfile,
+          behavior: HitTestBehavior.opaque,
+          child: Row(
+            children: [
+              CircleAvatar(radius: 18, backgroundImage: NetworkImage(widget.avatar)),
+              const SizedBox(width: 10),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    widget.userName,
+                    style: TextStyle(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w600),
+                  ),
+                  Text(
+                    "Online",
+                    style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF4B5563), fontSize: 12, fontWeight: FontWeight.w400),
+                  ),
+                ],
+              ),
+            ],
+          ),
         ),
+        actions: [
+          PopupMenuButton<String>(
+            icon: Icon(Icons.more_vert, color: isDark ? Colors.white : const Color(0xFF111827)),
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            onSelected: _handleMenuSelection,
+            itemBuilder: (context) => [
+              _buildMenuItem('important', Icons.push_pin_outlined, 'Mark as important', isDark),
+              _buildMenuItem('contact', Icons.person_outline, 'View contact', isDark),
+              _buildMenuItem('select_all', Icons.checklist_outlined, 'Select all', isDark),
+              _buildMenuItem('delete', Icons.delete_outline, 'Delete chat', isDark),
+              _buildMenuItem('report', Icons.flag_outlined, 'Report user', isDark),
+              _buildMenuItem('safety', Icons.shield_outlined, 'Safety tips', isDark),
+              _buildMenuItem('block', Icons.block, 'Block user', isDark, isDestructive: true),
+            ],
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
           child: Container(color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB), height: 1.0),
@@ -188,6 +293,20 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             ),
           ),
           _buildMessageComposer(context, isDark, primaryBlue),
+        ],
+      ),
+    );
+  }
+
+  PopupMenuItem<String> _buildMenuItem(String value, IconData icon, String label, bool isDark, {bool isDestructive = false}) {
+    final color = isDestructive ? Colors.red : (isDark ? Colors.white : const Color(0xFF111827));
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: [
+          Icon(icon, size: 18, color: color),
+          const SizedBox(width: 12),
+          Text(label, style: TextStyle(color: color, fontSize: 14)),
         ],
       ),
     );
@@ -243,7 +362,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Widget _buildMessageComposer(BuildContext context, bool isDark, Color primaryBlue) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-      color: isDark ? Theme.of(context).colorScheme.surface : const Color(0xFFF3F4F6),
+      color: isDark ? Theme.of(context).colorScheme.surface : AppTheme.lightBackground,
       child: SafeArea(
         child: Row(
           children: [

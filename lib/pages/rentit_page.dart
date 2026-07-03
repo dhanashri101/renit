@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/pages/form/product_listing_form.dart';
+import 'package:rentit24/pages/form/service_upload_form.dart';
 
 class RentItScreen extends StatefulWidget {
   const RentItScreen({super.key});
@@ -21,7 +23,7 @@ class _RentItScreenState extends State<RentItScreen> {
         elevation: 0,
         shape: const Border(
           bottom: BorderSide(
-            color: Color(0xFFE0E0E0), // Border color
+            color: Color(0xFFE0E0E0), 
             width: 1,
           ),
         ),
@@ -41,7 +43,6 @@ class _RentItScreenState extends State<RentItScreen> {
             children: [
               const Spacer(flex: 1),
 
-              // Subtitle
               Text(
                 'Earn money\nby renting something you have!',
                 textAlign: TextAlign.center,
@@ -57,27 +58,28 @@ class _RentItScreenState extends State<RentItScreen> {
 
               const Spacer(flex: 2),
 
-              // First Section: Rent a Product
               Expanded(
                 flex:
-                    7, // Allocates a dynamic chunk of the screen for the image
+                    7,
                 child: Image.asset(
                   'assets/images/rentaproduct.png',
                   fit: BoxFit
-                      .contain, // Ensures the image never overflows its boundaries
+                      .contain,
                 ),
               ),
               const SizedBox(height: 16),
               PremiumGlowButton(
                 text: 'Rent a Product',
-                onPressed: () {
-                  // Handle rent product
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ProductListingFlow()),
+                  );
                 },
               ),
 
               const Spacer(flex: 2),
 
-              // Divider "or"
               Row(
                 children: [
                   Expanded(
@@ -107,7 +109,6 @@ class _RentItScreenState extends State<RentItScreen> {
 
               const Spacer(flex: 2),
 
-              // Second Section: Give a Professional Service
               Expanded(
                 flex: 7,
                 child: Image.asset(
@@ -118,14 +119,17 @@ class _RentItScreenState extends State<RentItScreen> {
               const SizedBox(height: 16),
               PremiumGlowButton(
                 text: 'Give a Professional Service',
-                onPressed: () {
-                  // Handle professional service
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (_) => ServiceUploadFlow()),
+                  );
                 },
               ),
 
               const Spacer(
                 flex: 3,
-              ), // Pushes everything up slightly so it doesn't hug the very bottom
+              ), 
             ],
           ),
         ),
@@ -134,17 +138,12 @@ class _RentItScreenState extends State<RentItScreen> {
   }
 }
 
-// --- PREMIUM CUSTOM BUTTON ---
 
 class PremiumGlowButton extends StatefulWidget {
   final String text;
-  final VoidCallback onPressed;
+  final VoidCallback onTap;
 
-  const PremiumGlowButton({
-    super.key,
-    required this.text,
-    required this.onPressed,
-  });
+  const PremiumGlowButton({super.key, required this.text, required this.onTap});
 
   @override
   State<PremiumGlowButton> createState() => _PremiumGlowButtonState();
@@ -160,7 +159,7 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton>
 
   void _onTapUp(TapUpDetails details) {
     setState(() => _scale = 1.0);
-    widget.onPressed();
+    widget.onTap();
   }
 
   void _onTapCancel() {
@@ -178,8 +177,8 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton>
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOut,
         child: Container(
-          width: 280, // Stays consistent horizontally
-          height: 52, // Standard touch target height
+          width: 280, 
+          height: 52,
           decoration: BoxDecoration(
             color: AppTheme.primaryBlue,
             borderRadius: BorderRadius.circular(26),
