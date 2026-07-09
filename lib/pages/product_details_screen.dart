@@ -42,26 +42,26 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     final isDark = theme.brightness == Brightness.dark;
 
     final surfaceColor = theme.colorScheme.surface;
-    final primaryBlue = const Color(0xFF2B5BE4);
+    final primaryBlue  = const Color(0xFF2B5BE4);
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF2F5FF);
     final textColor = isDark ? Colors.white : const Color(0xFF1A1D26);
     final subtitleColor = isDark ? Colors.white54 : const Color(0xFF6B7280);
 
     return Scaffold(
       backgroundColor: bgColor,
-      appBar: _buildAppBar(primaryBlue, isDark),
-      bottomNavigationBar: _buildBottomBar(primaryBlue, isDark),
+      appBar: _buildAppBar(primaryBlue , isDark),
+      bottomNavigationBar: _buildBottomBar(primaryBlue , isDark),
       body: SingleChildScrollView(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            _buildImageCarousel(primaryBlue),
+            _buildImageCarousel(primaryBlue ),
             const SizedBox(height: 12),
-            _buildHeaderInfo(textColor, subtitleColor, isDark, primaryBlue),
+            _buildHeaderInfo(textColor, subtitleColor, isDark, primaryBlue ),
             _buildOwnerCard(isDark, textColor, subtitleColor),
-            _buildDescription(textColor, subtitleColor, primaryBlue),
+            _buildDescription(textColor, subtitleColor, primaryBlue ),
             _buildDetails(textColor, subtitleColor),
-            _buildAvailabilityCalendar(isDark, textColor, primaryBlue),
+            _buildAvailabilityCalendar(isDark, textColor, primaryBlue ),
             _buildReviews(surfaceColor, textColor, subtitleColor, isDark, theme),
             _buildSimilarProducts(theme, isDark, textColor),
             const SizedBox(height: 32),
@@ -71,10 +71,10 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  PreferredSizeWidget _buildAppBar(Color primaryBlue, bool isDark) {
+  PreferredSizeWidget _buildAppBar(Color primaryBlue , bool isDark) {
     return AppBar(
       toolbarHeight: 80,
-      backgroundColor: primaryBlue,
+      backgroundColor: primaryBlue ,
       elevation: 0,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back, color: Colors.white),
@@ -110,7 +110,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildImageCarousel(Color primaryBlue) {
+  Widget _buildImageCarousel(Color primaryBlue ) {
     return Stack(
       children: [
         SizedBox(
@@ -160,7 +160,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                 height: 6,
                 decoration: BoxDecoration(
                   color: _currentImageIndex == index
-                      ? primaryBlue
+                      ? primaryBlue 
                       : Colors.white.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(4),
                 ),
@@ -187,7 +187,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     Color textColor,
     Color subtitleColor,
     bool isDark,
-    Color primaryBlue,
+    Color primaryBlue ,
   ) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 16.0),
@@ -200,7 +200,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
             children: [
               Row(
                 children: [
-                  _buildBadge('Featured', primaryBlue),
+                  _buildBadge('Featured', primaryBlue ),
                   const SizedBox(width: 8),
                   _buildBadge(
                     'Top Choice',
@@ -338,7 +338,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
   Widget _buildDescription(
     Color textColor,
     Color subtitleColor,
-    Color primaryBlue,
+    Color primaryBlue ,
   ) {
     final displayText = _isDescriptionExpanded
         ? _fullDescription
@@ -381,7 +381,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
                       child: Text(
                         _isDescriptionExpanded ? " Show less" : " Read more",
                         style: TextStyle(
-                          color: primaryBlue,
+                          color: primaryBlue ,
                           fontWeight: FontWeight.w700,
                           fontSize: 13,
                         ),
@@ -456,7 +456,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildAvailabilityCalendar(bool isDark, Color textColor, Color primaryBlue) {
+  Widget _buildAvailabilityCalendar(bool isDark, Color textColor, Color primaryBlue ) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Column(
@@ -488,13 +488,13 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               data: Theme.of(context).copyWith(
                 colorScheme: isDark
                     ? ColorScheme.dark(
-                        primary: primaryBlue,
+                        primary: primaryBlue ,
                         onPrimary: Colors.white,
                         surface: const Color(0xFF1E1E1E),
                         onSurface: Colors.white,
                       )
                     : ColorScheme.light(
-                        primary: primaryBlue,
+                        primary: primaryBlue ,
                         onPrimary: Colors.white,
                         surface: Colors.white,
                         onSurface: Colors.black,
@@ -841,7 +841,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     );
   }
 
-  Widget _buildBottomBar(Color primaryBlue, bool isDark) {
+  Widget _buildBottomBar(Color primaryBlue , bool isDark) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
       decoration: BoxDecoration(
@@ -861,7 +861,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: _buildSolidButton(
                 icon: Icons.call_outlined,
                 label: 'Call Now',
-                color: primaryBlue,
+                color: primaryBlue ,
               ),
             ),
             const SizedBox(width: 16),
@@ -869,7 +869,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
               child: _buildSolidButton(
                 icon: Icons.chat_bubble_outline,
                 label: 'Chat',
-                color: primaryBlue,
+                color: primaryBlue ,
               ),
             ),
           ],

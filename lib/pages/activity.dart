@@ -169,7 +169,7 @@ class _MyActivityPageState extends State<MyActivityPage>
                   dividerColor: Colors.transparent,
                   indicator: UnderlineTabIndicator(
                     borderSide: BorderSide(
-                      color: AppTheme.primaryBlue,
+                      color: AppTheme.primaryBlue ,
                       width: 4.0,
                     ),
                     borderRadius: const BorderRadius.only(
@@ -246,10 +246,10 @@ class _MyActivityPageState extends State<MyActivityPage>
                         backgroundColor: isDark
                             ? const Color(0xFF2A2A2A)
                             : Colors.transparent,
-                        selectedColor: AppTheme.primaryBlue,
+                        selectedColor: AppTheme.primaryBlue ,
                         side: BorderSide(
                           color: isSelected
-                              ? AppTheme.primaryBlue
+                              ? AppTheme.primaryBlue 
                               : (isDark
                                   ? Colors.transparent
                                   : const Color(0xFFE5E7EB)),

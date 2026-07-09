@@ -180,11 +180,11 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton>
           width: 280, 
           height: 52,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue,
+            color: AppTheme.primaryBlue ,
             borderRadius: BorderRadius.circular(26),
             boxShadow: [
               BoxShadow(
-                color: AppTheme.primaryBlue.withOpacity(0.4),
+                color: AppTheme.primaryBlue .withOpacity(0.4),
                 blurRadius: 16,
                 offset: const Offset(0, 8),
               ),

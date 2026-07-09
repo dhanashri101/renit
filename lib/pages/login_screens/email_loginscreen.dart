@@ -366,7 +366,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 children: [
                   SocialIconButton(
                     icon: Icons.phone_android,
-                    color: AppTheme.primaryBlue,
+                    color: AppTheme.primaryBlue ,
                     onTap: () {
                       Navigator.push(
                         context,

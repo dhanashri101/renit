@@ -130,9 +130,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
         appBar: _buildAppBar(isDark, isSelectionMode),
         body: TabBarView(
           children: [
-            _buildActiveChats(context, isDark, AppTheme.primaryBlue, isSelectionMode),
-            _buildEmptyState(context, isDark, AppTheme.primaryBlue, "Rent IN"),
-            _buildEmptyState(context, isDark, AppTheme.primaryBlue, "Rent OUT"),
+            _buildActiveChats(context, isDark, AppTheme.primaryBlue , isSelectionMode),
+            _buildEmptyState(context, isDark, AppTheme.primaryBlue , "Rent IN"),
+            _buildEmptyState(context, isDark, AppTheme.primaryBlue , "Rent OUT"),
           ],
         ),
       ),
@@ -263,7 +263,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
                 indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(color: AppTheme.primaryBlue, width: 4.0),
+                  borderSide: BorderSide(color: AppTheme.primaryBlue , width: 4.0),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8),
                     topRight: Radius.circular(8),
@@ -288,11 +288,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
             padding: const EdgeInsets.symmetric(horizontal: 16.0),
             child: Row(
               children: [
-                _buildFilterChip('All', 0, AppTheme.primaryBlue, isDark),
+                _buildFilterChip('All', 0, AppTheme.primaryBlue , isDark),
                 const SizedBox(width: 8),
-                _buildFilterChip('Unread', 1, AppTheme.primaryBlue, isDark),
+                _buildFilterChip('Unread', 1, AppTheme.primaryBlue , isDark),
                 const SizedBox(width: 8),
-                _buildFilterChip('Important', 2, AppTheme.primaryBlue, isDark),
+                _buildFilterChip('Important', 2, AppTheme.primaryBlue , isDark),
               ],
             ),
           ),
@@ -324,7 +324,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildActiveChats(BuildContext context, bool isDark, Color primaryBlue, bool isSelectionMode) {
+  Widget _buildActiveChats(BuildContext context, bool isDark, Color primaryBlue , bool isSelectionMode) {
     final chatsToDisplay = _filteredChats;
 
     if (chatsToDisplay.isEmpty) {
@@ -352,7 +352,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           children: [
             Container(
               color: isSelected 
-                  ? (isDark ? primaryBlue.withOpacity(0.2) : const Color(0xFFE5EDFF))
+                  ? (isDark ? primaryBlue .withOpacity(0.2) : const Color(0xFFE5EDFF))
                   : Colors.transparent,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
@@ -426,7 +426,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     Text(
                       chat['time'] as String,
                       style: TextStyle(
-                        color: hasUnread ? primaryBlue : const Color(0xFF9CA3AF),
+                        color: hasUnread ? primaryBlue  : const Color(0xFF9CA3AF),
                         fontSize: 12,
                         fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
                       ),
@@ -441,7 +441,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         Icon(
                           Icons.done_all,
                           size: 16,
-                          color: isReadByOther ? primaryBlue : Colors.grey[400],
+                          color: isReadByOther ? primaryBlue  : Colors.grey[400],
                         ),
                         const SizedBox(width: 4),
                       ],
@@ -464,7 +464,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           margin: const EdgeInsets.only(left: 8),
                           padding: const EdgeInsets.all(6),
                           decoration: BoxDecoration(
-                            color: primaryBlue,
+                            color: primaryBlue ,
                             shape: BoxShape.circle,
                           ),
                           child: Text(
@@ -491,7 +491,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isDark, Color primaryBlue, String tabName) {
+  Widget _buildEmptyState(BuildContext context, bool isDark, Color primaryBlue , String tabName) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(
@@ -525,7 +525,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             child: ElevatedButton(
               onPressed: () {},
               style: ElevatedButton.styleFrom(
-                backgroundColor: primaryBlue,
+                backgroundColor: primaryBlue ,
                 foregroundColor: Colors.white,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),

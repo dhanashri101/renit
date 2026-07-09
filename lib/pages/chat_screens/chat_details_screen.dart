@@ -190,7 +190,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primaryBlue = const Color(0xFF2563EB);
+    final primaryBlue  = const Color(0xFF2563EB);
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
@@ -286,13 +286,13 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                   msg.time, 
                   msg.isMe, 
                   isDark, 
-                  primaryBlue, 
+                  primaryBlue , 
                   isRead: msg.isRead
                 );
               },
             ),
           ),
-          _buildMessageComposer(context, isDark, primaryBlue),
+          _buildMessageComposer(context, isDark, primaryBlue ),
         ],
       ),
     );
@@ -312,7 +312,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildMessageBubble(BuildContext context, String message, String time, bool isMe, bool isDark, Color primaryBlue, {bool isRead = false}) {
+  Widget _buildMessageBubble(BuildContext context, String message, String time, bool isMe, bool isDark, Color primaryBlue , {bool isRead = false}) {
      final bgColor = isMe 
         ? (isDark ? const Color(0xFF1E3A8A) : const Color(0x19235BD6)) 
         : (isDark ? const Color(0xFF2A2A2A) : const Color.fromARGB(255, 255, 255, 255));
@@ -349,7 +349,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 4),
-                  Icon(Icons.done_all, size: 14, color: isRead ? primaryBlue : Colors.grey[400]),
+                  Icon(Icons.done_all, size: 14, color: isRead ? primaryBlue  : Colors.grey[400]),
                 ]
               ],
             ),
@@ -359,7 +359,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     );
   }
 
-  Widget _buildMessageComposer(BuildContext context, bool isDark, Color primaryBlue) {
+  Widget _buildMessageComposer(BuildContext context, bool isDark, Color primaryBlue ) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
       color: isDark ? Theme.of(context).colorScheme.surface : AppTheme.lightBackground,
@@ -380,7 +380,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                       onTap: _toggleRecording,
                       child: Icon(
                         _isRecording ? Icons.stop_circle : Icons.mic_none, 
-                        color: _isRecording ? Colors.red : primaryBlue, 
+                        color: _isRecording ? Colors.red : primaryBlue , 
                         size: 24
                       ),
                     ),
@@ -405,7 +405,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     const SizedBox(width: 12),
                     GestureDetector(
                       onTap: _handleAttachment,
-                      child: Icon(Icons.attach_file, color: primaryBlue, size: 22),
+                      child: Icon(Icons.attach_file, color: primaryBlue , size: 22),
                     ),
                   ],
                 ),
@@ -417,7 +417,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: primaryBlue, 
+                  color: primaryBlue , 
                   shape: BoxShape.circle
                 ),
                 child: const Icon(Icons.send_outlined, color: Colors.white, size: 20),

@@ -357,7 +357,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
             icon: const Icon(Icons.camera_alt_outlined, size: 20),
             label: const Text('Open Camera & Take Photo'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: AppTheme.primaryBlue ,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25), 

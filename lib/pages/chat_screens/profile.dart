@@ -113,7 +113,7 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primaryBlue = const Color(0xFF2563EB);
+    final primaryBlue  = const Color(0xFF2563EB);
     final textColor = isDark ? Colors.white : const Color(0xFF111827);
     final subTextColor = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
     final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
@@ -226,7 +226,7 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: _isFollowing
                       ? (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB))
-                      : primaryBlue,
+                      : primaryBlue ,
                   foregroundColor: _isFollowing ? textColor : Colors.white,
                   elevation: 0,
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -245,11 +245,11 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
             const SizedBox(height: 12),
             Row(
               children: [
-                _buildTabChip('All', textColor, subTextColor, primaryBlue, isDark),
+                _buildTabChip('All', textColor, subTextColor, primaryBlue , isDark),
                 const SizedBox(width: 8),
-                _buildTabChip('Products', textColor, subTextColor, primaryBlue, isDark),
+                _buildTabChip('Products', textColor, subTextColor, primaryBlue , isDark),
                 const SizedBox(width: 8),
-                _buildTabChip('Services', textColor, subTextColor, primaryBlue, isDark),
+                _buildTabChip('Services', textColor, subTextColor, primaryBlue , isDark),
               ],
             ),
             const SizedBox(height: 16),
@@ -291,14 +291,14 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
     );
   }
 
-  Widget _buildTabChip(String label, Color textColor, Color? subTextColor, Color primaryBlue, bool isDark) {
+  Widget _buildTabChip(String label, Color textColor, Color? subTextColor, Color primaryBlue , bool isDark) {
     final isSelected = _selectedTab == label;
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = label),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
+          color: isSelected ? primaryBlue  : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(

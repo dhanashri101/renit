@@ -373,7 +373,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 children: [
                   SocialIconButton(
                     icon: Icons.phone_android,
-                    color: AppTheme.primaryBlue,
+                    color: AppTheme.primaryBlue ,
                     onTap: () {
                       Navigator.push(
                         context,

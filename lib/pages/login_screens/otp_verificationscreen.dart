@@ -196,7 +196,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                   fontSize: 14,
                   fontWeight: FontWeight.w600,
                   color: _remainingSeconds > 0
-                      ? AppTheme.primaryBlue
+                      ? AppTheme.primaryBlue 
                       : Colors.red,
                 ),
               ),
@@ -236,7 +236,7 @@ class _OtpVerificationScreenState extends State<OtpVerificationScreen> {
                         }
                       : null,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.primaryBlue,
+                    backgroundColor: AppTheme.primaryBlue ,
                     foregroundColor: Colors.white,
                     disabledBackgroundColor: isDark
                         ? Colors.grey.shade800
