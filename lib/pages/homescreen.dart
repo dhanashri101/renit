@@ -833,7 +833,6 @@ class _HomeScreenState extends State<HomeScreen> {
               width: cardWidth,
               padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
-                // Uses a very sleek dark gray in dark mode, similar to the WhatsApp screenshot
                 color: isDark ? const Color(0xFF242426) : AppColors.baseWhite,
                 borderRadius: BorderRadius.circular(24 * scale),
                 boxShadow: [
@@ -846,14 +845,13 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               child: Row(
                 children: [
-                  // Portrait-style image matching the WhatsApp screenshot
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16 * scale),
                     child: Image.asset(
-                      "assets/images/carpainter.jpg", // Replace with your actual asset
+                      "assets/images/carpainter.jpg", 
                       width: 105 * scale,
                       height:
-                          double.infinity, // Fills the available vertical space
+                          double.infinity, 
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: 105 * scale,

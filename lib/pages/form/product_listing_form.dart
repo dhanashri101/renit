@@ -13,7 +13,6 @@ class ProductListingFlow extends StatefulWidget {
 class _ProductListingFlowState extends State<ProductListingFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
-
   List<String> _imagePaths = [];
   String? _selectedCategory;
   String? _selectedSubCategory;
