@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/chat_screens/chat_details_screen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 class ChatListScreen extends StatefulWidget {
   const ChatListScreen({super.key});
@@ -11,7 +12,7 @@ class ChatListScreen extends StatefulWidget {
 
 class _ChatListScreenState extends State<ChatListScreen> {
   int _selectedFilterIndex = 0;
-  
+
   bool _isSearching = false;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
@@ -27,7 +28,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': true,
       'isSentByMe': true,
       'isOnline': true,
-      'avatar': 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      'avatar':
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
     },
     {
       'name': 'Robert Fox',
@@ -37,7 +39,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': false,
       'isSentByMe': false,
       'isOnline': true,
-      'avatar': 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
+      'avatar':
+          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=100',
     },
     {
       'name': 'Kathryn Murphy',
@@ -47,7 +50,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': false,
       'isSentByMe': false,
       'isOnline': true,
-      'avatar': 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
+      'avatar':
+          'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=100',
     },
     {
       'name': 'Darrell Steward',
@@ -57,7 +61,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': false,
       'isSentByMe': false,
       'isOnline': true,
-      'avatar': 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100',
+      'avatar':
+          'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=100',
     },
     {
       'name': 'Jerome Bell',
@@ -67,7 +72,8 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': false,
       'isSentByMe': false,
       'isOnline': true,
-      'avatar': 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
+      'avatar':
+          'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=100',
     },
     {
       'name': 'Leslie Alexander',
@@ -77,16 +83,19 @@ class _ChatListScreenState extends State<ChatListScreen> {
       'isReadByOther': false,
       'isSentByMe': false,
       'isOnline': false,
-      'avatar': 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
-    }
+      'avatar':
+          'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=100',
+    },
   ];
 
   List<Map<String, dynamic>> get _filteredChats {
     if (_searchQuery.isEmpty) return _allChats;
     return _allChats
-        .where((chat) => (chat['name'] as String)
-            .toLowerCase()
-            .contains(_searchQuery.toLowerCase()))
+        .where(
+          (chat) => (chat['name'] as String).toLowerCase().contains(
+            _searchQuery.toLowerCase(),
+          ),
+        )
         .toList();
   }
 
@@ -126,11 +135,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
     return DefaultTabController(
       length: 3,
       child: Scaffold(
-        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+        backgroundColor: isDark
+            ? AppTheme.darkBackground
+            : AppTheme.lightBackground,
         appBar: _buildAppBar(isDark, isSelectionMode),
         body: TabBarView(
           children: [
-            _buildActiveChats(context, isDark, AppTheme.primaryBlue, isSelectionMode),
+            _buildActiveChats(
+              context,
+              isDark,
+              AppTheme.primaryBlue,
+              isSelectionMode,
+            ),
             _buildEmptyState(context, isDark, AppTheme.primaryBlue, "Rent IN"),
             _buildEmptyState(context, isDark, AppTheme.primaryBlue, "Rent OUT"),
           ],
@@ -144,7 +160,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
     if (isSelectionMode) {
       return AppBar(
-        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+        backgroundColor: isDark
+            ? AppTheme.darkBackground
+            : AppTheme.lightBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -153,7 +171,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ),
         title: Text(
           '${_selectedChats.length}',
-          style: TextStyle(color: textColor, fontSize: 20, fontWeight: FontWeight.bold),
+          style: TextStyle(
+            color: textColor,
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+          ),
         ),
         actions: [
           PopupMenuButton<String>(
@@ -182,7 +204,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
 
     if (_isSearching) {
       return AppBar(
-        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+        backgroundColor: isDark
+            ? AppTheme.darkBackground
+            : AppTheme.lightBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
@@ -201,7 +225,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
           style: TextStyle(color: textColor),
           decoration: InputDecoration(
             hintText: 'Search chats...',
-            hintStyle: TextStyle(color: isDark ? Colors.grey[500] : Colors.grey[400]),
+            hintStyle: TextStyle(
+              color: isDark ? Colors.grey[500] : Colors.grey[400],
+            ),
             border: InputBorder.none,
           ),
           onChanged: (value) => setState(() => _searchQuery = value),
@@ -220,12 +246,20 @@ class _ChatListScreenState extends State<ChatListScreen> {
     }
 
     return AppBar(
-      backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+      backgroundColor: isDark
+          ? AppTheme.darkBackground
+          : AppTheme.lightBackground,
       surfaceTintColor: Colors.transparent,
       elevation: 0,
       leading: IconButton(
         icon: Icon(Icons.arrow_back, color: textColor),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const NavigationWrapper()),
+            (route) => false,
+          );
+        },
       ),
       titleSpacing: 0,
       title: Text(
@@ -263,22 +297,48 @@ class _ChatListScreenState extends State<ChatListScreen> {
                 indicatorSize: TabBarIndicatorSize.label,
                 dividerColor: Colors.transparent,
                 indicator: UnderlineTabIndicator(
-                  borderSide: BorderSide(color: AppTheme.primaryBlue, width: 4.0),
+                  borderSide: BorderSide(
+                    color: AppTheme.primaryBlue,
+                    width: 4.0,
+                  ),
                   borderRadius: const BorderRadius.only(
                     topLeft: Radius.circular(8),
                     topRight: Radius.circular(8),
                   ),
                 ),
                 labelColor: isDark ? Colors.white : const Color(0xFF1F2937),
-                unselectedLabelColor: isDark ? Colors.grey[500] : const Color(0xFF9CA3AF),
-                labelStyle: const TextStyle(fontWeight: FontWeight.w600, fontSize: 16),
-                unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 16),
+                unselectedLabelColor: isDark
+                    ? Colors.grey[500]
+                    : const Color(0xFF9CA3AF),
+                labelStyle: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 16,
+                ),
+                unselectedLabelStyle: const TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 16,
+                ),
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 tabs: const [
-                  Tab(child: Padding(padding: EdgeInsets.only(bottom: 4.0), child: Text('All'))),
-                  Tab(child: Padding(padding: EdgeInsets.only(bottom: 4.0), child: Text('Rent IN'))),
-                  Tab(child: Padding(padding: EdgeInsets.only(bottom: 4.0), child: Text('Rent OUT'))),
+                  Tab(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: Text('All'),
+                    ),
+                  ),
+                  Tab(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: Text('Rent IN'),
+                    ),
+                  ),
+                  Tab(
+                    child: Padding(
+                      padding: EdgeInsets.only(bottom: 4.0),
+                      child: Text('Rent OUT'),
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -302,20 +362,29 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildFilterChip(String label, int index, Color activeColor, bool isDark) {
+  Widget _buildFilterChip(
+    String label,
+    int index,
+    Color activeColor,
+    bool isDark,
+  ) {
     final isSelected = _selectedFilterIndex == index;
     return GestureDetector(
       onTap: () => setState(() => _selectedFilterIndex = index),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected ? activeColor : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
+          color: isSelected
+              ? activeColor
+              : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : (isDark ? Colors.grey[400] : const Color(0xFF6B7280)),
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.grey[400] : const Color(0xFF6B7280)),
             fontSize: 12,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
           ),
@@ -324,7 +393,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildActiveChats(BuildContext context, bool isDark, Color primaryBlue, bool isSelectionMode) {
+  Widget _buildActiveChats(
+    BuildContext context,
+    bool isDark,
+    Color primaryBlue,
+    bool isSelectionMode,
+  ) {
     final chatsToDisplay = _filteredChats;
 
     if (chatsToDisplay.isEmpty) {
@@ -345,17 +419,22 @@ class _ChatListScreenState extends State<ChatListScreen> {
         final hasUnread = unreadCount > 0;
         final isSentByMe = chat['isSentByMe'] as bool;
         final isReadByOther = chat['isReadByOther'] as bool;
-        
+
         final isSelected = _selectedChats.contains(chatName);
 
         return Column(
           children: [
             Container(
-              color: isSelected 
-                  ? (isDark ? primaryBlue.withOpacity(0.2) : const Color(0xFFE5EDFF))
+              color: isSelected
+                  ? (isDark
+                        ? primaryBlue.withOpacity(0.2)
+                        : const Color(0xFFE5EDFF))
                   : Colors.transparent,
               child: ListTile(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 onLongPress: () => _toggleSelection(chatName),
                 onTap: () {
                   if (isSelectionMode) {
@@ -387,7 +466,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                             color: Colors.blue,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(Icons.check, size: 16, color: Colors.white),
+                          child: const Icon(
+                            Icons.check,
+                            size: 16,
+                            color: Colors.white,
+                          ),
                         ),
                       ),
                   ],
@@ -420,15 +503,23 @@ class _ChatListScreenState extends State<ChatListScreen> {
                       ),
                     const Spacer(),
                     if (!hasUnread && !isSentByMe) ...[
-                      Icon(Icons.access_time, size: 12, color: Colors.grey[400]),
+                      Icon(
+                        Icons.access_time,
+                        size: 12,
+                        color: Colors.grey[400],
+                      ),
                       const SizedBox(width: 4),
                     ],
                     Text(
                       chat['time'] as String,
                       style: TextStyle(
-                        color: hasUnread ? primaryBlue : const Color(0xFF9CA3AF),
+                        color: hasUnread
+                            ? primaryBlue
+                            : const Color(0xFF9CA3AF),
                         fontSize: 12,
-                        fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                        fontWeight: hasUnread
+                            ? FontWeight.w600
+                            : FontWeight.w400,
                       ),
                     ),
                   ],
@@ -453,9 +544,13 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           style: TextStyle(
                             color: hasUnread
                                 ? (isDark ? Colors.white : Colors.black87)
-                                : (isDark ? Colors.grey[500] : const Color(0xFF6B7280)),
+                                : (isDark
+                                      ? Colors.grey[500]
+                                      : const Color(0xFF6B7280)),
                             fontSize: 13,
-                            fontWeight: hasUnread ? FontWeight.w600 : FontWeight.w400,
+                            fontWeight: hasUnread
+                                ? FontWeight.w600
+                                : FontWeight.w400,
                           ),
                         ),
                       ),
@@ -491,7 +586,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
     );
   }
 
-  Widget _buildEmptyState(BuildContext context, bool isDark, Color primaryBlue, String tabName) {
+  Widget _buildEmptyState(
+    BuildContext context,
+    bool isDark,
+    Color primaryBlue,
+    String tabName,
+  ) {
     return Padding(
       padding: const EdgeInsets.all(32.0),
       child: Column(

@@ -3,11 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
+import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/email_loginscreen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
 import 'package:rentit24/wrapper/navbar.dart';
-import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 
 class MainLoginScreen extends StatefulWidget {
   const MainLoginScreen({super.key});
@@ -22,56 +22,55 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
   final GoogleSignIn _googleSignIn = GoogleSignIn.instance;
   GoogleSignInAccount? _googleUser;
 
-@override
-void initState() {
-  super.initState();
-  _initializeGoogleSignIn();
-}
-
-Future<void> _initializeGoogleSignIn() async {
-  try {
-    await _googleSignIn.initialize(
-      serverClientId:
-          '672213207103-93tuhrddf4dtkhh6k94fns48f9b165fo.apps.googleusercontent.com',
-    );
-
-    _googleSignIn.authenticationEvents.listen((event) {
-      if (!mounted) return;
-
-      setState(() {
-        _googleUser = switch (event) {
-          GoogleSignInAuthenticationEventSignIn() => event.user,
-          _ => null,
-        };
-      });
-    });
-
-    await _googleSignIn.attemptLightweightAuthentication();
-  } catch (e) {
-    debugPrint("Google Sign-In initialization failed: $e");
+  @override
+  void initState() {
+    super.initState();
+    _initializeGoogleSignIn();
   }
-}
+
+  Future<void> _initializeGoogleSignIn() async {
+    try {
+      await _googleSignIn.initialize(
+        serverClientId:
+            '672213207103-93tuhrddf4dtkhh6k94fns48f9b165fo.apps.googleusercontent.com',
+      );
+
+      _googleSignIn.authenticationEvents.listen((event) {
+        if (!mounted) return;
+
+        setState(() {
+          _googleUser = switch (event) {
+            GoogleSignInAuthenticationEventSignIn() => event.user,
+            _ => null,
+          };
+        });
+      });
+
+      await _googleSignIn.attemptLightweightAuthentication();
+    } catch (e) {
+      debugPrint('Google Sign-In initialization failed: $e');
+    }
+  }
+
   Future<void> _signInWithGoogle() async {
     setState(() => _isLoading = true);
     try {
       if (_googleSignIn.supportsAuthenticate()) {
         final GoogleSignInAccount account = await _googleSignIn.authenticate();
-
         final String? idToken = account.authentication.idToken;
 
         if (idToken != null) {
-          print("Google Token Received: $idToken");
-          _showSuccess("Google login successful! (Backend integration pending)");
+          _showSuccess('Google login successful! (Backend integration pending)');
         } else {
-          _showError("Google Sign-In failed: could not retrieve ID token.");
+          _showError('Google Sign-In failed: could not retrieve ID token.');
         }
       } else {
-        _showError("Google Sign-In is not supported on this platform.");
+        _showError('Google Sign-In is not supported on this platform.');
       }
     } on GoogleSignInException catch (e) {
-      _showError("Google Sign-In failed: ${e.code.name} — ${e.description}");
+      _showError('Google Sign-In failed: ${e.code.name} — ${e.description}');
     } catch (error) {
-      _showError("Google Sign-In failed: $error");
+      _showError('Google Sign-In failed: $error');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -85,15 +84,15 @@ Future<void> _initializeGoogleSignIn() async {
       if (result.status == LoginStatus.success) {
         final AccessToken accessToken = result.accessToken!;
         final String tokenString = accessToken.tokenString;
-        print("Facebook Token Received: $tokenString");
-        _showSuccess("Facebook login successful! (Backend integration pending)");
+        debugPrint('Facebook Token Received: $tokenString');
+        _showSuccess('Facebook login successful! (Backend integration pending)');
       } else if (result.status == LoginStatus.cancelled) {
-        _showError("Facebook Sign-In cancelled.");
+        _showError('Facebook Sign-In cancelled.');
       } else {
-        _showError("Facebook Sign-In failed: ${result.message}");
+        _showError('Facebook Sign-In failed: ${result.message}');
       }
     } catch (error) {
-      _showError("Facebook Error: $error");
+      _showError('Facebook Error: $error');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -111,11 +110,11 @@ Future<void> _initializeGoogleSignIn() async {
 
       final String? identityToken = credential.identityToken;
       if (identityToken != null) {
-        print("Apple Token Received: $identityToken");
-        _showSuccess("Apple login successful! (Backend integration pending)");
+        debugPrint('Apple Token Received: $identityToken');
+        _showSuccess('Apple login successful! (Backend integration pending)');
       }
     } catch (error) {
-      _showError("Apple Sign-In failed: $error");
+      _showError('Apple Sign-In failed: $error');
     } finally {
       if (mounted) setState(() => _isLoading = false);
     }
@@ -124,14 +123,24 @@ Future<void> _initializeGoogleSignIn() async {
   void _showError(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.red),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.error500,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
   void _showSuccess(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message), backgroundColor: Colors.green),
+      SnackBar(
+        content: Text(message),
+        backgroundColor: AppColors.success500,
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+      ),
     );
   }
 
@@ -139,210 +148,265 @@ Future<void> _initializeGoogleSignIn() async {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final borderColor = isDark ? Colors.white12 : AppColors.neutral100;
+    final size = MediaQuery.sizeOf(context);
+    final isTablet = size.shortestSide >= 600;
+    final horizontalPadding = isTablet ? 36.0 : 22.0;
+    final heroHeight = isTablet ? 280.0 : 220.0;
+    final titleStyle = AppTypography.h2Style(
+      isDark ? AppColors.baseWhite : AppColors.neutral900,
+    ).copyWith(
+      fontSize: isTablet ? 30 : 28,
+      letterSpacing: -0.6,
+      height: 1.1,
+    );
+    final bodyStyle = AppTypography.bodyMedium(
+      AppTypography.regular,
+      isDark ? AppColors.neutral300 : AppColors.neutral600,
+    ).copyWith(fontSize: isTablet ? 15 : 14, height: 1.5);
+    final maxWidth = isTablet ? 460.0 : 390.0;
+    final buttonHeight = isTablet ? 58.0 : 54.0;
+    final buttonRadius = isTablet ? 20.0 : 16.0;
 
     return Scaffold(
+      backgroundColor: theme.scaffoldBackgroundColor,
       body: SafeArea(
         child: Stack(
           children: [
-            SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  Align(
-                    alignment: Alignment.topRight,
-                    child: TextButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const NavigationWrapper(),
+            LayoutBuilder(
+              builder: (context, constraints) {
+                return Center(
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(maxWidth: maxWidth),
+                    child: SingleChildScrollView(
+                      padding: EdgeInsets.fromLTRB(horizontalPadding, 16, horizontalPadding, 24),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Align(
+                            alignment: Alignment.topRight,
+                            child: TextButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const NavigationWrapper(),
+                                  ),
+                                );
+                              },
+                              style: TextButton.styleFrom(
+                                padding: EdgeInsets.zero,
+                                minimumSize: const Size(0, 0),
+                                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                              ),
+                              child: Text(
+                                'SKIP FOR NOW',
+                                style: AppTypography.bodyExtraSmall(
+                                  AppTypography.semibold,
+                                  isDark ? AppColors.neutral200 : AppColors.neutral500,
+                                ),
+                              ),
+                            ),
                           ),
-                        );
-                      },
-                      style: TextButton.styleFrom(
-                        padding: EdgeInsets.zero,
-                        minimumSize: const Size(0, 0),
-                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      ),
-                      child: Text(
-                        'SKIP FOR NOW',
-                        style: TextStyle(
-                          color: isDark ? Colors.white54 : const Color(0xFF6B7280),
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          letterSpacing: 0.5,
-                        ),
-                      ),
-                    ),
-                  ),
-
-                  Container(
-                    height: 200,
-                    width: double.infinity,
-                    child: Center(child: Image.asset("assets/images/rocket.png")),
-                  ),
-                  const SizedBox(height: 24),
-                  Text(
-                    'Welcome to Rent It 24',
-                    style: TextStyle(
-                      fontSize: 26,
-                      fontWeight: FontWeight.w900,
-                      color: isDark ? Colors.white : const Color(0xFF1A1A2E),
-                      letterSpacing: -0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 32),
-
-                  _buildSocialButton(
-                    context: context,
-                    text: 'Continue with Phone Number',
-                    icon: Icons.phone_android,
-                    iconColor: theme.primaryColor,
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const PhoneLoginScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildSocialButton(
-                    context: context,
-                    text: 'Continue with Facebook',
-                    icon: Icons.facebook,
-                    iconColor: const Color(0xFF1877F2),
-                    onPressed: _signInWithFacebook,
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildSocialButton(
-                    context: context,
-                    text: 'Continue with Google',
-                    icon: Icons.g_mobiledata,
-                    iconColor: Colors.red,
-                    iconSize: 32,
-                    onPressed: _signInWithGoogle,
-                  ),
-                  const SizedBox(height: 16),
-
-                  _buildSocialButton(
-                    context: context,
-                    text: 'Continue with Apple',
-                    icon: Icons.apple,
-                    iconColor: isDark ? Colors.white : Colors.black,
-                    onPressed: _signInWithApple,
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Divider(
-                          color: isDark ? Colors.white24 : const Color(0xFFD1D5DB),
-                          thickness: 1,
-                        ),
-                      ),
-                      Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 16.0),
-                        child: Text(
-                          'or',
-                          style: TextStyle(
-                            color: isDark ? Colors.white54 : Colors.grey.shade500,
-                            fontSize: 14,
+                          const SizedBox(height: 6),
+                          SizedBox(
+                            height: heroHeight,
+                            width: double.infinity,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                Container(
+                                  width: heroHeight * 0.74,
+                                  height: heroHeight * 0.74,
+                                  decoration: BoxDecoration(
+                                    shape: BoxShape.circle,
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        theme.primaryColor.withOpacity(0.16),
+                                        theme.primaryColor.withOpacity(0.02),
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 0,
+                                  child: Image.asset(
+                                    'assets/images/rocket.png',
+                                    height: heroHeight * 0.7,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
-                        ),
-                      ),
-                      Expanded(
-                        child: Divider(
-                          color: isDark ? Colors.white24 : const Color(0xFFD1D5DB),
-                          thickness: 1,
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 32),
-
-                  Container(
-                    width: double.infinity,
-                    height: 56,
-                    decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(28),
-                      boxShadow: [
-                        BoxShadow(
-                          color: theme.primaryColor.withOpacity(0.2),
-                          blurRadius: 12,
-                          offset: const Offset(0, 4),
-                        ),
-                      ],
-                    ),
-                    child: ElevatedButton(
-                      onPressed: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const emailLoginScreen(),
+                          const SizedBox(height: 12),
+                          Text(
+                            'Welcome to Rent It 24',
+                            textAlign: TextAlign.center,
+                            style: titleStyle,
                           ),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: theme.primaryColor,
-                        foregroundColor: Colors.white,
-                        elevation: 0,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(28),
-                        ),
-                      ),
-                      child: const Text(
-                        'Sign in with password',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
-                      ),
-                    ),
-                  ),
-
-                  const SizedBox(height: 24),
-
-                  RichText(
-                    text: TextSpan(
-                      text: 'Ready to join us? ',
-                      style: TextStyle(
-                        color: isDark ? Colors.white54 : const Color(0xFF9CA3AF),
-                        fontSize: 13,
-                      ),
-                      children: [
-                        TextSpan(
-                          text: 'Create an account!',
-                          style: TextStyle(
-                            color: theme.primaryColor,
-                            fontWeight: FontWeight.w600,
-                            decoration: TextDecoration.underline,
+                          const SizedBox(height: 10),
+                          Text(
+                            'Discover rentals, connect with trusted hosts, and move faster with a seamless experience.',
+                            textAlign: TextAlign.center,
+                            style: bodyStyle,
                           ),
-                          recognizer: TapGestureRecognizer()
-                            ..onTap = () {
+                          const SizedBox(height: 28),
+                          _buildSocialButton(
+                            context: context,
+                            text: 'Continue with Phone Number',
+                            icon: Icons.phone_android,
+                            iconColor: theme.primaryColor,
+                            onPressed: () {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => const CreateAccountScreen(),
+                                  builder: (context) => const PhoneLoginScreen(),
                                 ),
                               );
                             },
-                        ),
-                      ],
+                            buttonHeight: buttonHeight,
+                            radius: buttonRadius,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSocialButton(
+                            context: context,
+                            text: 'Continue with Facebook',
+                            icon: Icons.facebook,
+                            iconColor: const Color(0xFF1877F2),
+                            onPressed: _signInWithFacebook,
+                            buttonHeight: buttonHeight,
+                            radius: buttonRadius,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSocialButton(
+                            context: context,
+                            text: 'Continue with Google',
+                            icon: Icons.g_mobiledata,
+                            iconColor: Colors.red,
+                            iconSize: isTablet ? 32 : 28,
+                            onPressed: _signInWithGoogle,
+                            buttonHeight: buttonHeight,
+                            radius: buttonRadius,
+                          ),
+                          const SizedBox(height: 12),
+                          _buildSocialButton(
+                            context: context,
+                            text: 'Continue with Apple',
+                            icon: Icons.apple,
+                            iconColor: isDark ? AppColors.baseWhite : AppColors.neutral900,
+                            onPressed: _signInWithApple,
+                            buttonHeight: buttonHeight,
+                            radius: buttonRadius,
+                          ),
+                          const SizedBox(height: 24),
+                          Row(
+                            children: [
+                              Expanded(
+                                child: Divider(
+                                  color: borderColor,
+                                  thickness: 1,
+                                ),
+                              ),
+                              Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 14),
+                                child: Text(
+                                  'or',
+                                  style: AppTypography.bodySmall(
+                                    AppTypography.medium,
+                                    isDark ? AppColors.neutral400 : AppColors.neutral500,
+                                  ),
+                                ),
+                              ),
+                              Expanded(
+                                child: Divider(
+                                  color: borderColor,
+                                  thickness: 1,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 24),
+                          Container(
+                            width: double.infinity,
+                            height: buttonHeight,
+                            decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(buttonRadius + 8),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: theme.primaryColor.withOpacity(0.18),
+                                  blurRadius: 16,
+                                  offset: const Offset(0, 8),
+                                ),
+                              ],
+                            ),
+                            child: ElevatedButton(
+                              onPressed: () {
+                                Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                    builder: (context) => const emailLoginScreen(),
+                                  ),
+                                );
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: theme.primaryColor,
+                                foregroundColor: AppColors.baseWhite,
+                                elevation: 0,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(buttonRadius + 8),
+                                ),
+                              ),
+                              child: Text(
+                                'Sign in with password',
+                                style: AppTypography.bodyMedium(
+                                  AppTypography.semibold,
+                                  AppColors.baseWhite,
+                                ),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 22),
+                          RichText(
+                            textAlign: TextAlign.center,
+                            text: TextSpan(
+                              text: 'Ready to join us? ',
+                              style: AppTypography.bodySmall(
+                                AppTypography.regular,
+                                isDark ? AppColors.neutral400 : AppColors.neutral500,
+                              ),
+                              children: [
+                                TextSpan(
+                                  text: 'Create an account!',
+                                  style: AppTypography.bodySmall(
+                                    AppTypography.semibold,
+                                    theme.primaryColor,
+                                  ).copyWith(decoration: TextDecoration.underline),
+                                  recognizer: TapGestureRecognizer()
+                                    ..onTap = () {
+                                      Navigator.push(
+                                        context,
+                                        MaterialPageRoute(
+                                          builder: (context) => const CreateAccountScreen(),
+                                        ),
+                                      );
+                                    },
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 16),
-                ],
-              ),
+                );
+              },
             ),
-
             if (_isLoading)
               Container(
-                color: Colors.black.withOpacity(0.4),
+                color: Colors.black.withOpacity(0.35),
                 child: const Center(
                   child: CircularProgressIndicator(),
                 ),
@@ -360,24 +424,28 @@ Future<void> _initializeGoogleSignIn() async {
     required Color iconColor,
     required VoidCallback onPressed,
     double iconSize = 22,
+    double buttonHeight = 54,
+    double radius = 16,
   }) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
 
     return SizedBox(
       width: double.infinity,
-      height: 56,
+      height: buttonHeight,
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: theme.colorScheme.surface,
-          foregroundColor: isDark ? Colors.white : const Color(0xFF1A1A2E),
-          elevation: isDark ? 0 : 0.5,
+          backgroundColor: isDark ? theme.colorScheme.surface : AppColors.baseWhite,
+          foregroundColor: isDark ? AppColors.baseWhite : AppColors.neutral900,
+          elevation: 0,
+          padding: const EdgeInsets.symmetric(horizontal: 16),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(28),
-            side: isDark
-                ? BorderSide.none
-                : BorderSide(color: Colors.grey.shade200, width: 1),
+            borderRadius: BorderRadius.circular(radius),
+            side: BorderSide(
+              color: isDark ? Colors.white12 : AppColors.neutral100,
+              width: 1,
+            ),
           ),
         ),
         child: Row(
@@ -387,7 +455,10 @@ Future<void> _initializeGoogleSignIn() async {
             const SizedBox(width: 12),
             Text(
               text,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+              style: AppTypography.bodyMedium(
+                AppTypography.semibold,
+                isDark ? AppColors.baseWhite : AppColors.neutral900,
+              ),
             ),
           ],
         ),

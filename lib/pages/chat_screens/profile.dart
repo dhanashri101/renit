@@ -1,20 +1,30 @@
 import 'package:flutter/material.dart';
-import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/pages/product_details_screen.dart';
 
 class AdItem {
   final String image;
   final String title;
   final String price;
   final double rating;
-  final String? badge;
-  final String category; 
+  final int reviews;
+  final String distance;
+  final String owner;
+  final String ownerAvatar;
+  final bool isFeatured;
+  final bool isTopChoice;
+  final String category;
 
   AdItem({
     required this.image,
     required this.title,
     required this.price,
     required this.rating,
-    this.badge,
+    required this.reviews,
+    required this.distance,
+    required this.owner,
+    required this.ownerAvatar,
+    this.isFeatured = false,
+    this.isTopChoice = false,
     this.category = 'Products',
   });
 }
@@ -31,40 +41,85 @@ class ProfileScreenchat extends StatefulWidget {
 
   const ProfileScreenchat({
     super.key,
-    required this.userName,
-    this.avatar = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
+    this.userName = 'Floyd Miles',
+    this.avatar =
+        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
     this.isVerified = true,
-    this.joinedLabel = 'Joined March 2023',
+    this.joinedLabel = 'Joined in Nov 2025',
     this.adsCount = 24,
     this.followersCount = 110,
     this.followingCount = 0,
     this.bio =
-        'Discover our groundbreaking range of products and services designed specifically for the photography industry, elevating your creative potential and transforming your workflow.',
+        'Discover our groundbreaking range of products and services designed specifically for the photography industry, elevating your creative potential and transforming your workflow!',
   });
 
   @override
-  State<ProfileScreenchat> createState() => _ProfileScreenState();
+  State<ProfileScreenchat> createState() => _ProfileScreenchatState();
 }
 
-class _ProfileScreenState extends State<ProfileScreenchat> {
+class _ProfileScreenchatState extends State<ProfileScreenchat> {
   bool _isFollowing = false;
   String _selectedTab = 'All';
 
   final List<AdItem> _ads = [
     AdItem(
-      image: 'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400',
-      title: 'GoPro 12',
-      price: '₹1500/day',
+      image:
+          'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400',
+      title: 'Go Pro 12',
+      price: '₹1300/day',
       rating: 3.5,
-      badge: 'Featured',
+      reviews: 110,
+      distance: '2.5 km',
+      owner: 'Floyd Miles',
+      ownerAvatar:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      isFeatured: true,
+      isTopChoice: true,
       category: 'Products',
     ),
     AdItem(
-      image: 'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400',
+      image:
+          'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400',
       title: 'Canon EOS R6',
       price: '₹2000/day',
-      rating: 4.9,
-      badge: 'Top Choice',
+      rating: 5.0,
+      reviews: 48,
+      distance: '3 km',
+      owner: 'Floyd Miles',
+      ownerAvatar:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      isFeatured: true,
+      isTopChoice: true,
+      category: 'Products',
+    ),
+    AdItem(
+      image:
+          'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400',
+      title: 'Sony Alpha A7 III',
+      price: '₹1800/day',
+      rating: 4.8,
+      reviews: 89,
+      distance: '4.1 km',
+      owner: 'Floyd Miles',
+      ownerAvatar:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      isFeatured: false,
+      isTopChoice: true,
+      category: 'Products',
+    ),
+    AdItem(
+      image:
+          'https://images.unsplash.com/photo-1519183071298-a2962be96f83?w=400',
+      title: 'Studio Light Kit',
+      price: '₹900/day',
+      rating: 4.2,
+      reviews: 34,
+      distance: '1.8 km',
+      owner: 'Floyd Miles',
+      ownerAvatar:
+          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
+      isFeatured: false,
+      isTopChoice: false,
       category: 'Products',
     ),
   ];
@@ -93,13 +148,23 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
   }
 
   void _confirmBlockUser() {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text("Block ${widget.userName}"),
-        content: const Text("Blocked users won't be able to message you or view your ads."),
+        backgroundColor: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+        title: Text(
+          "Block ${widget.userName}",
+          style: TextStyle(color: isDark ? Colors.white : Colors.black),
+        ),
+        content: Text(
+          "Blocked users won't be able to message you or view your ads.",
+          style: TextStyle(color: isDark ? Colors.white70 : Colors.black87),
+        ),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text("Cancel")),
           TextButton(
             onPressed: () => Navigator.pop(context),
             child: const Text("Block", style: TextStyle(color: Colors.red)),
@@ -113,198 +178,327 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primaryBlue = const Color(0xFF2563EB);
-    final textColor = isDark ? Colors.white : const Color(0xFF111827);
-    final subTextColor = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
-    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+
+    final Color primaryBlue = const Color(0xFF2563EB);
+    final Color backgroundColor =
+        isDark ? const Color(0xFF121212) : const Color(0xFFF3F4F6);
+    final Color surfaceColor =
+        isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final Color textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final Color subTextColor =
+        isDark ? Colors.white60 : const Color(0xFF6B7280);
+    final Color statsBg =
+        isDark ? const Color(0xFF1E2A4A) : const Color(0xFFE0E7FF);
+    final Color dividerColor =
+        isDark ? Colors.white24 : Colors.grey.withOpacity(0.3);
+    final Color chipUnselectedBg = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final Color chipBorder =
+        isDark ? Colors.white24 : Colors.grey.shade300;
+    final Color chipUnselectedText =
+        isDark ? Colors.white54 : const Color(0xFF9CA3AF);
+    final Color followingBg =
+        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB);
+
+    final screenWidth = MediaQuery.of(context).size.width;
+    const horizontalPadding = 20.0;
+    const gridSpacing = 12.0;
+    final usableWidth = screenWidth - (horizontalPadding * 2);
+    final cardWidth = (usableWidth - gridSpacing) / 2;
+
+    const imageHeight = 104.0;
+    const cardInfoHeight = 128.0;
+    final cardHeight = imageHeight + cardInfoHeight;
+    final childAspectRatio = cardWidth / cardHeight;
 
     return Scaffold(
-      backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+      backgroundColor: backgroundColor,
       appBar: AppBar(
-        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
+        backgroundColor: backgroundColor,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor),
+          icon: Icon(Icons.arrow_back, color: textColor, size: 22),
           onPressed: () => Navigator.pop(context),
         ),
         actions: [
-          PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: textColor),
-            color: cardColor,
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-            onSelected: _handleMenuSelection,
-            itemBuilder: (context) => [
-              PopupMenuItem(
-                value: 'share',
-                child: Row(children: [
-                  Icon(Icons.ios_share, size: 18, color: textColor),
-                  const SizedBox(width: 12),
-                  Text('Share profile', style: TextStyle(color: textColor, fontSize: 14)),
-                ]),
-              ),
-              PopupMenuItem(
-                value: 'report',
-                child: Row(children: [
-                  Icon(Icons.flag_outlined, size: 18, color: textColor),
-                  const SizedBox(width: 12),
-                  Text('Report user', style: TextStyle(color: textColor, fontSize: 14)),
-                ]),
-              ),
-              const PopupMenuItem(
-                value: 'block',
-                child: Row(children: [
-                  Icon(Icons.block, size: 18, color: Colors.red),
-                  SizedBox(width: 12),
-                  Text('Block user', style: TextStyle(color: Colors.red, fontSize: 14)),
-                ]),
-              ),
-            ],
+          Container(
+            margin: const EdgeInsets.only(right: 16),
+            height: 32,
+            width: 32,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              border: Border.all(
+                  color: isDark ? Colors.white38 : Colors.grey.shade400,
+                  width: 1),
+            ),
+            child: PopupMenuButton<String>(
+              padding: EdgeInsets.zero,
+              icon: Icon(Icons.more_horiz, color: textColor, size: 18),
+              color: surfaceColor,
+              elevation: 4,
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
+              onSelected: _handleMenuSelection,
+              itemBuilder: (context) => [
+                PopupMenuItem(
+                  value: 'share',
+                  height: 44,
+                  child: Text('Share profile',
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500)),
+                ),
+                PopupMenuItem(
+                  value: 'report',
+                  height: 44,
+                  child: Text('Report user',
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500)),
+                ),
+                PopupMenuItem(
+                  value: 'block',
+                  height: 44,
+                  child: Text('Block user',
+                      style: TextStyle(
+                          color: textColor,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500)),
+                ),
+              ],
+            ),
           ),
         ],
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-              child: CircleAvatar(
-                radius: 40,
-                backgroundImage: NetworkImage(widget.avatar),
-              ),
-            ),
-            const SizedBox(height: 12),
-            Center(
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
+      body: SafeArea(
+        bottom: false,
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.symmetric(horizontal: horizontalPadding),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    widget.userName,
-                    style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w700),
+                  CircleAvatar(
+                    radius: 36,
+                    backgroundColor:
+                        isDark ? Colors.grey[800] : Colors.grey.shade200,
+                    backgroundImage: NetworkImage(widget.avatar),
                   ),
-                  if (widget.isVerified) ...[
-                    const SizedBox(width: 6),
-                    const Icon(Icons.verified, size: 18, color: Color(0xFF2563EB)),
-                  ],
+                  const SizedBox(width: 16),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                widget.userName,
+                                overflow: TextOverflow.ellipsis,
+                                style: TextStyle(
+                                    color: textColor,
+                                    fontSize: 20,
+                                    fontWeight: FontWeight.w800),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Container(
+                              width: 8,
+                              height: 8,
+                              decoration: const BoxDecoration(
+                                color: Colors.green,
+                                shape: BoxShape.circle,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        if (widget.isVerified)
+                          Row(
+                            children: [
+                              Icon(Icons.workspace_premium,
+                                  size: 14, color: textColor),
+                              const SizedBox(width: 4),
+                              Text(
+                                'Verified',
+                                style: TextStyle(
+                                    color: textColor.withOpacity(0.8),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500),
+                              ),
+                            ],
+                          ),
+                        const SizedBox(height: 4),
+                        Text(
+                          widget.joinedLabel,
+                          style: TextStyle(
+                              color: subTextColor,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500),
+                        ),
+                      ],
+                    ),
+                  ),
                 ],
               ),
-            ),
-            const SizedBox(height: 4),
-            Center(
-              child: Text(
-                widget.joinedLabel,
-                style: TextStyle(color: subTextColor, fontSize: 12),
+              const SizedBox(height: 20),
+
+              Text(
+                widget.bio,
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 13.5,
+                    height: 1.5,
+                    fontWeight: FontWeight.w500),
               ),
-            ),
-            const SizedBox(height: 18),
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                child: Text(
-                  widget.bio,
-                  textAlign: TextAlign.center,
-                  style: TextStyle(color: subTextColor, fontSize: 13, height: 1.4),
+              const SizedBox(height: 20),
+
+              Container(
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                decoration: BoxDecoration(
+                  color: statsBg,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    _buildStat('${widget.adsCount}', 'Ads', textColor,
+                        subTextColor),
+                    Container(width: 1, height: 36, color: dividerColor),
+                    _buildStat('${widget.followersCount}', 'Followers',
+                        textColor, subTextColor),
+                    Container(width: 1, height: 36, color: dividerColor),
+                    _buildStat('${widget.followingCount}', 'Following',
+                        textColor, subTextColor),
+                  ],
                 ),
               ),
-            ),
-            const SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                _buildStat('${widget.adsCount}', 'Ads', textColor, subTextColor),
-                _buildStat('${widget.followersCount}', 'Followers', textColor, subTextColor),
-                _buildStat('${widget.followingCount}', 'Following', textColor, subTextColor),
-              ],
-            ),
-            const SizedBox(height: 20),
-            SizedBox(
-              width: double.infinity,
-              height: 46,
-              child: ElevatedButton(
-                onPressed: () => setState(() => _isFollowing = !_isFollowing),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: _isFollowing
-                      ? (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB))
-                      : primaryBlue,
-                  foregroundColor: _isFollowing ? textColor : Colors.white,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  _isFollowing ? 'Following' : 'Follow',
-                  style: const TextStyle(fontSize: 15, fontWeight: FontWeight.w600),
-                ),
-              ),
-            ),
-            const SizedBox(height: 24),
-            Text(
-              'Ads posted',
-              style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700),
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                _buildTabChip('All', textColor, subTextColor, primaryBlue, isDark),
-                const SizedBox(width: 8),
-                _buildTabChip('Products', textColor, subTextColor, primaryBlue, isDark),
-                const SizedBox(width: 8),
-                _buildTabChip('Services', textColor, subTextColor, primaryBlue, isDark),
-              ],
-            ),
-            const SizedBox(height: 16),
-            _filteredAds.isEmpty
-                ? Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 40),
-                    child: Center(
-                      child: Text('No ads in this category', style: TextStyle(color: subTextColor)),
-                    ),
-                  )
-                : GridView.builder(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: _filteredAds.length,
-                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 2,
-                      crossAxisSpacing: 12,
-                      mainAxisSpacing: 12,
-                      childAspectRatio: 0.72,
-                    ),
-                    itemBuilder: (context, index) {
-                      return _buildAdCard(_filteredAds[index], isDark, cardColor, textColor, subTextColor);
-                    },
+              const SizedBox(height: 20),
+
+              SizedBox(
+                width: double.infinity,
+                height: 48,
+                child: ElevatedButton(
+                  onPressed: () =>
+                      setState(() => _isFollowing = !_isFollowing),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor:
+                        _isFollowing ? followingBg : primaryBlue,
+                    foregroundColor: _isFollowing ? textColor : Colors.white,
+                    elevation: _isFollowing ? 0 : 4,
+                    shadowColor: primaryBlue.withOpacity(0.4),
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24)),
                   ),
-            const SizedBox(height: 24),
-          ],
+                  child: Text(
+                    _isFollowing ? 'Following' : 'Follow',
+                    style: const TextStyle(
+                        fontSize: 15, fontWeight: FontWeight.w600),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 28),
+
+              Text(
+                'Ads posted',
+                style: TextStyle(
+                    color: textColor,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  _buildTabChip('All', primaryBlue, chipUnselectedBg,
+                      chipBorder, chipUnselectedText),
+                  const SizedBox(width: 8),
+                  _buildTabChip('Products', primaryBlue, chipUnselectedBg,
+                      chipBorder, chipUnselectedText),
+                  const SizedBox(width: 8),
+                  _buildTabChip('Services', primaryBlue, chipUnselectedBg,
+                      chipBorder, chipUnselectedText),
+                ],
+              ),
+              const SizedBox(height: 20),
+
+              _filteredAds.isEmpty
+                  ? Padding(
+                      padding: const EdgeInsets.symmetric(vertical: 40),
+                      child: Center(
+                        child: Text('No ads in this category',
+                            style: TextStyle(color: subTextColor)),
+                      ),
+                    )
+                  : GridView.builder(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: _filteredAds.length,
+                      gridDelegate:
+                          SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount: 2,
+                        crossAxisSpacing: gridSpacing,
+                        mainAxisSpacing: gridSpacing,
+                        childAspectRatio: childAspectRatio,
+                      ),
+                      itemBuilder: (context, index) {
+                        return _buildAdCard(
+                            _filteredAds[index], theme, isDark);
+                      },
+                    ),
+              const SizedBox(height: 24),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget _buildStat(String value, String label, Color textColor, Color? subTextColor) {
+  Widget _buildStat(
+      String value, String label, Color textColor, Color subTextColor) {
     return Column(
       children: [
-        Text(value, style: TextStyle(color: textColor, fontSize: 18, fontWeight: FontWeight.w700)),
+        Text(value,
+            style: TextStyle(
+                color: textColor, fontSize: 22, fontWeight: FontWeight.w800)),
         const SizedBox(height: 2),
-        Text(label, style: TextStyle(color: subTextColor, fontSize: 12)),
+        Text(label,
+            style: TextStyle(
+                color: subTextColor,
+                fontSize: 13,
+                fontWeight: FontWeight.w500)),
       ],
     );
   }
 
-  Widget _buildTabChip(String label, Color textColor, Color? subTextColor, Color primaryBlue, bool isDark) {
+  Widget _buildTabChip(String label, Color primaryBlue, Color unselectedBg,
+      Color borderColor, Color unselectedText) {
     final isSelected = _selectedTab == label;
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = label),
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 150),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
-          borderRadius: BorderRadius.circular(20),
+          color: isSelected ? primaryBlue : unselectedBg,
+          borderRadius: BorderRadius.circular(24),
+          border: isSelected ? null : Border.all(color: borderColor, width: 1),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                      color: primaryBlue.withOpacity(0.3),
+                      blurRadius: 8,
+                      offset: const Offset(0, 4))
+                ]
+              : [],
         ),
         child: Text(
           label,
           style: TextStyle(
-            color: isSelected ? Colors.white : subTextColor,
+            color: isSelected ? Colors.white : unselectedText,
             fontSize: 13,
             fontWeight: FontWeight.w600,
           ),
@@ -313,76 +507,241 @@ class _ProfileScreenState extends State<ProfileScreenchat> {
     );
   }
 
-  Widget _buildAdCard(AdItem ad, bool isDark, Color cardColor, Color textColor, Color? subTextColor) {
-    return Container(
-      decoration: BoxDecoration(
-        color: cardColor,
-        borderRadius: BorderRadius.circular(14),
-        boxShadow: [
-          BoxShadow(color: Colors.black.withValues(alpha: 0.04), blurRadius: 8, offset: const Offset(0, 2)),
-        ],
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Expanded(
-            child: Stack(
-              fit: StackFit.expand,
+  Widget _buildAdCard(AdItem ad, ThemeData theme, bool isDark) {
+    final Color textColor = isDark ? Colors.white : const Color(0xFF2F314D);
+    final Color priceColor = isDark ? Colors.white : const Color(0xFF090726);
+    final Color distanceColor =
+        isDark ? Colors.white60 : const Color(0x99090726);
+    final Color ratingCountColor =
+        isDark ? Colors.white54 : const Color(0x99090726);
+
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(context, MaterialPageRoute(
+          builder: (_) => ProductDetailsScreen(adData: ad),
+        ));
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+          borderRadius: BorderRadius.circular(8),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(isDark ? 0.3 : 0.06),
+              blurRadius: 12,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Stack(
               children: [
-                Image.network(ad.image, fit: BoxFit.cover),
-                if (ad.badge != null)
+                ClipRRect(
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(8),
+                    topRight: Radius.circular(8),
+                  ),
+                  child: Image.network(
+                    ad.image,
+                    height: 104,
+                    width: double.infinity,
+                    fit: BoxFit.cover,
+                    loadingBuilder: (context, child, progress) {
+                      if (progress == null) return child;
+                      return Container(
+                        height: 104,
+                        width: double.infinity,
+                        color: isDark ? Colors.grey[850] : Colors.grey[100],
+                        child: const Center(
+                          child: SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(strokeWidth: 2),
+                          ),
+                        ),
+                      );
+                    },
+                    errorBuilder: (context, error, stackTrace) => Container(
+                      height: 104,
+                      width: double.infinity,
+                      color: isDark ? Colors.grey[800] : Colors.grey[300],
+                      child: const Icon(Icons.image, color: Colors.grey),
+                    ),
+                  ),
+                ),
+                if (ad.isFeatured)
                   Positioned(
-                    top: 8,
-                    left: 8,
+                    top: 11,
+                    left: 0,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: const Color(0xFF2563EB),
-                        borderRadius: BorderRadius.circular(6),
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 8,
+                        vertical: 4,
                       ),
-                      child: Text(
-                        ad.badge!,
-                        style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.w600),
+                      decoration: const BoxDecoration(
+                        color: Color(0xFF235BD6),
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(2),
+                          bottomRight: Radius.circular(2),
+                        ),
+                      ),
+                      child: const Text(
+                        'Featured',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          letterSpacing: 0.20,
+                        ),
                       ),
                     ),
                   ),
+                Positioned(
+                  top: 8,
+                  right: 8,
+                  child: Container(
+                    padding: const EdgeInsets.all(6),
+                    decoration: const BoxDecoration(
+                      color: Color(0x66090726),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.favorite_border,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                  ),
+                ),
               ],
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  ad.title,
-                  style: TextStyle(color: textColor, fontSize: 13, fontWeight: FontWeight.w600),
-                ),
-                const SizedBox(height: 4),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.location_on,
+                              color: isDark ? Colors.white38 : Colors.grey[400],
+                              size: 10,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              ad.distance,
+                              style: TextStyle(
+                                color: distanceColor,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w300,
+                              ),
+                            ),
+                          ],
+                        ),
+                        if (ad.isTopChoice)
+                          Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 4,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: isDark
+                                  ? Colors.grey[800]
+                                  : const Color(0xFF090726),
+                              borderRadius: BorderRadius.circular(2),
+                            ),
+                            child: const Text(
+                              'Top Choice',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 10,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ),
+                      ],
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      ad.title,
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                        height: 1.2,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 4),
                     Text(
                       ad.price,
-                      style: TextStyle(color: subTextColor, fontSize: 12, fontWeight: FontWeight.w500),
+                      style: TextStyle(
+                        color: priceColor,
+                        fontSize: 14,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
+                    const Spacer(),
                     Row(
                       children: [
-                        const Icon(Icons.star, size: 12, color: Color(0xFFF59E0B)),
+                        CircleAvatar(
+                          radius: 8,
+                          backgroundColor:
+                              isDark ? Colors.grey[800] : Colors.grey.shade200,
+                          backgroundImage: NetworkImage(ad.ownerAvatar),
+                        ),
+                        const SizedBox(width: 6),
+                        Expanded(
+                          child: Text(
+                            ad.owner,
+                            style: TextStyle(
+                              color: priceColor,
+                              fontSize: 10,
+                              fontWeight: FontWeight.w500,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
+                    Row(
+                      children: [
+                        const Icon(Icons.star,
+                            color: Colors.amber, size: 12),
                         const SizedBox(width: 2),
                         Text(
                           ad.rating.toStringAsFixed(1),
-                          style: TextStyle(color: subTextColor, fontSize: 11),
+                          style: TextStyle(
+                            color: textColor,
+                            fontSize: 11,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '(${ad.reviews})',
+                          style: TextStyle(
+                            color: ratingCountColor,
+                            fontSize: 10,
+                            fontWeight: FontWeight.w400,
+                          ),
                         ),
                       ],
                     ),
                   ],
                 ),
-              ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

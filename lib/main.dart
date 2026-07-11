@@ -1,14 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'dart:async'; 
-
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
 import 'package:rentit24/pages/splash_screen/splash_screen.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
 
-final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.light);
-
+final ValueNotifier<ThemeMode> themeNotifier = ValueNotifier(ThemeMode.system);
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
 

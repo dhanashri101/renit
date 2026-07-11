@@ -19,11 +19,9 @@ final response = await _dio.post(
 print("Status Code: ${response.statusCode}");
 print("Response Data: ${response.data}");
 
-      // Adjust 'token' if your backend uses a different key (like 'accessToken' or 'data.token')
       if (response.statusCode == 200 && response.data['token'] != null) {
         final String token = response.data['token'];
         
-        // Save the token locally to 
         final prefs = await SharedPreferences.getInstance();
         await prefs.setString('auth_token', token);
         

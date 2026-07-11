@@ -42,6 +42,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
     );
   }
 }
+
 class _CustomBottomNav extends StatelessWidget {
   final int currentIndex;
   final ValueChanged<int> onTap;
@@ -51,92 +52,81 @@ class _CustomBottomNav extends StatelessWidget {
     required this.onTap,
   });
 
-  static const _items = [
-    (icon: Icons.home_filled, label: 'HOME'),
-    (icon: Icons.chat_bubble_outline, label: 'CHATS'),
-    (icon: Icons.add, label: 'RENT IT'),
-    (icon: Icons.assignment_outlined, label: 'ACTIVITY'),
-    (icon: Icons.person_outline, label: 'PROFILE'),
-  ];
-
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
 
-    return SafeArea(
-      top: false,
-      child: Container(
-        height: 78,
-        decoration: BoxDecoration(
-          color: theme.primaryColor,
+    final primaryBlue = Theme.of(context).primaryColor; 
+
+    return Container(
+      decoration: BoxDecoration(
+        color: primaryBlue,
+        borderRadius: const BorderRadius.only(
+          topLeft: Radius.circular(24),
+          topRight: Radius.circular(24),
+        ),
+      ),
+      child: SafeArea(
+        top: false,
+        child: ClipRRect(
           borderRadius: const BorderRadius.only(
             topLeft: Radius.circular(24),
             topRight: Radius.circular(24),
           ),
-        ),
-        child: Row(
-          children: List.generate(_items.length, (index) {
-            final item = _items[index];
-            final isSelected = currentIndex == index;
-
-            return Expanded(
-              child: InkWell(
-                onTap: () => onTap(index),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    AnimatedContainer(
-                      duration: const Duration(milliseconds: 250),
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 16,
-                        vertical: 6,
-                      ),
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? Colors.white.withOpacity(0.15)
-                            : Colors.transparent,
-                        borderRadius: BorderRadius.circular(20),
-                      ),
-                      child: index == 2
-                          ? Container(
-                              padding: const EdgeInsets.all(4),
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                border: Border.all(
-                                  color: Colors.white,
-                                  width: 1.5,
-                                ),
-                              ),
-                              child: const Icon(
-                                Icons.add,
-                                color: Colors.white,
-                                size: 20,
-                              ),
-                            )
-                          : Icon(
-                              item.icon,
-                              color: isSelected
-                                  ? Colors.white
-                                  : Colors.white70,
-                              size: 22,
-                            ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      item.label,
-                      style: TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: isSelected
-                            ? Colors.white
-                            : Colors.white70,
-                      ),
-                    ),
-                  ],
+          child: BottomNavigationBar(
+            type: BottomNavigationBarType.fixed,
+            backgroundColor: primaryBlue,
+            selectedItemColor: Colors.white,
+            unselectedItemColor: Colors.white.withOpacity(0.7),
+            showUnselectedLabels: true,
+            selectedFontSize: 10,
+            unselectedFontSize: 10,
+            currentIndex: currentIndex, 
+            onTap: onTap,               
+            items: [
+              const BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4, top: 8),
+                  child: Icon(Icons.home_outlined),
                 ),
+                label: 'HOME',
               ),
-            );
-          }),
+              const BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4, top: 8),
+                  child: Icon(Icons.chat_bubble_outline),
+                ),
+                label: 'CHATS',
+              ),
+              BottomNavigationBarItem(
+                icon: Padding(
+                  padding: const EdgeInsets.only(bottom: 4, top: 8),
+                  child: Container(
+                    padding: const EdgeInsets.all(2),
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.white.withOpacity(0.7)),
+                    ),
+                    child: const Icon(Icons.add, size: 20),
+                  ),
+                ),
+                label: 'RENT IT',
+              ),
+              const BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4, top: 8),
+                  child: Icon(Icons.assignment_outlined),
+                ),
+                label: 'ACTIVITY',
+              ),
+              const BottomNavigationBarItem(
+                icon: Padding(
+                  padding: EdgeInsets.only(bottom: 4, top: 8),
+                  child: Icon(Icons.person_outline),
+                ),
+                label: 'PROFILE',
+              ),
+            ],
+          ),
         ),
       ),
     );
