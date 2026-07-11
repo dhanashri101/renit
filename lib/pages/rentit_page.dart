@@ -27,13 +27,8 @@ class _RentItScreenState extends State<RentItScreen> {
             width: 1,
           ),
         ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back, color: Colors.black),
-          onPressed: () {
-            Navigator.pop(context);
-          },
-        ),
-        title: const Text('Rent It', style: TextStyle(color: Colors.black)),
+
+        title: Text('Rent It', style: TextStyle(color: isDark ? Colors.white : const Color(0xFF2D3748))),
       ),
       body: SafeArea(
         child: Padding(
@@ -149,8 +144,7 @@ class PremiumGlowButton extends StatefulWidget {
   State<PremiumGlowButton> createState() => _PremiumGlowButtonState();
 }
 
-class _PremiumGlowButtonState extends State<PremiumGlowButton>
-    with SingleTickerProviderStateMixin {
+class _PremiumGlowButtonState extends State<PremiumGlowButton> {
   double _scale = 1.0;
 
   void _onTapDown(TapDownDetails details) {
@@ -177,8 +171,9 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton>
         duration: const Duration(milliseconds: 100),
         curve: Curves.easeInOut,
         child: Container(
-          width: 280, 
+          width: 280,
           height: 52,
+          alignment: Alignment.center,
           decoration: BoxDecoration(
             color: AppTheme.primaryBlue ,
             borderRadius: BorderRadius.circular(26),
@@ -190,7 +185,6 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton>
               ),
             ],
           ),
-          alignment: Alignment.center,
           child: Text(
             widget.text,
             style: const TextStyle(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
+import 'package:rentit24/pages/chat_screens/profile.dart'; // for AdItem
 
 class CategoryAdListScreen extends StatefulWidget {
   const CategoryAdListScreen({super.key});
@@ -16,95 +17,103 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  final List<Map<String, dynamic>> _adsData = [
-    {
-      'title': 'Go Pro 12',
-      'price': '₹1300/day',
-      'distance': '2.5 km',
-      'owner': 'Wade Warren',
-      'image': 'assets/images/camera.jpg',
-      'rating': '3.5',
-      'reviews': '110',
-      'isFeatured': true,
-      'isTopChoice': true,
-    },
-    {
-      'title': 'Canon EOS R6',
-      'price': '₹2000/day',
-      'distance': '3 km',
-      'owner': 'Cody Fisher',
-      'image': 'assets/images/camera.jpg',
-      'rating': '5.0',
-      'reviews': '48',
-      'isFeatured': true,
-      'isTopChoice': true,
-    },
-    {
-      'title': 'Nikon DSLR with lense',
-      'price': '₹1200/day',
-      'distance': '0.5 km',
-      'owner': 'Robert Fox',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.0',
-      'reviews': '22',
-      'isFeatured': false,
-      'isTopChoice': true,
-    },
-    {
-      'title': 'Canon EOS M50 Mark II...',
-      'price': '₹1500/day',
-      'distance': '2 km',
-      'owner': 'Hamza',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.0',
-      'reviews': '10',
-      'isFeatured': false,
-      'isTopChoice': false,
-    },
-    {
-      'title': 'Sony A7 III Body Only',
-      'price': '₹1800/day',
-      'distance': '1.2 km',
-      'owner': 'Arjun Mehta',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.8',
-      'reviews': '85',
-      'isFeatured': true,
-      'isTopChoice': false,
-    },
-    {
-      'title': 'DJI Mavic 3 Drone',
-      'price': '₹3500/day',
-      'distance': '4.5 km',
-      'owner': 'Priya Singh',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.9',
-      'reviews': '132',
-      'isFeatured': true,
-      'isTopChoice': true,
-    },
-    {
-      'title': 'Insta360 X3 Action Cam',
-      'price': '₹900/day',
-      'distance': '0.8 km',
-      'owner': 'Rahul K',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.5',
-      'reviews': '41',
-      'isFeatured': false,
-      'isTopChoice': true,
-    },
-    {
-      'title': 'Godox Studio Light Kit',
-      'price': '₹600/day',
-      'distance': '3.2 km',
-      'owner': 'Wade Warren',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.2',
-      'reviews': '18',
-      'isFeatured': false,
-      'isTopChoice': false,
-    },
+  final List<AdItem> _adsData = [
+    AdItem(
+      title: 'Go Pro 12',
+      price: '₹1300/day',
+      distance: '2.5 km',
+      owner: 'Wade Warren',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 3.5,
+      reviews: 110,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Canon EOS R6',
+      price: '₹2000/day',
+      distance: '3 km',
+      owner: 'Cody Fisher',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 5.0,
+      reviews: 48,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Nikon DSLR with lense',
+      price: '₹1200/day',
+      distance: '0.5 km',
+      owner: 'Robert Fox',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.0,
+      reviews: 22,
+      isFeatured: false,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Canon EOS M50 Mark II...',
+      price: '₹1500/day',
+      distance: '2 km',
+      owner: 'Hamza',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.0,
+      reviews: 10,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Sony A7 III Body Only',
+      price: '₹1800/day',
+      distance: '1.2 km',
+      owner: 'Arjun Mehta',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.8,
+      reviews: 85,
+      isFeatured: true,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'DJI Mavic 3 Drone',
+      price: '₹3500/day',
+      distance: '4.5 km',
+      owner: 'Priya Singh',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.9,
+      reviews: 132,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Insta360 X3 Action Cam',
+      price: '₹900/day',
+      distance: '0.8 km',
+      owner: 'Rahul K',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.5,
+      reviews: 41,
+      isFeatured: false,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Godox Studio Light Kit',
+      price: '₹600/day',
+      distance: '3.2 km',
+      owner: 'Wade Warren',
+      ownerAvatar: 'https://i.pravatar.cc/100',
+      image: 'assets/images/camera.jpg',
+      rating: 4.2,
+      reviews: 18,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
   ];
 
   @override
@@ -123,12 +132,11 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
     super.dispose();
   }
 
-  List<Map<String, dynamic>> get _filteredAds {
+  List<AdItem> get _filteredAds {
     if (_searchQuery.isEmpty) return _adsData;
-    return _adsData.where((ad) {
-      final title = ad['title'].toString().toLowerCase();
-      return title.contains(_searchQuery.toLowerCase());
-    }).toList();
+    return _adsData
+        .where((ad) => ad.title.toLowerCase().contains(_searchQuery.toLowerCase()))
+        .toList();
   }
 
   void _showSortBottomSheet() {
@@ -412,7 +420,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
   }
 
   Widget _buildGrid(
-    List<Map<String, dynamic>> ads,
+    List<AdItem> ads,
     ThemeData theme,
     bool isDark,
   ) {
@@ -450,7 +458,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
   }
 
   Widget _buildPremiumAdCard(
-    Map<String, dynamic> ad,
+    AdItem ad,
     ThemeData theme,
     bool isDark,
   ) {
@@ -486,7 +494,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                   topRight: Radius.circular(12),
                 ),
                 child: Image.asset(
-                  ad['image'],
+                  ad.image,
                   height: 110,
                   width: double.infinity,
                   fit: BoxFit.cover,
@@ -497,7 +505,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                   ),
                 ),
               ),
-              if (ad['isFeatured'])
+              if (ad.isFeatured)
                 Positioned(
                   top: 12,
                   left: 0,
@@ -559,7 +567,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                           ),
                           const SizedBox(width: 4),
                           Text(
-                            ad['distance'],
+                            ad.distance,
                             style: TextStyle(
                               color: Colors.grey[500],
                               fontSize: 10,
@@ -567,7 +575,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                           ),
                         ],
                       ),
-                      if (ad['isTopChoice'])
+                      if (ad.isTopChoice)
                         Container(
                           padding: const EdgeInsets.symmetric(
                             horizontal: 6,
@@ -588,7 +596,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    ad['title'],
+                    ad.title,
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black87,
                       fontSize: 13,
@@ -599,7 +607,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    ad['price'],
+                    ad.price,
                     style: TextStyle(
                       color: isDark ? Colors.white : Colors.black,
                       fontSize: 15,
@@ -621,7 +629,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                           ),
                           const SizedBox(width: 6),
                           Text(
-                            ad['owner'],
+                            ad.owner,
                             style: TextStyle(
                               color: isDark ? Colors.white70 : Colors.black87,
                               fontSize: 10,
@@ -637,7 +645,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                       const Icon(Icons.star, color: Colors.amber, size: 12),
                       const SizedBox(width: 4),
                       Text(
-                        ad['rating'],
+                        ad.rating.toStringAsFixed(1),
                         style: TextStyle(
                           color: isDark ? Colors.white : Colors.black,
                           fontSize: 11,
@@ -645,7 +653,7 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                         ),
                       ),
                       Text(
-                        ' (${ad['reviews']})',
+                        ' (${ad.reviews})',
                         style: TextStyle(color: Colors.grey[500], fontSize: 10),
                       ),
                     ],

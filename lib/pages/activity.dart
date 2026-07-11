@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 class MyActivityPage extends StatefulWidget {
   const MyActivityPage({super.key});
@@ -144,9 +145,15 @@ class _MyActivityPageState extends State<MyActivityPage>
    
   ),
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: textColor),
-          onPressed: () => Navigator.pop(context),
-        ),
+        icon: Icon(Icons.arrow_back, color: textColor),
+        onPressed: () {
+          Navigator.pushAndRemoveUntil(
+            context,
+            MaterialPageRoute(builder: (_) => const NavigationWrapper()),
+            (route) => false,
+          );
+        },
+      ),
         titleSpacing: 0,
         title: Text(
           'My Activity',

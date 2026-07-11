@@ -20,7 +20,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
-  // Instantiate your auth service
   final AuthService _authService = AuthService();
 
   final FocusNode _emailFocus = FocusNode();
@@ -29,7 +28,7 @@ class _LoginScreenState extends State<emailLoginScreen> {
   bool _obscurePassword = true;
   bool _rememberMe = false;
   bool _isFormValid = false;
-  bool _isLoading = false; // Added to track API call state
+  bool _isLoading = false; 
 
   @override
   void initState() {
@@ -50,7 +49,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
     });
   }
 
-  // Handle the login process
   Future<void> _handleLogin() async {
     setState(() {
       _isLoading = true;
@@ -68,7 +66,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
     });
 
     if (success) {
-      // Used pushReplacement so the user can't hit 'back' to return to login
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
@@ -76,7 +73,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
         ),
       );
     } else {
-      // Show error snackbar on failure
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Login failed. Please check your credentials.'),
@@ -273,7 +269,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
                 width: double.infinity,
                 height: 50,
                 child: ElevatedButton(
-                  // Disable the button if the form is invalid or currently loading
                   onPressed: (_isFormValid && !_isLoading) ? _handleLogin : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: focusedBorderColor,
@@ -295,7 +290,6 @@ class _LoginScreenState extends State<emailLoginScreen> {
                             ),
                     ),
                   ),
-                  // Show progress indicator while loading, otherwise show text
                   child: _isLoading 
                       ? const SizedBox(
                           height: 20,

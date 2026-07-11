@@ -133,7 +133,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
                     margin: const EdgeInsets.symmetric(horizontal: 2),
                     decoration: BoxDecoration(
                       color: isActive ? selectedBgColor : Colors.transparent,
-                      // borderRadius: BorderRadius.circular(12), // Uncomment if you want rounded backgrounds
+                      // borderRadius: BorderRadius.circular(12), 
                     ),
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,

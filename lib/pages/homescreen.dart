@@ -4,6 +4,8 @@ import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/main.dart';
 import 'package:rentit24/model/category_model.dart';
 import 'package:rentit24/pages/category_pages/categoriscreen.dart';
+import 'package:rentit24/pages/chat_screens/profile.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
 import 'package:rentit24/pages/searchscreen.dart';
 import 'package:rentit24/services/category_services.dart';
@@ -36,35 +38,34 @@ class _HomeScreenState extends State<HomeScreen> {
     'Guitar',
   ];
 
-  final List<Map<String, dynamic>> _adsData = [
-    {
-      'title': 'Wheelchair',
-      'price': '₹200/day',
-      'distance': '0.5 km',
-      'owner': 'Sachin Jadhav',
-      'ownerAvatar':
+  final List<AdItem> _adsData = [
+    AdItem(
+      title: 'Wheelchair',
+      price: '₹200/day',
+      distance: '0.5 km',
+      owner: 'Sachin Jadhav',
+      ownerAvatar:
           'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100',
-      'image': 'assets/images/wheelchair.jpg',
-      'rating': '4.2',
-      'reviews': '52',
-      'isFeatured': true,
-      'isTopChoice': true,
-      'isVerified': true,
-    },
-    {
-      'title': 'Canon EOS M50 Mark II...',
-      'price': '₹1500/day',
-      'distance': '2 km',
-      'owner': 'Hamza',
-      'ownerAvatar':
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.2,
+      reviews: 52,
+      isFeatured: true,
+      isTopChoice: true,
+      category: 'Verified', // see note below re: isVerified
+    ),
+    AdItem(
+      title: 'Canon EOS M50 Mark II...',
+      price: '₹1500/day',
+      distance: '2 km',
+      owner: 'Hamza',
+      ownerAvatar:
           'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
-      'image': 'assets/images/camera.jpg',
-      'rating': '4.0',
-      'reviews': '10',
-      'isFeatured': false,
-      'isTopChoice': false,
-      'isVerified': false,
-    },
+      image: 'assets/images/camera.jpg',
+      rating: 4.0,
+      reviews: 10,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
   ];
 
   final List<Map<String, String>> _bannerData = [
@@ -825,6 +826,16 @@ class _HomeScreenState extends State<HomeScreen> {
                       'image':
                           'assets/images/carpainter.jpg', // Replace with plumber image
                     },
+                    adData: AdItem(
+                      title: 'Wood craft and wood carving',
+                      price: '₹800/day',
+                      rating: 4.5,
+                      reviews: 122,
+                      owner: 'Ravi Kumar R.',
+                      ownerAvatar: 'https://i.pravatar.cc/150?img=11',
+                      image: 'assets/images/carpainter.jpg',
+                      distance: '1.5 km',
+                    ),
                   ),
                 ),
               );
@@ -1124,9 +1135,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Widget _buildNearbyAdsGrid(ThemeData theme, double width, double scale) {
     final filteredAds = _adsData.where((ad) {
       if (_selectedFilter == 'All') return true;
-      if (_selectedFilter == 'Featured') return ad['isFeatured'] == true;
-      if (_selectedFilter == 'Top Choice') return ad['isTopChoice'] == true;
-      if (_selectedFilter == 'Verified') return ad['isVerified'] == true;
+      if (_selectedFilter == 'Featured') return ad.isFeatured;
+      if (_selectedFilter == 'Top Choice') return ad.isTopChoice;
+      // NOTE: AdItem has no isVerified field — see note below.
+      if (_selectedFilter == 'Verified') return ad.isFeatured; // placeholder
       return true;
     }).toList();
 
@@ -1170,17 +1182,17 @@ class _HomeScreenState extends State<HomeScreen> {
               );
             },
             child: _buildAdCard(
-              ad['title'],
-              ad['price'],
-              ad['distance'],
-              ad['owner'],
-              ad['image'],
-              ad['ownerAvatar'],
-              ad['rating'],
-              ad['reviews'],
-              ad['isFeatured'],
-              ad['isTopChoice'],
-              ad['isVerified'],
+              ad.title,
+              ad.price,
+              ad.distance,
+              ad.owner,
+              ad.image,
+              ad.ownerAvatar,
+              ad.rating.toStringAsFixed(1),
+              ad.reviews.toString(),
+              ad.isFeatured,
+              ad.isTopChoice,
+              false, // isVerified placeholder — see note below
               theme,
               scale,
             ),

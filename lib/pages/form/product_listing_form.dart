@@ -33,11 +33,11 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
     }
   }
 
-void _prevStep() {
+  void _prevStep() {
     if (_currentStep > 0) {
       setState(() => _currentStep--);
     } else {
-      Navigator.of(context).pop(); 
+      Navigator.of(context).pop();
     }
   }
 
@@ -57,10 +57,6 @@ void _prevStep() {
       _SelectCategoryStep(
         selectedCategory: _selectedCategory,
         selectedSubCategory: _selectedSubCategory,
-        onCategoryChanged: (cat) => setState(() {
-          _selectedCategory = cat;
-          _selectedSubCategory = null;
-        }),
         onSubCategoryChanged: (sub) =>
             setState(() => _selectedSubCategory = sub),
       ),
@@ -100,8 +96,10 @@ void _prevStep() {
 
     final isLastStep = _currentStep == _totalSteps - 1;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    final bgColor = isDark ? AppTheme.darkBackground : AppTheme.lightBackground;
 
     return Scaffold(
+      backgroundColor: bgColor,
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(60),
         child: AppBar(
@@ -109,10 +107,7 @@ void _prevStep() {
           elevation: 0,
           scrolledUnderElevation: 0,
           surfaceTintColor: Colors.transparent,
-          backgroundColor: isDark
-              ? AppTheme.darkBackground
-              : AppTheme.lightBackground,
-
+          backgroundColor: bgColor,
           leading: IconButton(
             icon: Icon(
               Icons.arrow_back,
@@ -120,7 +115,6 @@ void _prevStep() {
             ),
             onPressed: _prevStep,
           ),
-
           titleSpacing: 0,
           title: Text(
             stepTitles[_currentStep],
@@ -130,19 +124,19 @@ void _prevStep() {
               fontWeight: FontWeight.w600,
             ),
           ),
-
           bottom: PreferredSize(
             preferredSize: const Size.fromHeight(4),
             child: Row(
               children: List.generate(_totalSteps, (index) {
                 return Expanded(
-                  child: Container(
+                  child: AnimatedContainer(
+                    duration: const Duration(milliseconds: 300),
                     height: 4,
                     color: index <= _currentStep
-                        ? const Color(0xFF2F6BFF)
+                        ? AppTheme.primaryBlue
                         : (isDark
-                              ? const Color(0xFF2D2D2D)
-                              : const Color(0xFFDCE5F8)),
+                            ? const Color(0xFF2D2D2D)
+                            : const Color(0xFFDCE5F8)),
                   ),
                 );
               }),
@@ -152,12 +146,28 @@ void _prevStep() {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: steps[_currentStep],
+          if (_currentStep == 1)
+            _MainCategoryBar(
+              selectedCategory: _selectedCategory,
+              onCategoryChanged: (cat) => setState(() {
+                _selectedCategory = cat;
+                _selectedSubCategory = null;
+              }),
             ),
-          ),
+         Expanded(
+  child: SingleChildScrollView(
+    padding: EdgeInsets.fromLTRB(
+      16,
+      _currentStep == 1 ? 0 : 20, // No top padding on category page
+      16,
+      20,
+    ),
+    child: AnimatedSwitcher(
+      duration: const Duration(milliseconds: 400),
+      child: steps[_currentStep],
+    ),
+  ),
+),
           _BottomButton(
             label: isLastStep ? 'Submit' : 'Continue',
             onPressed: isLastStep ? _onSubmit : _nextStep,
@@ -184,10 +194,10 @@ class _BottomButton extends StatelessWidget {
           height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: AppTheme.primaryBlue,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(25),
               ),
               elevation: 0,
             ),
@@ -197,6 +207,146 @@ class _BottomButton extends StatelessWidget {
               style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _FormLabel extends StatelessWidget {
+  final String text;
+  final bool isRequired;
+
+  const _FormLabel(this.text, {this.isRequired = false});
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    return RichText(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          color: isDark ? Colors.white : Colors.black87,
+        ),
+        children: [
+          if (isRequired)
+            const TextSpan(
+              text: '*',
+              style: TextStyle(color: Colors.red),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _InputField extends StatelessWidget {
+  final TextEditingController controller;
+  final String hint;
+  final ValueChanged<String> onChanged;
+  final int maxLines;
+  final TextInputType keyboardType;
+
+  const _InputField({
+    required this.controller,
+    required this.hint,
+    required this.onChanged,
+    this.maxLines = 1,
+    this.keyboardType = TextInputType.text,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark ? Colors.transparent : const Color(0xFFE5E7EB);
+
+    return TextField(
+      controller: controller,
+      onChanged: onChanged,
+      maxLines: maxLines,
+      keyboardType: keyboardType,
+      style: TextStyle(
+        fontSize: 14,
+        color: isDark ? Colors.white : Colors.black87,
+      ),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
+        filled: true,
+        fillColor: surfaceColor,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: BorderSide(color: borderColor),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8),
+          borderSide: const BorderSide(color: Color(0xFF2F6BFF), width: 1.5),
+        ),
+      ),
+    );
+  }
+}
+
+class _DropdownField<T> extends StatelessWidget {
+  final T? value;
+  final String hint;
+  final List<T> items;
+  final ValueChanged<T?> onChanged;
+
+  const _DropdownField({
+    required this.value,
+    required this.hint,
+    required this.items,
+    required this.onChanged,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark ? Colors.transparent : const Color(0xFFE5E7EB);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: surfaceColor,
+        border: Border.all(color: borderColor),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<T>(
+          value: value,
+          hint: Text(
+            hint,
+            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
+          ),
+          isExpanded: true,
+          dropdownColor: surfaceColor,
+          iconEnabledColor: Colors.grey[500],
+          style: TextStyle(
+            fontSize: 14,
+            color: isDark ? Colors.white : Colors.black87,
+          ),
+          items: items
+              .map(
+                (item) => DropdownMenuItem<T>(
+                  value: item,
+                  child: Text(item.toString()),
+                ),
+              )
+              .toList(),
+          onChanged: onChanged,
         ),
       ),
     );
@@ -217,7 +367,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   final ImagePicker _picker = ImagePicker();
   bool _isPicking = false;
 
- Future<void> _pickGalleryImages() async {
+  Future<void> _pickGalleryImages() async {
     if (widget.imagePaths.length >= 10) {
       _showLimitMessage();
       return;
@@ -229,10 +379,10 @@ class _UploadImageStepState extends State<_UploadImageStep> {
 
       if (images.isNotEmpty) {
         final availableSlots = 10 - widget.imagePaths.length;
-        
+
         final selectedPaths = images.take(availableSlots).map((e) => e.path).toList();
         final updated = List<String>.from(widget.imagePaths)..addAll(selectedPaths);
-        
+
         widget.onChanged(updated);
 
         if (images.length > availableSlots && mounted) {
@@ -285,49 +435,33 @@ class _UploadImageStepState extends State<_UploadImageStep> {
       ),
     );
   }
+
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFDDE3F0);
-    final hintColor = isDark ? Colors.grey[500] : Colors.grey[400];
-    final primaryColor = Theme.of(context).colorScheme.primary;
+    final hintColor = isDark ? Colors.grey[400] : Colors.grey[600];
+    final dashColor = isDark ? AppTheme.primaryBlue.withOpacity(0.5) : AppTheme.primaryBlue.withOpacity(0.3);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 4),
-        Text(
-          'Upload product images*',
-          style: TextStyle(
-            color: isDark ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w600,
-            fontSize: 14,
-          ),
-        ),
-        const SizedBox(height: 4),
+        const _FormLabel('Upload product images', isRequired: true),
+        const SizedBox(height: 6),
         Text(
           'Add your product images here. You can add a maximum of 10 files. Please add clear photos.',
           style: TextStyle(fontSize: 12, color: hintColor),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 24),
 
         GestureDetector(
           onTap: _isPicking ? null : () => _pickGalleryImages(),
-          child: AnimatedContainer(
-            duration: const Duration(milliseconds: 200),
+          child: Container(
             width: double.infinity,
-            height: 160,
+            height: 140,
             decoration: BoxDecoration(
-              color: surfaceColor,
-              border: Border.all(
-                color: _isPicking ? primaryColor : borderColor,
-                style: BorderStyle.solid,
-                width: _isPicking ? 1.5 : 1.0,
-              ),
-              borderRadius: BorderRadius.circular(12),
+              color: isDark ? const Color(0xFF1E1E1E) : const Color(0xFFF8FAFC),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(color: dashColor, width: 1.5),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
@@ -335,10 +469,10 @@ class _UploadImageStepState extends State<_UploadImageStep> {
                 if (_isPicking)
                   const CircularProgressIndicator(strokeWidth: 2)
                 else ...[
-                  Icon(Icons.cloud_upload_outlined, size: 40, color: hintColor),
+                  Icon(Icons.image_outlined, size: 32, color: hintColor),
                   const SizedBox(height: 8),
                   Text(
-                    'Select from Gallery',
+                    'Select file',
                     style: TextStyle(color: hintColor, fontSize: 13),
                   ),
                 ],
@@ -346,7 +480,13 @@ class _UploadImageStepState extends State<_UploadImageStep> {
             ),
           ),
         ),
-        const SizedBox(height: 16),
+
+        const Padding(
+          padding: EdgeInsets.symmetric(vertical: 16),
+          child: Center(
+            child: Text('or', style: TextStyle(color: Colors.grey, fontSize: 12)),
+          ),
+        ),
 
         SizedBox(
           width: double.infinity,
@@ -359,15 +499,15 @@ class _UploadImageStepState extends State<_UploadImageStep> {
               backgroundColor: AppTheme.primaryBlue ,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(25), 
+                borderRadius: BorderRadius.circular(25),
               ),
               elevation: 0,
             ),
           ),
         ),
-        const SizedBox(height: 20),
+        const SizedBox(height: 24),
 
-        if (widget.imagePaths.isNotEmpty) ...[
+        if (widget.imagePaths.isNotEmpty)
           Wrap(
             spacing: 12,
             runSpacing: 12,
@@ -375,111 +515,236 @@ class _UploadImageStepState extends State<_UploadImageStep> {
               final index = entry.key;
               final path = entry.value;
 
-              return TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0.0, end: 1.0),
-                duration: const Duration(milliseconds: 300),
-                curve: Curves.easeOutBack,
-                builder: (context, scale, child) {
-                  return Transform.scale(scale: scale, child: child);
-                },
-                child: Stack(
-                  clipBehavior: Clip.none,
-                  children: [
-                    Container(
-                      width: 80,
-                      height: 80,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.05),
-                            blurRadius: 8,
-                            offset: const Offset(0, 4),
-                          ),
-                        ],
-                      ),
-                      child: ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.file(
-                          File(path),
-                          fit: BoxFit.cover,
-                          errorBuilder: (context, error, stackTrace) =>
-                              Container(
-                                color: isDark
-                                    ? const Color(0xFF2A2A2A)
-                                    : const Color(0xFFEEF2FF),
-                                child: Icon(
-                                  Icons.broken_image,
-                                  color: hintColor,
-                                ),
-                              ),
-                        ),
+              return Stack(
+                clipBehavior: Clip.none,
+                children: [
+                  Container(
+                    width: 75,
+                    height: 75,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      image: DecorationImage(
+                        image: FileImage(File(path)),
+                        fit: BoxFit.cover,
                       ),
                     ),
-                    Positioned(
-                      top: -6,
-                      right: -6,
-                      child: GestureDetector(
-                        onTap: () {
-                          final updated = List<String>.from(widget.imagePaths)
-                            ..removeAt(index);
-                          widget.onChanged(updated);
-                        },
-                        child: Container(
-                          width: 22,
-                          height: 22,
-                          decoration: BoxDecoration(
-                            color: isDark ? Colors.grey[800] : Colors.white,
-                            shape: BoxShape.circle,
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.1),
-                                blurRadius: 4,
-                              ),
-                            ],
-                          ),
-                          child: const Icon(
-                            Icons.close,
-                            color: Colors.redAccent,
-                            size: 14,
-                          ),
+                  ),
+                  Positioned(
+                    top: -6,
+                    right: -6,
+                    child: GestureDetector(
+                      onTap: () {
+                        final updated = List<String>.from(widget.imagePaths)..removeAt(index);
+                        widget.onChanged(updated);
+                      },
+                      child: Container(
+                        padding: const EdgeInsets.all(2),
+                        decoration: const BoxDecoration(
+                          color: Colors.white,
+                          shape: BoxShape.circle,
                         ),
+                        child: const Icon(Icons.remove_circle, color: Colors.blue, size: 20),
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                ],
               );
             }).toList(),
           ),
-        ],
       ],
     );
   }
 }
 
+class _CategoryData {
+  final String label;
+  final String asset;
+  const _CategoryData(this.label, this.asset);
+}
+
+class _MainCategoryBar extends StatelessWidget {
+  final String? selectedCategory;
+  final ValueChanged<String?> onCategoryChanged;
+
+  const _MainCategoryBar({
+    super.key,
+    required this.selectedCategory,
+    required this.onCategoryChanged,
+  });
+
+  static const List<_CategoryData> _mainCategories = [
+    _CategoryData('Agriculture Farming', 'agriculture-farming'),
+    _CategoryData('Appliances', 'appliances'),
+    _CategoryData('Baby Kids', 'baby-kids'),
+    _CategoryData('Beauty Grooming', 'beauty-grooming'),
+    _CategoryData('Books Stationery', 'books-stationery'),
+    _CategoryData('Community NGO', 'community-ngo'),
+    _CategoryData('Construction Heavy Machinery', 'construction-heavy-machinery'),
+    _CategoryData('Coworking Business', 'coworking-business'),
+    _CategoryData('Delivery Logistics', 'delivery-logistics'),
+    _CategoryData('Digital Tech Services', 'digital-tech-services'),
+    _CategoryData('Education', 'education'),
+    _CategoryData('Electronics', 'electronics'),
+    _CategoryData('Event Professionals', 'event-professionals'),
+    _CategoryData('Events Parties', 'events-parties'),
+    _CategoryData('Fashion Dress', 'fashion-dress'),
+    _CategoryData('Fashion Services', 'fashion-services'),
+    _CategoryData('Festivals Celebrations', 'festivals-celebrations'),
+    _CategoryData('Food Catering', 'food-catering'),
+    _CategoryData('Furniture', 'furniture'),
+    _CategoryData('Gaming Consoles', 'gaming-consoles'),
+    _CategoryData('Gardening Outdoor', 'gardening-outdoor'),
+    _CategoryData('Health Wellness', 'health-wellness'),
+    _CategoryData('Household Items', 'household-items'),
+    _CategoryData('Medical Equipment', 'medical-equipment'),
+    _CategoryData('Miscellaneous', 'miscellaneous'),
+    _CategoryData('Musical Instruments', 'musical-instruments'),
+    _CategoryData('Office Work Equipment', 'office-work-equipment'),
+    _CategoryData('Pets Animals', 'pets-animals'),
+    _CategoryData('Professional Services', 'professional-services'),
+    _CategoryData('Real Estate', 'real-estate'),
+    _CategoryData('Security Services', 'security-services'),
+    _CategoryData('Seasonal Needs', 'sesonal-needs'),
+    _CategoryData('Sports Fitness', 'sports-fitness'),
+    _CategoryData('Tools Machinery', 'tools-machinery'),
+    _CategoryData('Transportation Services', 'transportation-services'),
+    _CategoryData('Travel Hospitality', 'travel-hospitality'),
+    _CategoryData('Travel Outdoors', 'travel-outdoors'),
+    _CategoryData('Vehicles', 'vehicles'),
+    _CategoryData('Wedding Photography', 'wedding-photography'),
+  ];
+
+  static const List<double> _grayscaleMatrix = <double>[
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0, 0, 0, 1, 0,
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final blue = AppTheme.primaryBlue; 
+    
+    final barBgColor = isDark ? const Color(0xFF121212) : Colors.white;
+    
+    final selectedBgColor = isDark ? blue.withOpacity(0.15) : const Color(0xFFF0F4FF);
+
+    return Container(
+      height: 95, 
+      width: double.infinity,
+      color: barBgColor, 
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: _mainCategories.length,
+        itemBuilder: (context, index) {
+          final cat = _mainCategories[index];
+          final isSelected = selectedCategory == cat.label;
+          final assetPath = 'assets/images/categories/${cat.asset}.png';
+
+          final icon = Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.category_outlined,
+              size: 24,
+              color: isDark ? Colors.grey[500] : Colors.grey[400],
+            ),
+          );
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque, 
+            onTap: () => onCategoryChanged(isSelected ? null : cat.label),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 85, 
+              margin: const EdgeInsets.symmetric(horizontal: 2), 
+              decoration: BoxDecoration(
+
+                color: isSelected ? selectedBgColor : Colors.transparent,
+                // borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 32, 
+                    width: 32,
+                    child: isSelected
+                        ? icon
+                        : ColorFiltered(
+                            colorFilter: const ColorFilter.matrix(_grayscaleMatrix),
+                            child: Opacity(
+                              opacity: 0.7, 
+                              child: icon,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    cat.label,
+                    textAlign: TextAlign.center,
+                    maxLines: 1, 
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12, 
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? (isDark ? Colors.white : const Color(0xFF2C3E50)) 
+                          : (isDark ? Colors.grey[500] : Colors.grey[600]),
+                    ),
+                  ),
+                  const SizedBox(height: 6), 
+                                    AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    height: 4,
+                    width: 40, 
+                    decoration: BoxDecoration(
+                      color: isSelected ? blue : Colors.transparent, 
+                      borderRadius: BorderRadius.circular(4), 
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      ),
+    );
+  }
+}
 class _SelectCategoryStep extends StatelessWidget {
   final String? selectedCategory;
   final String? selectedSubCategory;
-  final ValueChanged<String?> onCategoryChanged;
   final ValueChanged<String?> onSubCategoryChanged;
 
   const _SelectCategoryStep({
     required this.selectedCategory,
     required this.selectedSubCategory,
-    required this.onCategoryChanged,
     required this.onSubCategoryChanged,
   });
 
-  static const List<_CategoryItem> _categories = [
-    _CategoryItem('Electronics', Icons.devices_other),
-    _CategoryItem('Mobile', Icons.smartphone),
-    _CategoryItem('Tablet', Icons.tablet),
-    _CategoryItem('TV', Icons.tv),
-    _CategoryItem('Projector', Icons.videocam_outlined),
-    _CategoryItem('Camera', Icons.camera_alt_outlined),
-  ];
+ static const Map<String, List<_CategoryItem>> _subCategories = {
+    'Agriculture Farming': [
+      _CategoryItem('Tractors', Icons.agriculture),
+      _CategoryItem('Seeds', Icons.grass),
+      _CategoryItem('Fertilizers', Icons.eco),
+      _CategoryItem('Tools', Icons.hardware),
+    ],
+    'Appliances': [
+      _CategoryItem('Microwave', Icons.microwave),
+      _CategoryItem('Fridge', Icons.kitchen),
+      _CategoryItem('AC', Icons.ac_unit),
+      _CategoryItem('Washing Machine', Icons.local_laundry_service),
+    ],
+    'Baby Kids': [
+      _CategoryItem('Toys', Icons.toys),
+      _CategoryItem('Strollers', Icons.child_friendly),
+      _CategoryItem('Clothing', Icons.checkroom),
+    ],
 
-  static const Map<String, List<_CategoryItem>> _subCategories = {
     'Electronics': [
       _CategoryItem('Laptop', Icons.laptop),
       _CategoryItem('Desktop', Icons.desktop_windows),
@@ -490,43 +755,22 @@ class _SelectCategoryStep extends StatelessWidget {
       _CategoryItem('Android', Icons.android),
       _CategoryItem('iPhone', Icons.phone_iphone),
     ],
-    'Tablet': [
-      _CategoryItem('iPad', Icons.tablet_mac),
-      _CategoryItem('Android Tab', Icons.tablet_android),
-    ],
-    'Camera': [
-      _CategoryItem('DSLR', Icons.camera),
-      _CategoryItem('Mirrorless', Icons.camera_enhance),
-      _CategoryItem('Action Cam', Icons.videocam),
-    ],
   };
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     final List<_CategoryItem> subItems = selectedCategory != null
         ? (_subCategories[selectedCategory] ?? [])
         : [];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const SizedBox(height: 4),
-        _CategoryGrid(
-          items: _categories,
-          selected: selectedCategory,
-          onTap: onCategoryChanged,
-        ),
-        if (subItems.isNotEmpty) ...[
-          const SizedBox(height: 20),
-          _CategoryGrid(
-            items: subItems,
-            selected: selectedSubCategory,
-            onTap: onSubCategoryChanged,
-          ),
-        ],
-      ],
+    if (subItems.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    return _CategoryGrid(
+      items: subItems,
+      selected: selectedSubCategory,
+      onTap: onSubCategoryChanged,
     );
   }
 }
@@ -551,61 +795,54 @@ class _CategoryGrid extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final blue = Theme.of(context).colorScheme.primary;
-    final surfaceColor = isDark ? AppTheme.darkSurface : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFDDE3F0);
+    final blue = AppTheme.primaryBlue;
 
-    return GridView.count(
-      crossAxisCount: 4,
+    return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 0.85,
-      children: items.map((item) {
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 4,
+        crossAxisSpacing: 8,
+        mainAxisSpacing: 20,
+        childAspectRatio: 0.75, 
+      ),
+      itemCount: items.length,
+      itemBuilder: (context, index) {
+        final item = items[index];
         final isSelected = selected == item.label;
+
         return GestureDetector(
-          onTap: () => onTap(isSelected ? null : item.label),
+          onTap: () => onTap(item.label),
           child: Container(
             decoration: BoxDecoration(
-              color: isSelected ? blue.withOpacity(0.12) : surfaceColor,
-              border: Border.all(
-                color: isSelected ? blue : borderColor,
-                width: isSelected ? 1.5 : 1,
-              ),
-              borderRadius: BorderRadius.circular(10),
+              color: isSelected
+                  ? (isDark ? blue.withOpacity(0.2) : const Color(0xFFDFE6F9))
+                  : Colors.transparent,
+              borderRadius: BorderRadius.circular(12),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(
                   item.icon,
-                  size: 26,
-                  color: isSelected
-                      ? blue
-                      : (isDark ? Colors.white70 : Colors.black54),
+                  size: 32,
+                  color: isDark ? Colors.blue[300] : const Color(0xFF1F54D3),
                 ),
-                const SizedBox(height: 6),
+                const SizedBox(height: 8),
                 Text(
                   item.label,
+                  textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 11,
-                    color: isSelected
-                        ? blue
-                        : (isDark ? Colors.white70 : Colors.black54),
-                    fontWeight: isSelected
-                        ? FontWeight.w600
-                        : FontWeight.normal,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                    color: isDark ? Colors.white : Colors.black87,
                   ),
-                  textAlign: TextAlign.center,
                 ),
               ],
             ),
           ),
         );
-      }).toList(),
+      },
     );
   }
 }
@@ -684,13 +921,10 @@ class _SpecificationsStepState extends State<_SpecificationsStep> {
 
   @override
   Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 4),
-        _FormLabel('Brand'),
+        const _FormLabel('Brand'),
         const SizedBox(height: 6),
         _DropdownField<String>(
           value: widget.brand,
@@ -699,7 +933,7 @@ class _SpecificationsStepState extends State<_SpecificationsStep> {
           onChanged: widget.onBrandChanged,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Model Name'),
+        const _FormLabel('Model Name'),
         const SizedBox(height: 6),
         _InputField(
           controller: _modelCtrl,
@@ -707,7 +941,7 @@ class _SpecificationsStepState extends State<_SpecificationsStep> {
           onChanged: widget.onModelChanged,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Color'),
+        const _FormLabel('Color'),
         const SizedBox(height: 6),
         _DropdownField<String>(
           value: widget.color,
@@ -716,7 +950,7 @@ class _SpecificationsStepState extends State<_SpecificationsStep> {
           onChanged: widget.onColorChanged,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Additional Details'),
+        const _FormLabel('Additional Details'),
         const SizedBox(height: 6),
         _InputField(
           controller: _additionalCtrl,
@@ -841,16 +1075,13 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFDDE3F0);
-    final surfaceColor = isDark ? AppTheme.darkSurface : Colors.white;
+    final surfaceColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final borderColor = isDark ? Colors.transparent : const Color(0xFFE5E7EB);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const SizedBox(height: 4),
-        _FormLabel('Product name/Title*'),
+        const _FormLabel('Product name/Title', isRequired: true),
         const SizedBox(height: 6),
         _InputField(
           controller: _nameCtrl,
@@ -858,7 +1089,7 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
           onChanged: widget.onProductNameChanged,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Description'),
+        const _FormLabel('Description'),
         const SizedBox(height: 6),
         _InputField(
           controller: _descCtrl,
@@ -867,7 +1098,7 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
           maxLines: 5,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Rental Price*'),
+        const _FormLabel('Rental Price', isRequired: true),
         const SizedBox(height: 6),
         Row(
           children: [
@@ -881,7 +1112,7 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
             ),
             const SizedBox(width: 10),
             SizedBox(
-              width: 110,
+              width: 120,
               child: _DropdownField<String>(
                 value: widget.rentalUnit,
                 hint: 'per day',
@@ -892,7 +1123,7 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
           ],
         ),
         const SizedBox(height: 16),
-        _FormLabel('Security Deposit'),
+        const _FormLabel('Security Deposit'),
         const SizedBox(height: 6),
         _InputField(
           controller: _depositCtrl,
@@ -901,17 +1132,17 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
           keyboardType: TextInputType.number,
         ),
         const SizedBox(height: 16),
-        _FormLabel('Available From'),
+        const _FormLabel('Available From'),
         const SizedBox(height: 6),
         GestureDetector(
           onTap: () => _pickDate(context),
           child: Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
             decoration: BoxDecoration(
               color: surfaceColor,
               border: Border.all(color: borderColor),
-              borderRadius: BorderRadius.circular(10),
+              borderRadius: BorderRadius.circular(8),
             ),
             child: Row(
               children: [
@@ -944,156 +1175,9 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
 
   String _monthName(int m) {
     const months = [
-      '',
-      'Jan',
-      'Feb',
-      'Mar',
-      'Apr',
-      'May',
-      'Jun',
-      'Jul',
-      'Aug',
-      'Sep',
-      'Oct',
-      'Nov',
-      'Dec',
+      '', 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
     ];
     return months[m];
-  }
-}
-
-class _FormLabel extends StatelessWidget {
-  final String text;
-  const _FormLabel(this.text);
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    return Text(
-      text,
-      style: TextStyle(
-        fontSize: 13,
-        fontWeight: FontWeight.w500,
-        color: isDark ? Colors.white70 : Colors.black87,
-      ),
-    );
-  }
-}
-
-class _InputField extends StatelessWidget {
-  final TextEditingController controller;
-  final String hint;
-  final ValueChanged<String> onChanged;
-  final int maxLines;
-  final TextInputType keyboardType;
-
-  const _InputField({
-    required this.controller,
-    required this.hint,
-    required this.onChanged,
-    this.maxLines = 1,
-    this.keyboardType = TextInputType.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? AppTheme.darkSurface : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFDDE3F0);
-
-    return TextField(
-      controller: controller,
-      onChanged: onChanged,
-      maxLines: maxLines,
-      keyboardType: keyboardType,
-      style: TextStyle(
-        fontSize: 14,
-        color: isDark ? Colors.white : Colors.black87,
-      ),
-      decoration: InputDecoration(
-        hintText: hint,
-        hintStyle: TextStyle(fontSize: 13, color: Colors.grey[500]),
-        filled: true,
-        fillColor: surfaceColor,
-        contentPadding: const EdgeInsets.symmetric(
-          horizontal: 14,
-          vertical: 12,
-        ),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: borderColor),
-        ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(color: borderColor),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(10),
-          borderSide: BorderSide(
-            color: Theme.of(context).colorScheme.primary,
-            width: 1.5,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DropdownField<T> extends StatelessWidget {
-  final T? value;
-  final String hint;
-  final List<T> items;
-  final ValueChanged<T?> onChanged;
-
-  const _DropdownField({
-    required this.value,
-    required this.hint,
-    required this.items,
-    required this.onChanged,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    final isDark = Theme.of(context).brightness == Brightness.dark;
-    final surfaceColor = isDark ? AppTheme.darkSurface : Colors.white;
-    final borderColor = isDark
-        ? const Color(0xFF2C2C2C)
-        : const Color(0xFFDDE3F0);
-
-    return Container(
-      decoration: BoxDecoration(
-        color: surfaceColor,
-        border: Border.all(color: borderColor),
-        borderRadius: BorderRadius.circular(10),
-      ),
-      padding: const EdgeInsets.symmetric(horizontal: 12),
-      child: DropdownButtonHideUnderline(
-        child: DropdownButton<T>(
-          value: value,
-          hint: Text(
-            hint,
-            style: TextStyle(fontSize: 13, color: Colors.grey[500]),
-          ),
-          isExpanded: true,
-          dropdownColor: isDark ? AppTheme.darkSurface : Colors.white,
-          iconEnabledColor: Colors.grey[500],
-          style: TextStyle(
-            fontSize: 14,
-            color: isDark ? Colors.white : Colors.black87,
-          ),
-          items: items
-              .map(
-                (item) => DropdownMenuItem<T>(
-                  value: item,
-                  child: Text(item.toString()),
-                ),
-              )
-              .toList(),
-          onChanged: onChanged,
-        ),
-      ),
-    );
   }
 }
