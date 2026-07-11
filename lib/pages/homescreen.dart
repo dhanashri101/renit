@@ -817,15 +817,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProductDetailsScreen(
-                    adData: const {
-                      'title': 'Plumber',
-                      'price': '₹1200/day',
-                      'rating': '4.6',
-                      'reviews': '189',
-                      'owner': 'Sadiq Ahmed',
-                      'image':
-                          'assets/images/carpainter.jpg', // Replace with plumber image
-                    },
+
                     adData: AdItem(
                       title: 'Wood craft and wood carving',
                       price: '₹800/day',
@@ -844,7 +836,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: cardWidth,
               padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
-                color: isDark ? const Color(0xFF242426) : AppColors.baseWhite,
+                color: isDark ?AppColors.darkSurface: AppColors.baseWhite,
                 borderRadius: BorderRadius.circular(24 * scale),
                 boxShadow: [
                   BoxShadow(
@@ -1221,7 +1213,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Container(
       decoration: BoxDecoration(
-        color: isDark ? AppColors.neutral900 : AppColors.baseWhite,
+        color: isDark ? AppColors.darkSurface : AppColors.baseWhite,
         borderRadius: BorderRadius.circular(8 * scale),
         boxShadow: [
           BoxShadow(

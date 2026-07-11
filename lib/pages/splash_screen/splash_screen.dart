@@ -1,11 +1,12 @@
 import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/on_boarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
 
-  @override 
+  @override
   State<SplashScreen> createState() => _SplashScreenState();
 }
 
@@ -13,16 +14,19 @@ class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
 
+  // Category icons animations
   late final Animation<double> _scatterProgress;
   late final Animation<double> _iconsFadeIn;
-
   late final Animation<double> _collapseProgress;
-  late final Animation<double> _iconsFadeOut; 
+  late final Animation<double> _iconsFadeOut;
 
+  // Logo animations
   late final Animation<double> _logoScale;
   late final Animation<double> _logoRotation;
   late final Animation<double> _logoOpacity;
+  late final Animation<double> _logoSlideUp;
   late final Animation<double> _textOpacity;
+  late final Animation<double> _textSlideUp;
 
   static const List<String> _iconAssets = [
     'assets/images/categories/appliances.png',
@@ -46,29 +50,45 @@ class _SplashScreenState extends State<SplashScreen>
   ];
 
   static const List<Alignment> _scatteredPositions = [
-    Alignment( 0.62,  0.28), 
-    Alignment(-0.12, -0.84), 
-    Alignment( 0.72, -0.76), 
-    Alignment(-0.68, -0.55), 
-    Alignment(-0.08, -0.58), 
-    Alignment( 0.62, -0.48), 
-    Alignment(-0.72, -0.25), 
-    Alignment( 0.62,  0.88), 
-    Alignment(-0.75,  0.32), 
-    Alignment(-0.18,  0.12), 
-    Alignment( 0.72, -0.02), 
-    Alignment(-0.35,  0.88), 
-    Alignment( 0.72,  0.58), 
-    Alignment(-0.02,  0.62), 
-    Alignment( 0.78, -0.25), 
-    Alignment(-0.75, -0.82), 
-    Alignment(-0.02, -0.25), 
-    Alignment(-0.68,  0.65), 
+    Alignment(0.62, 0.28),
+    Alignment(-0.12, -0.84),
+    Alignment(0.72, -0.76),
+    Alignment(-0.68, -0.55),
+    Alignment(-0.08, -0.58),
+    Alignment(0.62, -0.48),
+    Alignment(-0.72, -0.25),
+    Alignment(0.62, 0.88),
+    Alignment(-0.75, 0.32),
+    Alignment(-0.18, 0.12),
+    Alignment(0.72, -0.02),
+    Alignment(-0.35, 0.88),
+    Alignment(0.72, 0.58),
+    Alignment(-0.02, 0.62),
+    Alignment(0.78, -0.25),
+    Alignment(-0.75, -0.82),
+    Alignment(-0.02, -0.25),
+    Alignment(-0.68, 0.65),
   ];
 
   static const List<double> _targetRotations = [
-    -0.35, 0.35, 0.26, -0.26, 0.26, 0.43, 0.35, 0.35, -0.35, 
-     0.26, -0.43, -0.43, 0.43, 0.35, -0.26, 0.26, -0.35, -0.26, 
+    -0.35,
+    0.35,
+    0.26,
+    -0.26,
+    0.26,
+    0.43,
+    0.35,
+    0.35,
+    -0.35,
+    0.26,
+    -0.43,
+    -0.43,
+    0.43,
+    0.35,
+    -0.26,
+    0.26,
+    -0.35,
+    -0.26,
   ];
 
   @override
@@ -77,82 +97,193 @@ class _SplashScreenState extends State<SplashScreen>
 
     _controller = AnimationController(
       vsync: this,
-      duration: const Duration(milliseconds: 3500),
+      duration: const Duration(milliseconds: 4000),
     );
 
-    _scatterProgress = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Icons move from center to scattered positions.
+    _scatterProgress = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.55, curve: ElasticOutCurve(0.5)),
+        curve: const Interval(
+          0.0,
+          0.52,
+          curve: ElasticOutCurve(0.55),
+        ),
       ),
     );
 
-    _iconsFadeIn = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Icons appear.
+    _iconsFadeIn = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.0, 0.15, curve: Curves.easeIn),
+        curve: const Interval(
+          0.0,
+          0.14,
+          curve: Curves.easeIn,
+        ),
       ),
     );
 
-    _collapseProgress = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Icons return to the center.
+    _collapseProgress = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.55, 0.75, curve: Curves.easeInQuint),
+        curve: const Interval(
+          0.52,
+          0.70,
+          curve: Curves.easeInQuint,
+        ),
       ),
     );
 
-    _iconsFadeOut = Tween<double>(begin: 1.0, end: 0.0).animate(
+    // Icons disappear after collapsing.
+    _iconsFadeOut = Tween<double>(
+      begin: 1.0,
+      end: 0.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.70, 0.75, curve: Curves.easeOut),
+        curve: const Interval(
+          0.66,
+          0.72,
+          curve: Curves.easeOut,
+        ),
       ),
     );
 
-    _logoScale = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Logo starts small and grows.
+    _logoScale = Tween<double>(
+      begin: 0.25,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.70, 0.85, curve: Curves.easeOutBack),
+        curve: const Interval(
+          0.67,
+          0.88,
+          curve: Curves.easeOutBack,
+        ),
       ),
     );
 
-    // UPDATED: Clockwise 360-degree rotation
-    _logoRotation = Tween<double>(begin: 0.0, end: 2 * pi).animate(
+    // Logo starts below and moves upward to the center.
+    _logoSlideUp = Tween<double>(
+      begin: 350.0,
+      end: 0.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.70, 0.85, curve: Curves.easeOutBack),
+        curve: const Interval(
+          0.66,
+          0.88,
+          curve: Curves.easeOutBack,
+        ),
       ),
     );
 
-    _logoOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Logo performs two complete clockwise rotations.
+    _logoRotation = Tween<double>(
+      begin: 0.0,
+      end: 4 * pi,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.70, 0.80, curve: Curves.easeIn),
+        curve: const Interval(
+          0.66,
+          0.88,
+          curve: Curves.easeOutCubic,
+        ),
       ),
     );
 
-    _textOpacity = Tween<double>(begin: 0.0, end: 1.0).animate(
+    // Logo fades in.
+    _logoOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
       CurvedAnimation(
         parent: _controller,
-        curve: const Interval(0.75, 0.85, curve: Curves.easeIn),
+        curve: const Interval(
+          0.66,
+          0.73,
+          curve: Curves.easeIn,
+        ),
+      ),
+    );
+
+    // Text fades in after the logo reaches the center.
+    _textOpacity = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(
+          0.82,
+          0.94,
+          curve: Curves.easeIn,
+        ),
+      ),
+    );
+
+    // Text also moves slightly upward.
+    _textSlideUp = Tween<double>(
+      begin: 30.0,
+      end: 0.0,
+    ).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: const Interval(
+          0.82,
+          0.94,
+          curve: Curves.easeOut,
+        ),
       ),
     );
 
     _controller.forward().then((_) {
       if (!mounted) return;
-      
+
       Navigator.of(context).pushReplacement(
         PageRouteBuilder(
-          transitionDuration: const Duration(milliseconds: 700), 
-          pageBuilder: (context, animation, secondaryAnimation) => const OnboardingScreen(),
-          transitionsBuilder: (context, animation, secondaryAnimation, child) {
-            var curvedAnimation = CurvedAnimation(
+          transitionDuration: const Duration(milliseconds: 700),
+          pageBuilder: (
+            context,
+            animation,
+            secondaryAnimation,
+          ) {
+            return const OnboardingScreen();
+          },
+          transitionsBuilder: (
+            context,
+            animation,
+            secondaryAnimation,
+            child,
+          ) {
+            final curvedAnimation = CurvedAnimation(
               parent: animation,
-              curve: Curves.easeInExpo,
+              curve: Curves.easeInOutCubic,
             );
-            
-            return ClipPath(
-              clipper: CircularRevealClipper(curvedAnimation.value),
-              child: child,
+
+            return AnimatedBuilder(
+              animation: curvedAnimation,
+              builder: (context, _) {
+                return ClipPath(
+                  clipper: CircularRevealClipper(
+                    curvedAnimation.value,
+                  ),
+                  child: child,
+                );
+              },
             );
           },
         ),
@@ -179,9 +310,10 @@ class _SplashScreenState extends State<SplashScreen>
             alignment: Alignment.center,
             children: [
               if (iconsVisible) ..._buildIcons(),
+
               Center(
                 child: _buildLogoSection(),
-              )
+              ),
             ],
           );
         },
@@ -195,33 +327,46 @@ class _SplashScreenState extends State<SplashScreen>
     final fadeIn = _iconsFadeIn.value;
     final fadeOut = _iconsFadeOut.value;
 
-    return List.generate(_iconAssets.length, (i) {
-      final finalPos = _scatteredPositions[i];
-      Alignment currentPos = Alignment.center;
-      
+    return List.generate(_iconAssets.length, (index) {
+      final finalPosition = _scatteredPositions[index];
+
+      Alignment currentPosition;
+
       if (collapse == 0.0) {
-        currentPos = Alignment.lerp(Alignment.center, finalPos, scatter)!;
+        currentPosition = Alignment.lerp(
+          Alignment.center,
+          finalPosition,
+          scatter,
+        )!;
       } else {
-        currentPos = Alignment.lerp(finalPos, Alignment.center, collapse)!;
+        currentPosition = Alignment.lerp(
+          finalPosition,
+          Alignment.center,
+          collapse,
+        )!;
       }
 
-      double currentRotation = _targetRotations[i] * scatter;
-      
+      double currentRotation = _targetRotations[index] * scatter;
+
       if (scatter < 1.0 && _controller.value < 0.3) {
-        currentRotation += (1 - scatter) * pi * (i.isEven ? 1 : -1);
+        currentRotation +=
+            (1 - scatter) * pi * (index.isEven ? 1 : -1);
       }
-      
+
       if (collapse > 0.0) {
-        currentRotation += collapse * 2 * pi * (i.isEven ? -1 : 1);
+        currentRotation +=
+            collapse * 2 * pi * (index.isEven ? -1 : 1);
       }
 
       return Align(
-        alignment: currentPos,
+        alignment: currentPosition,
         child: Opacity(
           opacity: (fadeIn * fadeOut).clamp(0.0, 1.0),
           child: Transform.rotate(
             angle: currentRotation,
-            child: _IconCard(path: _iconAssets[i]),
+            child: _IconCard(
+              path: _iconAssets[index],
+            ),
           ),
         ),
       );
@@ -234,21 +379,35 @@ class _SplashScreenState extends State<SplashScreen>
       children: [
         Opacity(
           opacity: _logoOpacity.value,
-          child: Transform.scale(
-            scale: _logoScale.value,
-            child: Transform.rotate(
-              angle: _logoRotation.value,
-              child: Image.asset(
-                'assets/images/rentitlogo.png',
-                width: 120,
+          child: Transform.translate(
+            offset: Offset(
+              0,
+              _logoSlideUp.value,
+            ),
+            child: Transform.scale(
+              scale: _logoScale.value,
+              child: Transform.rotate(
+                angle: _logoRotation.value,
+                child: Image.asset(
+                  'assets/images/rentitlogo.png',
+                  width: 120,
+                  height: 120,
+                  fit: BoxFit.contain,
+                ),
               ),
             ),
           ),
         ),
-        if (_textOpacity.value > 0.0) ...[
-          const SizedBox(height: 16),
-          Opacity(
-            opacity: _textOpacity.value,
+
+        const SizedBox(height: 16),
+
+        Opacity(
+          opacity: _textOpacity.value,
+          child: Transform.translate(
+            offset: Offset(
+              0,
+              _textSlideUp.value,
+            ),
             child: const Text(
               'Rentit 24',
               style: TextStyle(
@@ -259,14 +418,16 @@ class _SplashScreenState extends State<SplashScreen>
               ),
             ),
           ),
-        ],
+        ),
       ],
     );
   }
 }
 
 class _IconCard extends StatelessWidget {
-  const _IconCard({super.key, required this.path});
+  const _IconCard({
+    required this.path,
+  });
 
   final String path;
 
@@ -298,15 +459,22 @@ class _IconCard extends StatelessWidget {
 }
 
 class CircularRevealClipper extends CustomClipper<Path> {
-  final double fraction;
+  const CircularRevealClipper(this.fraction);
 
-  CircularRevealClipper(this.fraction);
+  final double fraction;
 
   @override
   Path getClip(Size size) {
-    final center = Offset(size.width / 2, size.height / 2);
-    final maxRadius = sqrt(pow(size.width / 2, 2) + pow(size.height / 2, 2));
-    
+    final center = Offset(
+      size.width / 2,
+      size.height / 2,
+    );
+
+    final maxRadius = sqrt(
+      pow(size.width / 2, 2) +
+          pow(size.height / 2, 2),
+    );
+
     return Path()
       ..addOval(
         Rect.fromCircle(
@@ -317,7 +485,9 @@ class CircularRevealClipper extends CustomClipper<Path> {
   }
 
   @override
-  bool shouldReclip(CircularRevealClipper oldClipper) {
-    return fraction != oldClipper.fraction;
+  bool shouldReclip(
+    covariant CircularRevealClipper oldClipper,
+  ) {
+    return oldClipper.fraction != fraction;
   }
 }

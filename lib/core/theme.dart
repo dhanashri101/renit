@@ -4,6 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   AppColors._();
+  static const Color darkSurface = Color(0xFF1E1E1E);
 
   static const Color primary50 = Color(0xFFEAF1FD);
   static const Color primary100 = Color(0xFFC1D4F8);

@@ -975,7 +975,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
     required IconData icon,
     required String label,
     required Color color,
-    required VoidCallback onTap,
+    // required VoidCallback onTap,
   }) {
     return Container(
       decoration: BoxDecoration(
@@ -993,7 +993,7 @@ class _ProductDetailsScreenState extends State<ProductDetailsScreen> {
         color: Colors.transparent,
         child: InkWell(
           borderRadius: BorderRadius.circular(24),
-          onTap: onTap,
+          // onTap: onTap,
           child: Padding(
             padding: const EdgeInsets.symmetric(vertical: 14),
             child: Row(
