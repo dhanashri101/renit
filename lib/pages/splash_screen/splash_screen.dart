@@ -24,7 +24,6 @@ class _SplashScreenState extends State<SplashScreen>
   late final Animation<double> _logoScale;
   late final Animation<double> _logoRotation;
   late final Animation<double> _logoOpacity;
-  late final Animation<double> _logoSlideUp;
   late final Animation<double> _textOpacity;
   late final Animation<double> _textSlideUp;
 
@@ -176,20 +175,7 @@ class _SplashScreenState extends State<SplashScreen>
     );
 
     // Logo starts below and moves upward to the center.
-    _logoSlideUp = Tween<double>(
-      begin: 350.0,
-      end: 0.0,
-    ).animate(
-      CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(
-          0.66,
-          0.88,
-          curve: Curves.easeOutBack,
-        ),
-      ),
-    );
-
+   
     // Logo performs two complete clockwise rotations.
     _logoRotation = Tween<double>(
       begin: 0.0,
@@ -373,55 +359,50 @@ class _SplashScreenState extends State<SplashScreen>
     });
   }
 
-  Widget _buildLogoSection() {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Opacity(
+ Widget _buildLogoSection() {
+  return Column(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      SizedBox(
+        width: 120,
+        height: 120,
+        child: Opacity(
           opacity: _logoOpacity.value,
-          child: Transform.translate(
-            offset: Offset(
-              0,
-              _logoSlideUp.value,
-            ),
-            child: Transform.scale(
-              scale: _logoScale.value,
-              child: Transform.rotate(
-                angle: _logoRotation.value,
-                child: Image.asset(
-                  'assets/images/rentitlogo.png',
-                  width: 120,
-                  height: 120,
-                  fit: BoxFit.contain,
-                ),
+          child: Transform.scale(
+            scale: _logoScale.value,
+            alignment: Alignment.center,
+            child: Transform.rotate(
+              angle: _logoRotation.value,
+              alignment: Alignment.center,
+              child: Image.asset(
+                'assets/images/rentitlogo.png',
+                width: 120,
+                height: 120,
+                fit: BoxFit.contain,
               ),
             ),
           ),
         ),
-
-        const SizedBox(height: 16),
-
-        Opacity(
-          opacity: _textOpacity.value,
-          child: Transform.translate(
-            offset: Offset(
-              0,
-              _textSlideUp.value,
-            ),
-            child: const Text(
-              'Rentit 24',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 32,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.5,
-              ),
+      ),
+      const SizedBox(height: 16),
+      Opacity(
+        opacity: _textOpacity.value,
+        child: Transform.translate(
+          offset: Offset(0, _textSlideUp.value),
+          child: const Text(
+            'Rentit 24',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 32,
+              fontWeight: FontWeight.w700,
+              letterSpacing: 0.5,
             ),
           ),
         ),
-      ],
-    );
-  }
+      ),
+    ],
+  );
+}
 }
 
 class _IconCard extends StatelessWidget {

@@ -51,10 +51,10 @@ class _HomeScreenState extends State<HomeScreen> {
       reviews: 52,
       isFeatured: true,
       isTopChoice: true,
-      category: 'Verified', // see note below re: isVerified
+      category: 'Verified',
     ),
     AdItem(
-      title: 'Canon EOS M50 Mark II...',
+      title: 'Canon EOS M50 Mark II',
       price: '₹1500/day',
       distance: '2 km',
       owner: 'Hamza',
@@ -66,6 +66,222 @@ class _HomeScreenState extends State<HomeScreen> {
       isFeatured: false,
       isTopChoice: false,
     ),
+    AdItem(
+      title: 'Carpenter Tool Kit',
+      price: '₹350/day',
+      distance: '1.2 km',
+      owner: 'Ravi Kumar',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=11',
+      image: 'assets/images/carpainter.jpg',
+      rating: 4.5,
+      reviews: 122,
+      isFeatured: true,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Manual Wheelchair - Foldable',
+      price: '₹180/day',
+      distance: '0.8 km',
+      owner: 'Priya Shah',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=5',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.1,
+      reviews: 34,
+      isFeatured: false,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'DSLR Camera Kit with Lens',
+      price: '₹1200/day',
+      distance: '3.4 km',
+      owner: 'Aditya Rao',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=8',
+      image: 'assets/images/camera.jpg',
+      rating: 4.7,
+      reviews: 88,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Professional Wood Carving Set',
+      price: '₹450/day',
+      distance: '2.1 km',
+      owner: 'Imran Sheikh',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=12',
+      image: 'assets/images/carpainter.jpg',
+      rating: 3.9,
+      reviews: 21,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Electric Wheelchair',
+      price: '₹500/day',
+      distance: '1.9 km',
+      owner: 'Neha Joshi',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=15',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.4,
+      reviews: 60,
+      isFeatured: true,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Mirrorless Camera - Sony A6400',
+      price: '₹1800/day',
+      distance: '4.0 km',
+      owner: 'Farhan Khan',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=18',
+      image: 'assets/images/camera.jpg',
+      rating: 4.3,
+      reviews: 45,
+      isFeatured: false,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Carpentry Power Tools',
+      price: '₹600/day',
+      distance: '2.7 km',
+      owner: 'Suresh Patil',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=20',
+      image: 'assets/images/carpainter.jpg',
+      rating: 4.0,
+      reviews: 15,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Lightweight Travel Wheelchair',
+      price: '₹220/day',
+      distance: '1.1 km',
+      owner: 'Kavita Nair',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=22',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.6,
+      reviews: 77,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Action Camera - GoPro Hero 11',
+      price: '₹700/day',
+      distance: '2.3 km',
+      owner: 'Rohit Verma',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=25',
+      image: 'assets/images/camera.jpg',
+      rating: 4.2,
+      reviews: 33,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Custom Furniture Carving Service',
+      price: '₹900/day',
+      distance: '3.1 km',
+      owner: 'Manoj Deshmukh',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=28',
+      image: 'assets/images/carpainter.jpg',
+      rating: 4.8,
+      reviews: 102,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Pediatric Wheelchair',
+      price: '₹250/day',
+      distance: '0.9 km',
+      owner: 'Anjali Mehta',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=30',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.0,
+      reviews: 19,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Camera Tripod & Lighting Kit',
+      price: '₹300/day',
+      distance: '1.6 km',
+      owner: 'Vikram Singh',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=32',
+      image: 'assets/images/camera.jpg',
+      rating: 3.8,
+      reviews: 12,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Wood Furniture Repair Toolkit',
+      price: '₹400/day',
+      distance: '2.5 km',
+      owner: 'Ganesh Yadav',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=35',
+      image: 'assets/images/carpainter.jpg',
+      rating: 4.3,
+      reviews: 40,
+      isFeatured: true,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Heavy Duty Wheelchair',
+      price: '₹280/day',
+      distance: '1.4 km',
+      owner: 'Sunita Rane',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=38',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 4.5,
+      reviews: 55,
+      isFeatured: false,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Canon 90D DSLR Bundle',
+      price: '₹1600/day',
+      distance: '3.8 km',
+      owner: 'Arjun Malhotra',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=40',
+      image: 'assets/images/camera.jpg',
+      rating: 4.6,
+      reviews: 66,
+      isFeatured: true,
+      isTopChoice: true,
+    ),
+    AdItem(
+      title: 'Wooden Handicraft Making Kit',
+      price: '₹500/day',
+      distance: '2.9 km',
+      owner: 'Deepak Chavan',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=42',
+      image: 'assets/images/carpainter.jpg',
+      rating: 4.1,
+      reviews: 28,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Compact Folding Wheelchair',
+      price: '₹190/day',
+      distance: '0.6 km',
+      owner: 'Meera Iyer',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=45',
+      image: 'assets/images/wheelchair.jpg',
+      rating: 3.9,
+      reviews: 9,
+      isFeatured: false,
+      isTopChoice: false,
+    ),
+    AdItem(
+      title: 'Studio Camera & Backdrop Set',
+      price: '₹1300/day',
+      distance: '3.3 km',
+      owner: 'Sameer Qureshi',
+      ownerAvatar: 'https://i.pravatar.cc/150?img=48',
+      image: 'assets/images/camera.jpg',
+      rating: 4.4,
+      reviews: 51,
+      isFeatured: true,
+      isTopChoice: false,
+    ),
   ];
 
   final List<Map<String, String>> _bannerData = [
@@ -75,13 +291,13 @@ class _HomeScreenState extends State<HomeScreen> {
       'image': 'assets/images/slide1-illustration.png',
     },
     {
-      'title': 'Need a cool\ndress?',
-      'subtitle': 'From party wear to\nwedding wear find it all..',
+      'title': 'Easy Rentals\nQuick & Simple',
+      'subtitle': 'Browse book and enjoy\nHassle-free experience',
       'image': 'assets/images/slide2-illustration.png',
     },
     {
-      'title': 'Wanna be a\nguitarist?',
-      'subtitle': 'From guitar to bongo\nfind it all..',
+      'title': 'Flexible Options\nyour',
+      'subtitle': 'Daily,weekly,or monthly\nRent on your terms',
       'image': 'assets/images/slide3-illustration.png',
     },
   ];
@@ -115,17 +331,14 @@ class _HomeScreenState extends State<HomeScreen> {
     super.dispose();
   }
 
-
   double _scale(double width) => (width / 390).clamp(0.85, 1.35);
 
- 
   int _gridColumns(double width) {
     if (width >= 1100) return 5;
     if (width >= 900) return 4;
     if (width >= 600) return 3;
     return 2;
   }
-
 
   double _contentMaxWidth(double width) => width > 900 ? 900 : width;
 
@@ -143,61 +356,79 @@ class _HomeScreenState extends State<HomeScreen> {
           : AppTheme.lightBackground,
       body: SafeArea(
         top: false,
-        child: Center(
-          child: ConstrainedBox(
-            constraints: BoxConstraints(
-              maxWidth: maxWidth > 900 ? 900 : double.infinity,
-            ),
-            child: SingleChildScrollView(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  _buildCustomAppBar(theme, isDark, maxWidth, scale),
-                  SizedBox(height: 20 * scale),
-                  _buildBannerCarousel(theme, isDark, maxWidth, scale),
-                  SizedBox(height: 24 * scale),
-                  _buildSectionHeader(
-                    'Browse Categories',
-                    'See all',
-                    theme,
-                    scale,
-                    onSeeAll: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const CategoryListScreen(),
-                        ),
-                      );
-                    },
-                  ),
-                  SizedBox(height: 16 * scale),
-                  _buildCategories(theme, maxWidth, scale),
-                  SizedBox(height: 24 * scale),
-                  _buildSectionHeader(
-                    'Hire a Professional',
-                    'See all',
-                    theme,
-                    scale,
-                  ),
-                  SizedBox(height: 16 * scale),
-                  _buildProfessionalList(theme, context, maxWidth, scale),
-                  SizedBox(height: 24 * scale),
-                  _buildSectionHeader('Nearby Ads', '', theme, scale),
-                  SizedBox(height: 16 * scale),
-                  _buildFilterChips(theme, scale),
-                  SizedBox(height: 16 * scale),
-                  _buildNearbyAdsGrid(theme, maxWidth, scale),
-                  SizedBox(height: 16 * scale),
-                  _buildPromoBanner(theme, maxWidth, scale),
-                  SizedBox(height: 30 * scale),
-                ],
+        child: Column(
+          children: [
+            // Fixed app bar — stays pinned, not part of scroll view
+            Center(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: maxWidth > 900 ? 900 : double.infinity,
+                ),
+                child: _buildCustomAppBar(theme, isDark, maxWidth, scale),
               ),
             ),
-          ),
+
+            // Scrollable content below the app bar
+            Expanded(
+              child: Center(
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: maxWidth > 900 ? 900 : double.infinity,
+                  ),
+                  child: SingleChildScrollView(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        SizedBox(height: 20 * scale),
+                        _buildBannerCarousel(theme, isDark, maxWidth, scale),
+                        SizedBox(height: 24 * scale),
+                        _buildSectionHeader(
+                          'Browse Categories',
+                          'See all',
+                          theme,
+                          scale,
+                          onSeeAll: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) =>
+                                    const CategoryListScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildCategories(theme, maxWidth, scale),
+                        SizedBox(height: 24 * scale),
+                        _buildSectionHeader(
+                          'Hire a Professional',
+                          'See all',
+                          theme,
+                          scale,
+                        ),
+                        SizedBox(height: 16 * scale),
+                        _buildProfessionalList(theme, context, maxWidth, scale),
+                        SizedBox(height: 24 * scale),
+                        _buildSectionHeader('Nearby Ads', '', theme, scale),
+                        SizedBox(height: 16 * scale),
+                        _buildFilterChips(theme, scale),
+                        SizedBox(height: 16 * scale),
+                        _buildNearbyAdsGrid(theme, maxWidth, scale),
+                        SizedBox(height: 16 * scale),
+                        _buildPromoBanner(theme, maxWidth, scale),
+                        SizedBox(height: 30 * scale),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );
   }
+
   Widget _buildCustomAppBar(
     ThemeData theme,
     bool isDark,
@@ -324,16 +555,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(width: 12 * scale),
-              // _buildAppBarIcon(
-              //   isDark ? Icons.light_mode : Icons.dark_mode,
-              //   theme,
-              //   isDark,
-              //   scale,
-              //   onTap: () {
-              //     themeNotifier.value = isDark ? ThemeMode.light : ThemeMode.dark;
-              //   },
-              // ),
-              // SizedBox(width: 12 * scale),
               _buildAppBarIcon(Icons.favorite_border, theme, isDark, scale),
               SizedBox(width: 12 * scale),
               _buildAppBarIcon(Icons.notifications_none, theme, isDark, scale),
@@ -364,10 +585,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ---------------------------------------------------------------------
-  // BANNER CAROUSEL
-  // ---------------------------------------------------------------------
 
   Widget _buildBannerCarousel(
     ThemeData theme,
@@ -447,7 +664,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   data['title']!,
                   style: AppTypography.headingStyle(
                     AppTypography.h4,
-                    isDark ? AppColors.baseWhite : AppColors.neutral900,
+                    isDark ? AppColors.baseWhite : AppColors.neutral700,
                   ).copyWith(fontSize: AppTypography.h4 * scale, height: 1.2),
                 ),
                 SizedBox(height: 10 * scale),
@@ -456,9 +673,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   style:
                       AppTypography.bodySmall(
                         AppTypography.regular,
-                        AppColors.neutral400,
+                        AppColors.neutral300,
                       ).copyWith(
-                        fontSize: AppTypography.bodySM * scale,
+                        fontSize: AppTypography.bodyMD * scale,
                         height: 1.4,
                       ),
                 ),
@@ -489,10 +706,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ---------------------------------------------------------------------
-  // SECTION HEADER
-  // ---------------------------------------------------------------------
 
   Widget _buildSectionHeader(
     String title,
@@ -600,51 +813,6 @@ class _HomeScreenState extends State<HomeScreen> {
         'image': 'assets/images/categories/fashion-dress.png',
       },
       {
-        'name': 'Fashion Services',
-        'image': 'assets/images/categories/fashion-services.png',
-      },
-      {
-        'name': 'Festivals',
-        'image': 'assets/images/categories/festivals-celebrations.png',
-      },
-      {
-        'name': 'Food & Catering',
-        'image': 'assets/images/categories/food-catering.png',
-      },
-      {'name': 'Furniture', 'image': 'assets/images/categories/furniture.png'},
-      {
-        'name': 'Gaming Consoles',
-        'image': 'assets/images/categories/gaming-consoles.png',
-      },
-      {
-        'name': 'Gardening & Outdoor',
-        'image': 'assets/images/categories/gardening-outdoor.png',
-      },
-      {
-        'name': 'Health & Wellness',
-        'image': 'assets/images/categories/health-wellness.png',
-      },
-      {
-        'name': 'Household Items',
-        'image': 'assets/images/categories/household-items.png',
-      },
-      {
-        'name': 'Medical Equipment',
-        'image': 'assets/images/categories/medical-equipment.png',
-      },
-      {
-        'name': 'Miscellaneous',
-        'image': 'assets/images/categories/miscellaneous.png',
-      },
-      {
-        'name': 'Musical Instruments',
-        'image': 'assets/images/categories/musical-instruments.png',
-      },
-      {
-        'name': 'Office Equipment',
-        'image': 'assets/images/categories/office-work-equipment.png',
-      },
-      {
         'name': 'Pets & Animals',
         'image': 'assets/images/categories/pets-animals.png',
       },
@@ -733,7 +901,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       padding: EdgeInsets.all(12 * scale),
                       decoration: ShapeDecoration(
                         color: isDark
-                            ? AppColors.neutral800
+                            ? AppColors.darkSurface
                             : AppColors.baseWhite,
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16 * scale),
@@ -795,10 +963,9 @@ class _HomeScreenState extends State<HomeScreen> {
   ) {
     final isDark = theme.brightness == Brightness.dark;
 
-    // Adjusted to match the larger, cleaner card in the WhatsApp image
     final double cardWidth = 320.0 * scale;
     final double cardHeight =
-        160.0 * scale; // Taller card for portrait image and breathing room
+        176.0 * scale; // Taller card so rows aren't cramped
     final double padding = 12.0 * scale;
 
     return SizedBox(
@@ -817,7 +984,6 @@ class _HomeScreenState extends State<HomeScreen> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => ProductDetailsScreen(
-
                     adData: AdItem(
                       title: 'Wood craft and wood carving',
                       price: '₹800/day',
@@ -836,7 +1002,7 @@ class _HomeScreenState extends State<HomeScreen> {
               width: cardWidth,
               padding: EdgeInsets.all(padding),
               decoration: BoxDecoration(
-                color: isDark ?AppColors.darkSurface: AppColors.baseWhite,
+                color: isDark ? AppColors.darkSurface : AppColors.baseWhite,
                 borderRadius: BorderRadius.circular(24 * scale),
                 boxShadow: [
                   BoxShadow(
@@ -851,10 +1017,9 @@ class _HomeScreenState extends State<HomeScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16 * scale),
                     child: Image.asset(
-                      "assets/images/carpainter.jpg", 
+                      "assets/images/carpainter.jpg",
                       width: 105 * scale,
-                      height:
-                          double.infinity, 
+                      height: double.infinity,
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) => Container(
                         width: 105 * scale,
@@ -866,17 +1031,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                     ),
                   ),
-                  SizedBox(
-                    width: 16 * scale,
-                  ), // Wider spacing between image and text
-                  // Text Content Column
+                  SizedBox(width: 16 * scale),
                   Expanded(
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisAlignment: MainAxisAlignment
-                          .spaceBetween, // Perfect vertical distribution
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        // 1. Rating & Heart Icon
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
@@ -886,7 +1046,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                   Icons.star,
                                   color: const Color(0xFFFFB800),
                                   size: 16 * scale,
-                                ), // Brighter yellow
+                                ),
                                 SizedBox(width: 6 * scale),
                                 Text(
                                   '4.6',
@@ -909,7 +1069,6 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                               ],
                             ),
-                            // More pronounced circular background for the heart
                             Container(
                               padding: EdgeInsets.all(6 * scale),
                               decoration: BoxDecoration(
@@ -922,14 +1081,13 @@ class _HomeScreenState extends State<HomeScreen> {
                                 Icons.favorite_border,
                                 color: isDark
                                     ? AppColors.baseWhite
-                                    : AppColors.neutral900,
+                                    : AppColors.baseWhite,
                                 size: 16 * scale,
                               ),
                             ),
                           ],
                         ),
 
-                        // 2. Tags
                         Row(
                           children: [
                             _buildTag(
@@ -937,18 +1095,17 @@ class _HomeScreenState extends State<HomeScreen> {
                               const Color(0xFF3B82F6),
                               AppColors.baseWhite,
                               scale,
-                            ), // Bright blue
+                            ),
                             SizedBox(width: 8 * scale),
                             _buildTag(
                               'Top Choice',
                               const Color(0xFF1E1B4B),
                               AppColors.baseWhite,
                               scale,
-                            ), // Deep navy
+                            ),
                           ],
                         ),
 
-                        // 3. User Info
                         Row(
                           children: [
                             CircleAvatar(
@@ -985,29 +1142,21 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ],
                               ),
                             ),
-                            Text(
-                              'Plumber',
-                              style: AppTypography.bodyExtraSmall(
-                                AppTypography.medium,
-                                isDark
-                                    ? AppColors.baseWhite.withOpacity(0.5)
-                                    : AppColors.neutral500,
-                              ),
-                            ),
                           ],
                         ),
 
                         Text(
                           'Plumber',
-                          style: AppTypography.bodyLarge(
+                          style: AppTypography.bodyMedium(
                             AppTypography.medium,
-                            isDark ? AppColors.baseWhite : AppColors.neutral800,
-                          ).copyWith(fontSize: 16 * scale),
+                            isDark
+                                ? AppColors.baseWhite.withOpacity(0.6)
+                                : AppColors.neutral500,
+                          ).copyWith(fontSize: 13 * scale),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
 
-                        // 5. Bottom Row (Location & Price)
                         Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.end,
@@ -1104,12 +1253,12 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   filter,
                   style: AppTypography.bodyMedium(
-                    isActive ? AppTypography.semibold : AppTypography.medium,
+                     AppTypography.medium,
                     isActive
                         ? AppColors.baseWhite
                         : (isDark
                               ? AppColors.neutral300
-                              : AppColors.neutral400),
+                              : AppColors.neutral300),
                   ).copyWith(fontSize: AppTypography.bodyMD * scale),
                 ),
               ),
@@ -1120,16 +1269,11 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  // ---------------------------------------------------------------------
-  // NEARBY ADS GRID
-  // ---------------------------------------------------------------------
-
   Widget _buildNearbyAdsGrid(ThemeData theme, double width, double scale) {
     final filteredAds = _adsData.where((ad) {
       if (_selectedFilter == 'All') return true;
       if (_selectedFilter == 'Featured') return ad.isFeatured;
       if (_selectedFilter == 'Top Choice') return ad.isTopChoice;
-      // NOTE: AdItem has no isVerified field — see note below.
       if (_selectedFilter == 'Verified') return ad.isFeatured; // placeholder
       return true;
     }).toList();
@@ -1144,14 +1288,13 @@ class _HomeScreenState extends State<HomeScreen> {
         physics: const NeverScrollableScrollPhysics(),
         gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
           crossAxisCount: columns,
-          crossAxisSpacing: 16 * scale,
-          mainAxisSpacing: 16 * scale,
-          childAspectRatio: 0.68,
+          crossAxisSpacing: 12 * scale,
+          mainAxisSpacing: 14 * scale,
+          childAspectRatio: 160 / 260,
         ),
         itemCount: filteredAds.length,
         itemBuilder: (context, index) {
           final ad = filteredAds[index];
-
           return GestureDetector(
             onTap: () {
               Navigator.push(
@@ -1164,7 +1307,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         final tween = Tween(
                           begin: const Offset(1.0, 0.0),
                           end: Offset.zero,
-                        ).chain(CurveTween(curve: Curves.easeInOut));
+                        ).chain(CurveTween(curve: Curves.easeOutCubic));
                         return SlideTransition(
                           position: animation.drive(tween),
                           child: child,
@@ -1184,7 +1327,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ad.reviews.toString(),
               ad.isFeatured,
               ad.isTopChoice,
-              false, // isVerified placeholder — see note below
+              false,
               theme,
               scale,
             ),
@@ -1214,102 +1357,119 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       decoration: BoxDecoration(
         color: isDark ? AppColors.darkSurface : AppColors.baseWhite,
-        borderRadius: BorderRadius.circular(8 * scale),
+        borderRadius: BorderRadius.circular(16 * scale),
         boxShadow: [
           BoxShadow(
             color: AppColors.baseBlack.withOpacity(isDark ? 0.3 : 0.06),
-            blurRadius: 12,
-            offset: const Offset(0, 4),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Stack(
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(8 * scale),
-                  topRight: Radius.circular(8 * scale),
-                ),
-                child: AspectRatio(
-                  aspectRatio: 1.55,
-                  child: Image.asset(
-                    imgUrl,
-                    width: double.infinity,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) => Container(
-                      width: double.infinity,
-                      color: AppColors.neutral200,
-                      child: const Icon(
-                        Icons.image,
-                        color: AppColors.neutral400,
+          AspectRatio(
+            aspectRatio:
+                1.15, 
+            child: Stack(
+              children: [
+                Positioned.fill(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(16 * scale),
+                      topRight: Radius.circular(16 * scale),
+                    ),
+                    child: Container(
+                      color: isDark
+                          ? AppColors.neutral800
+                          : AppColors.neutral100,
+                      child: Image.asset(
+                        imgUrl,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Center(
+                              child: Icon(
+                                Icons.image,
+                                color: AppColors.neutral400,
+                              ),
+                            ),
                       ),
                     ),
                   ),
                 ),
-              ),
-              if (isFeatured)
+                if (isFeatured)
+                  Positioned(
+                    top: 12 * scale,
+                    left: 0,
+                    child: Container(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 10 * scale,
+                        vertical: 3 * scale,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary500,
+                        borderRadius: BorderRadius.only(
+                          topRight: Radius.circular(2 * scale),
+                          bottomRight: Radius.circular(2 * scale),
+                        ),
+                      ),
+                      child: Text(
+                        'Featured',
+                        style: AppTypography.bodyExtraSmall(
+                          AppTypography.regular,
+                          AppColors.baseWhite,
+                        ).copyWith(fontSize: 11 * scale, letterSpacing: 0.3),
+                      ),
+                    ),
+                  ),
                 Positioned(
-                  top: 11 * scale,
-                  left: 0,
+                  top: 10 * scale,
+                  right: 10 * scale,
                   child: Container(
-                    padding: EdgeInsets.symmetric(
-                      horizontal: 8 * scale,
-                      vertical: 4 * scale,
-                    ),
+                    padding: EdgeInsets.all(6 * scale),
                     decoration: BoxDecoration(
-                      color: AppColors.primary500,
-                      borderRadius: BorderRadius.only(
-                        topRight: Radius.circular(2 * scale),
-                        bottomRight: Radius.circular(2 * scale),
-                      ),
+                      color: AppColors.neutral900.withOpacity(0.45),
+                      shape: BoxShape.circle,
                     ),
-                    child: Text(
-                      'Featured',
-                      style: AppTypography.bodyExtraSmall(
-                        AppTypography.medium,
-                        AppColors.baseWhite,
-                      ).copyWith(letterSpacing: 0.20),
+                    child: Icon(
+                      Icons.favorite_border,
+                      color: AppColors.baseWhite,
+                      size: 16 * scale,
                     ),
                   ),
                 ),
-              Positioned(
-                top: 8 * scale,
-                right: 8 * scale,
-                child: Container(
-                  padding: EdgeInsets.all(6 * scale),
-                  decoration: BoxDecoration(
-                    color: AppColors.neutral900.withOpacity(0.4),
-                    shape: BoxShape.circle,
-                  ),
-                  child: Icon(
-                    Icons.favorite_border,
-                    color: AppColors.baseWhite,
-                    size: 14 * scale,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
+
           Expanded(
             child: Padding(
-              padding: EdgeInsets.all(8.0 * scale),
+              padding: EdgeInsets.fromLTRB(
+                12 * scale,
+                10 * scale,
+                12 * scale,
+                12 * scale,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisSize: MainAxisSize.min,
                 children: [
+                  // Distance + Top Choice badge
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Row(
                         children: [
                           Icon(
-                            Icons.location_on,
-                            color: AppColors.neutral300,
-                            size: 10 * scale,
+                            Icons.location_on_outlined,
+                            color: isDark
+                                ? AppColors.neutral400
+                                : AppColors.neutral400,
+                            size: 11 * scale,
                           ),
-                          SizedBox(width: 4 * scale),
+                          SizedBox(width: 3 * scale),
                           Text(
                             distance,
                             style: AppTypography.bodyExtraSmall(
@@ -1317,15 +1477,15 @@ class _HomeScreenState extends State<HomeScreen> {
                               isDark
                                   ? AppColors.baseWhite.withOpacity(0.6)
                                   : AppColors.neutral500,
-                            ),
+                            ).copyWith(fontSize: 12 * scale),
                           ),
                         ],
                       ),
                       if (isTopChoice)
                         Container(
                           padding: EdgeInsets.symmetric(
-                            horizontal: 4 * scale,
-                            vertical: 2 * scale,
+                            horizontal: 3 * scale,
+                            vertical: 1.5 * scale,
                           ),
                           decoration: BoxDecoration(
                             color: isDark
@@ -1336,75 +1496,93 @@ class _HomeScreenState extends State<HomeScreen> {
                           child: Text(
                             'Top Choice',
                             style: AppTypography.bodyExtraSmall(
-                              AppTypography.regular,
+                              AppTypography.semibold,
                               AppColors.baseWhite,
-                            ),
+                            ).copyWith(fontSize: 9.5 * scale),
                           ),
                         ),
                     ],
                   ),
-                  SizedBox(height: 6 * scale),
+                  SizedBox(height: 8 * scale),
+
+                  // Title
                   Text(
                     title,
-                    style: AppTypography.bodySmall(
+                    style: AppTypography.bodyMedium(
                       AppTypography.medium,
                       isDark ? AppColors.baseWhite : AppColors.neutral700,
-                    ).copyWith(height: 1.2),
+                    ).copyWith(fontSize: 12 * scale, height: 1.2),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  SizedBox(height: 4 * scale),
+                  SizedBox(height: 5 * scale),
+
+                  // Price — bold, standout like the reference
                   Text(
                     price,
-                    style: AppTypography.bodyMedium(
+                    style: AppTypography.bodyLarge(
                       AppTypography.bold,
                       isDark ? AppColors.baseWhite : AppColors.neutral900,
-                    ),
+                    ).copyWith(fontSize: 14 * scale, height: 1.0),
                   ),
-                  const Spacer(),
+                  SizedBox(height: 5 * scale),
+
+                  // Owner
                   Row(
                     children: [
                       CircleAvatar(
-                        radius: 8 * scale,
+                        radius: 11 * scale,
                         backgroundImage: NetworkImage(avatarUrl),
                       ),
-                      SizedBox(width: 6 * scale),
+                      SizedBox(width: 5 * scale),
                       Expanded(
-                        child: Text(
-                          owner,
-                          style: AppTypography.bodyExtraSmall(
-                            AppTypography.medium,
-                            isDark ? AppColors.baseWhite : AppColors.neutral900,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
+                        child: Row(
+                          children: [
+                            Flexible(
+                              child: Text(
+                                owner,
+                                style: AppTypography.bodyExtraSmall(
+                                  AppTypography.medium,
+                                  isDark
+                                      ? AppColors.baseWhite
+                                      : AppColors.neutral900,
+                                ).copyWith(fontSize: 12.5 * scale),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                            if (isVerified) ...[
+                              SizedBox(width: 4 * scale),
+                              Icon(
+                                Icons.verified,
+                                color: Colors.blue,
+                                size: 12 * scale,
+                              ),
+                            ],
+                          ],
                         ),
                       ),
-                      if (isVerified)
-                        Icon(
-                          Icons.verified,
-                          color: AppColors.info500,
-                          size: 10 * scale,
-                        ),
                     ],
                   ),
-                  SizedBox(height: 4 * scale),
+                  SizedBox(height: 5 * scale),
+
+                  // Rating
                   Row(
                     children: [
                       Icon(
                         Icons.star,
-                        color: AppColors.warning400,
-                        size: 12 * scale,
+                        color: const Color(0xFFFFB800),
+                        size: 11 * scale,
                       ),
-                      SizedBox(width: 2 * scale),
+                      SizedBox(width: 4 * scale),
                       Text(
                         rating,
                         style: AppTypography.bodyExtraSmall(
-                          AppTypography.medium,
+                          AppTypography.semibold,
                           isDark
-                              ? AppColors.baseWhite.withOpacity(0.7)
+                              ? AppColors.baseWhite.withOpacity(0.9)
                               : AppColors.neutral700,
-                        ),
+                        ).copyWith(fontSize: 11 * scale),
                       ),
                       SizedBox(width: 4 * scale),
                       Text(
@@ -1412,9 +1590,9 @@ class _HomeScreenState extends State<HomeScreen> {
                         style: AppTypography.bodyExtraSmall(
                           AppTypography.regular,
                           isDark
-                              ? AppColors.baseWhite.withOpacity(0.6)
-                              : AppColors.neutral500,
-                        ),
+                              ? AppColors.baseWhite.withOpacity(0.5)
+                              : AppColors.neutral400,
+                        ).copyWith(fontSize: 11 * scale),
                       ),
                     ],
                   ),
@@ -1426,10 +1604,6 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
     );
   }
-
-  // ---------------------------------------------------------------------
-  // PROMO BANNER
-  // ---------------------------------------------------------------------
 
   Widget _buildPromoBanner(ThemeData theme, double width, double scale) {
     final bannerHeight = (width * 0.31).clamp(100.0, 150.0);
@@ -1543,14 +1717,14 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Widget _buildTag(String text, Color bgColor, Color textColor, double scale) {
     return Container(
-      padding: EdgeInsets.symmetric(horizontal: 6 * scale, vertical: 3 * scale),
+      padding: EdgeInsets.symmetric(horizontal: 6 * scale, vertical: 1 * scale),
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(4 * scale),
       ),
       child: Text(
         text,
-        style: AppTypography.bodyExtraSmall(AppTypography.bold, textColor),
+        style: AppTypography.bodyExtraSmall(AppTypography.regular, textColor),
       ),
     );
   }

@@ -4,7 +4,7 @@ import 'package:google_fonts/google_fonts.dart';
 
 class AppColors {
   AppColors._();
-  static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color darkSurface = Color(0xFF2f2f2f);
 
   static const Color primary50 = Color(0xFFEAF1FD);
   static const Color primary100 = Color(0xFFC1D4F8);
@@ -22,77 +22,70 @@ class AppColors {
   static const Color secondary200 = Color(0xFFDCEEAD);
   static const Color secondary300 = Color(0xFFCEE68A);
   static const Color secondary400 = Color(0xFFC1DE61);
-  static const Color secondary500 = Color(0xFFB4D623); // default
+  static const Color secondary500 = Color(0xFFB4D623);
   static const Color secondary600 = Color(0xFF89A318);
   static const Color secondary700 = Color(0xFF748B13);
   static const Color secondary800 = Color(0xFF4D5D09);
   static const Color secondary900 = Color(0xFF293203);
 
-  // ---- Error (Red) ----
   static const Color error50 = Color(0xFFFEEEEC);
   static const Color error100 = Color(0xFFFBCBC5);
   static const Color error200 = Color(0xFFF4A8A0);
   static const Color error300 = Color(0xFFEB857B);
   static const Color error400 = Color(0xFFE05F56);
-  static const Color error500 = Color(0xFFD32F2F); // default
+  static const Color error500 = Color(0xFFD32F2F); 
   static const Color error600 = Color(0xFFA12121);
   static const Color error700 = Color(0xFF891B1B);
   static const Color error800 = Color(0xFF5B0F0F);
   static const Color error900 = Color(0xFF320505);
 
-  // ---- Success (Green) ----
   static const Color success50 = Color(0xFFECF3EC);
   static const Color success100 = Color(0xFFC6DBC5);
   static const Color success200 = Color(0xFFA1C3A0);
   static const Color success300 = Color(0xFF7CAC7C);
   static const Color success400 = Color(0xFF579457);
-  static const Color success500 = Color(0xFF2E7D32); // default
+  static const Color success500 = Color(0xFF2E7D32); 
   static const Color success600 = Color(0xFF215E24);
   static const Color success700 = Color(0xFF1A4F1D);
   static const Color success800 = Color(0xFF0E3310);
   static const Color success900 = Color(0xFF041905);
 
-  // ---- Warning (Orange) ----
   static const Color warning50 = Color(0xFFFFF2EC);
   static const Color warning100 = Color(0xFFFFD9C6);
   static const Color warning200 = Color(0xFFFEBF9F);
   static const Color warning300 = Color(0xFFFAA578);
   static const Color warning400 = Color(0xFFF5894D);
-  static const Color warning500 = Color(0xFFEF6C00); // default
+  static const Color warning500 = Color(0xFFEF6C00); 
   static const Color warning600 = Color(0xFFB75100);
   static const Color warning700 = Color(0xFF9C4400);
   static const Color warning800 = Color(0xFF692B00);
   static const Color warning900 = Color(0xFF391400);
 
-  // ---- Information (Sky Blue) ----
   static const Color info50 = Color(0xFFECF4FC);
   static const Color info100 = Color(0xFFC6DFF4);
   static const Color info200 = Color(0xFF9FCAEC);
   static const Color info300 = Color(0xFF78B4E4);
   static const Color info400 = Color(0xFF4D9EDB);
-  static const Color info500 = Color(0xFF0288D1); // default
+  static const Color info500 = Color(0xFF0288D1); 
   static const Color info600 = Color(0xFF0167A0);
   static const Color info700 = Color(0xFF015788);
   static const Color info800 = Color(0xFF00385B);
   static const Color info900 = Color(0xFF001C31);
 
-  // ---- Neutral (Slate) ----
   static const Color neutral50 = Color(0xFFE2E3E7);
   static const Color neutral100 = Color(0xFFC6C7D0);
   static const Color neutral200 = Color(0xFFAAACB9);
   static const Color neutral300 = Color(0xFF9092A3);
   static const Color neutral400 = Color(0xFF76788D);
-  static const Color neutral500 = Color(0xFF5D6077); // default
+  static const Color neutral500 = Color(0xFF5D6077); 
   static const Color neutral600 = Color(0xFF454862);
   static const Color neutral700 = Color(0xFF2F314D);
   static const Color neutral800 = Color(0xFF1B1C39);
   static const Color neutral900 = Color(0xFF090726);
 
-  // ---- Base ----
   static const Color baseWhite = Color(0xFFFFFFFF);
   static const Color baseBlack = Color(0xFF000000);
 
-  // Convenience shade maps (e.g. AppColors.primary[500])
   static const Map<int, Color> primary = {
     50: primary50, 100: primary100, 200: primary200, 300: primary300,
     400: primary400, 500: primary500, 600: primary600, 700: primary700,
@@ -130,7 +123,6 @@ class AppColors {
   };
 }
 
-// Semantic activity/status colors (kept from your existing chip usage)
 class ActivityColors {
   ActivityColors._();
   static const Color pendingBg = AppColors.warning100;
@@ -150,10 +142,9 @@ class AppTypography {
 
   static const String fontFamily = 'Outfit';
 
-  // Modular scale sizes (base 14, ratio 1.125)
   static const double bodyXS = 11;
   static const double bodySM = 12;
-  static const double bodyMD = 14; // base
+  static const double bodyMD = 14; 
   static const double bodyLG = 16;
   static const double h6 = 18;
   static const double h5 = 20;
