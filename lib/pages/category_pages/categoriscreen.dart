@@ -17,7 +17,7 @@ class _CategoryListScreenState extends State<CategoryListScreen> {
     {'icon': 'assets/images/categories/furniture.png', 'name': 'Furniture'},
     {
       'icon': 'assets/images/categories/event-professionals.png',
-      'name': 'Event Professionals', // Removed \n to let TextOverflow handle it cleanly
+      'name': 'Event Professionals',
     },
     {
       'icon': 'assets/images/categories/tools-machinery.png',

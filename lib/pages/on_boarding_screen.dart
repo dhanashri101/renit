@@ -161,7 +161,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         style: ElevatedButton.styleFrom(
                           shape: const CircleBorder(),
                           padding: const EdgeInsets.all(16),
-                          backgroundColor: AppTheme.primaryBlue,
+                          backgroundColor: AppTheme.primaryBlue ,
                           elevation: 2,
                         ),
                         child: const Icon(
@@ -188,8 +188,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       width: _currentPage == index ? 24 : 12,
       decoration: BoxDecoration(
         color: _currentPage == index
-            ? AppTheme.primaryBlue
-            : AppTheme.primaryBlue.withOpacity(0.3),
+            ? AppTheme.primaryBlue 
+            : AppTheme.primaryBlue .withOpacity(0.3),
         borderRadius: BorderRadius.circular(3),
       ),
     );

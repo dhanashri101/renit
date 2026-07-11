@@ -142,7 +142,7 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
                     duration: const Duration(milliseconds: 300),
                     height: 4,
                     color: index <= _currentStep
-                        ? AppTheme.primaryBlue
+                        ? AppTheme.primaryBlue 
                         : (isDark
                             ? const Color(0xFF2D2D2D)
                             : const Color(0xFFDCE5F8)),
@@ -212,7 +212,7 @@ class _BottomButton extends StatelessWidget {
           height: 50,
           child: ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: AppTheme.primaryBlue ,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -404,7 +404,7 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final hintColor = isDark ? Colors.grey[400] : Colors.grey[600];
-    final dashColor = isDark ? AppTheme.primaryBlue.withOpacity(0.5) : AppTheme.primaryBlue.withOpacity(0.3);
+    final dashColor = isDark ? AppTheme.primaryBlue .withOpacity(0.5) : AppTheme.primaryBlue .withOpacity(0.3);
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -462,7 +462,7 @@ class _ServiceImageStepState extends State<_ServiceImageStep> {
             icon: const Icon(Icons.camera_alt_outlined, size: 20),
             label: const Text('Open Camera & Take Photo'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: AppTheme.primaryBlue ,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),
@@ -708,7 +708,7 @@ class _SelectServiceCategoryStep extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
-    final blue = AppTheme.primaryBlue;
+    final blue = AppTheme.primaryBlue ;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -1030,7 +1030,7 @@ class _AgreementCheckbox extends StatelessWidget {
           child: Checkbox(
             value: value,
             onChanged: onChanged,
-            activeColor: AppTheme.primaryBlue,
+            activeColor: AppTheme.primaryBlue ,
             side: BorderSide(
               color: isDark ? Colors.grey[600]! : Colors.grey[400]!,
               width: 1.5,
@@ -1051,7 +1051,7 @@ class _AgreementCheckbox extends StatelessWidget {
                 TextSpan(
                   text: linkText,
                   style: const TextStyle(
-                    color: AppTheme.primaryBlue,
+                    color: AppTheme.primaryBlue ,
                     decoration: TextDecoration.underline,
                   ),
                 ),

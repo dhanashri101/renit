@@ -115,7 +115,8 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _logoRotation = Tween<double>(begin: -2 * pi, end: 0.0).animate(
+    // UPDATED: Clockwise 360-degree rotation
+    _logoRotation = Tween<double>(begin: 0.0, end: 2 * pi).animate(
       CurvedAnimation(
         parent: _controller,
         curve: const Interval(0.70, 0.85, curve: Curves.easeOutBack),

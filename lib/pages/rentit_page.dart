@@ -175,8 +175,15 @@ class _PremiumGlowButtonState extends State<PremiumGlowButton> {
           height: 52,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: AppTheme.primaryBlue,
+            color: AppTheme.primaryBlue ,
             borderRadius: BorderRadius.circular(26),
+            boxShadow: [
+              BoxShadow(
+                color: AppTheme.primaryBlue .withOpacity(0.4),
+                blurRadius: 16,
+                offset: const Offset(0, 8),
+              ),
+            ],
           ),
           child: Text(
             widget.text,

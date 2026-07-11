@@ -156,7 +156,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
   }
 
   PreferredSizeWidget _buildAppBar(bool isDark, bool isSelectionMode) {
-    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final textColor = isDark ? AppColors.baseWhite : AppColors.neutral900;
 
     if (isSelectionMode) {
       return AppBar(
@@ -171,11 +171,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ),
         title: Text(
           '${_selectedChats.length}',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
+          style: AppTypography.h5Style(textColor),
         ),
         actions: [
           PopupMenuButton<String>(
@@ -192,7 +188,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ].map((String choice) {
                 return PopupMenuItem<String>(
                   value: choice,
-                  child: Text(choice),
+                  child: Text(choice, style: AppTypography.bodyMedium(AppTypography.regular, textColor)),
                 );
               }).toList();
             },
@@ -222,11 +218,12 @@ class _ChatListScreenState extends State<ChatListScreen> {
         title: TextField(
           controller: _searchController,
           autofocus: true,
-          style: TextStyle(color: textColor),
+          style: AppTypography.bodyLarge(AppTypography.regular, textColor),
           decoration: InputDecoration(
             hintText: 'Search chats...',
-            hintStyle: TextStyle(
-              color: isDark ? Colors.grey[500] : Colors.grey[400],
+            hintStyle: AppTypography.bodyLarge(
+              AppTypography.regular,
+              isDark ? AppColors.neutral400 : AppColors.neutral300,
             ),
             border: InputBorder.none,
           ),
@@ -264,11 +261,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
       titleSpacing: 0,
       title: Text(
         'Chats',
-        style: TextStyle(
-          color: textColor,
-          fontSize: 20,
-          fontWeight: FontWeight.bold,
-        ),
+        style: AppTypography.h5Style(textColor),
       ),
       actions: [
         IconButton(
@@ -306,18 +299,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
                     topRight: Radius.circular(8),
                   ),
                 ),
-                labelColor: isDark ? Colors.white : const Color(0xFF1F2937),
-                unselectedLabelColor: isDark
-                    ? Colors.grey[500]
-                    : const Color(0xFF9CA3AF),
-                labelStyle: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 16,
-                ),
-                unselectedLabelStyle: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  fontSize: 16,
-                ),
+                labelColor: isDark ? AppColors.baseWhite : AppColors.neutral800,
+                unselectedLabelColor: isDark ? AppColors.neutral400 : AppColors.neutral300,
+                labelStyle: AppTypography.bodyLarge(AppTypography.semibold, isDark ? AppColors.baseWhite : AppColors.neutral800),
+                unselectedLabelStyle: AppTypography.bodyLarge(AppTypography.medium, isDark ? AppColors.neutral400 : AppColors.neutral300),
                 splashFactory: NoSplash.splashFactory,
                 overlayColor: WidgetStateProperty.all(Colors.transparent),
                 tabs: const [
@@ -374,19 +359,14 @@ class _ChatListScreenState extends State<ChatListScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
         decoration: BoxDecoration(
-          color: isSelected
-              ? activeColor
-              : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
+          color: isSelected ? activeColor : (isDark ? AppColors.neutral800 : AppColors.neutral50),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,
-          style: TextStyle(
-            color: isSelected
-                ? Colors.white
-                : (isDark ? Colors.grey[400] : const Color(0xFF6B7280)),
-            fontSize: 12,
-            fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+          style: AppTypography.bodySmall(
+            isSelected ? AppTypography.semibold : AppTypography.medium,
+            isSelected ? AppColors.baseWhite : (isDark ? AppColors.neutral400 : AppColors.neutral500),
           ),
         ),
       ),
@@ -405,7 +385,10 @@ class _ChatListScreenState extends State<ChatListScreen> {
       return Center(
         child: Text(
           'No chats found',
-          style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+          style: AppTypography.bodyMedium(
+            AppTypography.regular,
+            isDark ? AppColors.neutral400 : AppColors.neutral500,
+          ),
         ),
       );
     }
@@ -426,9 +409,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
           children: [
             Container(
               color: isSelected
-                  ? (isDark
-                        ? primaryBlue.withOpacity(0.2)
-                        : const Color(0xFFE5EDFF))
+                  ? (isDark ? primaryBlue.withValues(alpha: 0.2) : AppColors.primary50)
                   : Colors.transparent,
               child: ListTile(
                 contentPadding: const EdgeInsets.symmetric(
@@ -462,15 +443,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         bottom: 0,
                         right: 0,
                         child: Container(
-                          decoration: const BoxDecoration(
-                            color: Colors.blue,
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryBlue,
                             shape: BoxShape.circle,
                           ),
-                          child: const Icon(
-                            Icons.check,
-                            size: 16,
-                            color: Colors.white,
-                          ),
+                          child: const Icon(Icons.check, size: 16, color: AppColors.baseWhite),
                         ),
                       ),
                   ],
@@ -479,17 +456,16 @@ class _ChatListScreenState extends State<ChatListScreen> {
                   children: [
                     Text(
                       chatName,
-                      style: TextStyle(
-                        color: isDark ? Colors.white : const Color(0xFF111827),
-                        fontWeight: FontWeight.w600,
-                        fontSize: 15,
+                      style: AppTypography.bodyMedium(
+                        AppTypography.semibold,
+                        isDark ? AppColors.baseWhite : AppColors.neutral900,
                       ),
                     ),
                     const SizedBox(width: 4),
                     Icon(
                       Icons.person_outline,
                       size: 14,
-                      color: isDark ? Colors.grey[400] : Colors.grey[600],
+                      color: isDark ? AppColors.neutral400 : AppColors.neutral500,
                     ),
                     const SizedBox(width: 2),
                     if (chat['isOnline'] as bool)
@@ -497,29 +473,20 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         width: 6,
                         height: 6,
                         decoration: const BoxDecoration(
-                          color: Colors.green,
+                          color: AppColors.success500,
                           shape: BoxShape.circle,
                         ),
                       ),
                     const Spacer(),
                     if (!hasUnread && !isSentByMe) ...[
-                      Icon(
-                        Icons.access_time,
-                        size: 12,
-                        color: Colors.grey[400],
-                      ),
+                      Icon(Icons.access_time, size: 12, color: AppColors.neutral300),
                       const SizedBox(width: 4),
                     ],
                     Text(
                       chat['time'] as String,
-                      style: TextStyle(
-                        color: hasUnread
-                            ? primaryBlue
-                            : const Color(0xFF9CA3AF),
-                        fontSize: 12,
-                        fontWeight: hasUnread
-                            ? FontWeight.w600
-                            : FontWeight.w400,
+                      style: AppTypography.bodyExtraSmall(
+                        hasUnread ? AppTypography.semibold : AppTypography.regular,
+                        hasUnread ? primaryBlue : AppColors.neutral300,
                       ),
                     ),
                   ],
@@ -532,7 +499,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                         Icon(
                           Icons.done_all,
                           size: 16,
-                          color: isReadByOther ? primaryBlue : Colors.grey[400],
+                          color: isReadByOther ? primaryBlue : AppColors.neutral300,
                         ),
                         const SizedBox(width: 4),
                       ],
@@ -541,16 +508,11 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           chat['message'] as String,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
-                          style: TextStyle(
-                            color: hasUnread
-                                ? (isDark ? Colors.white : Colors.black87)
-                                : (isDark
-                                      ? Colors.grey[500]
-                                      : const Color(0xFF6B7280)),
-                            fontSize: 13,
-                            fontWeight: hasUnread
-                                ? FontWeight.w600
-                                : FontWeight.w400,
+                          style: AppTypography.bodySmall(
+                            hasUnread ? AppTypography.semibold : AppTypography.regular,
+                            hasUnread
+                                ? (isDark ? AppColors.baseWhite : AppColors.neutral800)
+                                : (isDark ? AppColors.neutral400 : AppColors.neutral500),
                           ),
                         ),
                       ),
@@ -564,11 +526,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
                           ),
                           child: Text(
                             unreadCount.toString(),
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontSize: 10,
-                              fontWeight: FontWeight.bold,
-                            ),
+                            style: AppTypography.bodyExtraSmall(AppTypography.bold, AppColors.baseWhite),
                           ),
                         ),
                     ],
@@ -578,7 +536,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             ),
             Divider(
               height: 1,
-              color: isDark ? Colors.grey[800] : Colors.grey[100],
+              color: isDark ? AppColors.neutral700 : AppColors.neutral50,
             ),
           ],
         );
@@ -602,20 +560,18 @@ class _ChatListScreenState extends State<ChatListScreen> {
           Text(
             "You haven't received any messages yet!",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
-              color: isDark ? Colors.white : const Color(0xFF111827),
+            style: AppTypography.bodyLarge(
+              AppTypography.semibold,
+              isDark ? AppColors.baseWhite : AppColors.neutral900,
             ),
           ),
           const SizedBox(height: 8),
           Text(
             "Search the product or service\nto begin a conversation.",
             textAlign: TextAlign.center,
-            style: TextStyle(
-              fontSize: 13,
-              color: isDark ? Colors.grey[400] : const Color(0xFF6B7280),
-              height: 1.4,
+            style: AppTypography.bodySmall(
+              AppTypography.regular,
+              isDark ? AppColors.neutral400 : AppColors.neutral500,
             ),
           ),
           const SizedBox(height: 32),
@@ -626,7 +582,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 backgroundColor: primaryBlue,
-                foregroundColor: Colors.white,
+                foregroundColor: AppColors.baseWhite,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(24),
                 ),
@@ -634,10 +590,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
               ),
               child: Text(
                 'Start ${tabName == 'Rent IN' ? 'Messaging' : 'Renting'}',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
-                ),
+                style: AppTypography.bodyMedium(AppTypography.semibold, AppColors.baseWhite),
               ),
             ),
           ),

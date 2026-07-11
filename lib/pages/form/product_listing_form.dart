@@ -13,7 +13,6 @@ class ProductListingFlow extends StatefulWidget {
 class _ProductListingFlowState extends State<ProductListingFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
-
   List<String> _imagePaths = [];
   String? _selectedCategory;
   String? _selectedSubCategory;
@@ -497,7 +496,7 @@ class _UploadImageStepState extends State<_UploadImageStep> {
             icon: const Icon(Icons.camera_alt_outlined, size: 20),
             label: const Text('Open Camera & Take Photo'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: AppTheme.primaryBlue,
+              backgroundColor: AppTheme.primaryBlue ,
               foregroundColor: Colors.white,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(25),

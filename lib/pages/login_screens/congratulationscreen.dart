@@ -15,7 +15,7 @@ class CongratulationsScreen extends StatelessWidget {
     final textColor = colorScheme.onSurface;
     final textSecondary = colorScheme.onSurface.withOpacity(0.7);
 
-    final primaryBlue = colorScheme.primary;
+    final primaryBlue  = colorScheme.primary;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: isDark ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
@@ -80,10 +80,10 @@ class CongratulationsScreen extends StatelessWidget {
                       );
                     },
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: primaryBlue,
+                      backgroundColor: primaryBlue ,
                       foregroundColor: Colors.white,
                       elevation: 4,
-                      shadowColor: primaryBlue.withOpacity(0.4),
+                      shadowColor: primaryBlue .withOpacity(0.4),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(25),
                       ),

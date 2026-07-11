@@ -17,8 +17,8 @@ class ChatDetailScreen extends StatefulWidget {
   final String avatar;
 
   const ChatDetailScreen({
-    super.key, 
-    required this.userName, 
+    super.key,
+    required this.userName,
     this.avatar = 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100'
   });
 
@@ -68,7 +68,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
     setState(() {
       _isRecording = !_isRecording;
     });
-    
+
     if (_isRecording) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Recording started... Tap again to send.")),
@@ -155,7 +155,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               Navigator.pop(context);
               setState(() => messages.clear());
             },
-            child: const Text("Delete", style: TextStyle(color: Colors.red)),
+            child: Text("Delete", style: TextStyle(color: AppColors.error500)),
           ),
         ],
       ),
@@ -172,7 +172,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           TextButton(onPressed: () => Navigator.pop(context), child: const Text("Cancel")),
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text("Block", style: TextStyle(color: Colors.red)),
+            child: Text("Block", style: TextStyle(color: AppColors.error500)),
           ),
         ],
       ),
@@ -190,17 +190,19 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
-    final primaryBlue = const Color(0xFF2563EB);
+    final primaryBlue = AppTheme.primaryBlue;
+    final textColor = isDark ? AppColors.baseWhite : AppColors.neutral900;
+    final subTextColor = isDark ? AppColors.neutral400 : AppColors.neutral500;
 
     return Scaffold(
       backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
       appBar: AppBar(
-        backgroundColor: isDark ? AppTheme.darkBackground :  AppTheme.lightBackground,
+        backgroundColor: isDark ? AppTheme.darkBackground : AppTheme.lightBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
         leadingWidth: 40,
         leading: IconButton(
-          icon: Icon(Icons.arrow_back, color: isDark ? Colors.white : const Color(0xFF111827)),
+          icon: Icon(Icons.arrow_back, color: textColor),
           onPressed: () => Navigator.pop(context),
         ),
         titleSpacing: 0,
@@ -216,11 +218,11 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                 children: [
                   Text(
                     widget.userName,
-                    style: TextStyle(color: isDark ? Colors.white : const Color(0xFF111827), fontSize: 16, fontWeight: FontWeight.w600),
+                    style: AppTypography.bodyLarge(AppTypography.semibold, textColor),
                   ),
                   Text(
                     "Online",
-                    style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF4B5563), fontSize: 12, fontWeight: FontWeight.w400),
+                    style: AppTypography.bodySmall(AppTypography.regular, subTextColor),
                   ),
                 ],
               ),
@@ -229,8 +231,8 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         ),
         actions: [
           PopupMenuButton<String>(
-            icon: Icon(Icons.more_vert, color: isDark ? Colors.white : const Color(0xFF111827)),
-            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            icon: Icon(Icons.more_vert, color: textColor),
+            color: isDark ? AppTheme.darkSurface : AppColors.baseWhite,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             onSelected: _handleMenuSelection,
             itemBuilder: (context) => [
@@ -246,7 +248,7 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(1.0),
-          child: Container(color: isDark ? Colors.grey[800] : const Color(0xFFE5E7EB), height: 1.0),
+          child: Container(color: isDark ? AppColors.neutral700 : AppColors.neutral100, height: 1.0),
         ),
       ),
       body: Column(
@@ -255,24 +257,27 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
             margin: const EdgeInsets.all(16),
             padding: const EdgeInsets.all(12),
             decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF1E1E1E) : Colors.white.withValues(alpha: 0.60),
+              color: isDark ? AppTheme.darkSurface : AppColors.baseWhite.withValues(alpha: 0.60),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.info_outline, color: Colors.grey[400], size: 20),
+                Icon(Icons.info_outline, color: AppColors.neutral300, size: 20),
                 const SizedBox(width: 10),
                 Expanded(
                   child: Text(
                     "Sharing personal information such as your phone number, ID, password, or security PIN is strictly prohibited according to our app's terms and conditions. If you choose to share any of this information, our app cannot be held responsible.",
-                    style: TextStyle(fontSize: 11, color: isDark ? Colors.grey[400] : const Color(0xFF9CA3AF), height: 1.4),
+                    style: AppTypography.bodyExtraSmall(
+                      AppTypography.regular,
+                      isDark ? AppColors.neutral400 : AppColors.neutral300,
+                    ).copyWith(height: 1.4),
                   ),
                 ),
               ],
             ),
           ),
-          
+
           Expanded(
             child: ListView.builder(
               controller: _scrollController,
@@ -281,12 +286,12 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               itemBuilder: (context, index) {
                 final msg = messages[index];
                 return _buildMessageBubble(
-                  context, 
-                  msg.text, 
-                  msg.time, 
-                  msg.isMe, 
-                  isDark, 
-                  primaryBlue, 
+                  context,
+                  msg.text,
+                  msg.time,
+                  msg.isMe,
+                  isDark,
+                  primaryBlue,
                   isRead: msg.isRead
                 );
               },
@@ -299,25 +304,25 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
   }
 
   PopupMenuItem<String> _buildMenuItem(String value, IconData icon, String label, bool isDark, {bool isDestructive = false}) {
-    final color = isDestructive ? Colors.red : (isDark ? Colors.white : const Color(0xFF111827));
+    final color = isDestructive ? AppColors.error500 : (isDark ? AppColors.baseWhite : AppColors.neutral900);
     return PopupMenuItem<String>(
       value: value,
       child: Row(
         children: [
           Icon(icon, size: 18, color: color),
           const SizedBox(width: 12),
-          Text(label, style: TextStyle(color: color, fontSize: 14)),
+          Text(label, style: AppTypography.bodyMedium(AppTypography.regular, color)),
         ],
       ),
     );
   }
 
   Widget _buildMessageBubble(BuildContext context, String message, String time, bool isMe, bool isDark, Color primaryBlue, {bool isRead = false}) {
-     final bgColor = isMe 
-        ? (isDark ? const Color(0xFF1E3A8A) : const Color(0x19235BD6)) 
-        : (isDark ? const Color(0xFF2A2A2A) : const Color.fromARGB(255, 255, 255, 255));
-    
-    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+     final bgColor = isMe
+        ? (isDark ? AppColors.primary700 : AppColors.primary50)
+        : (isDark ? AppTheme.darkSurface : AppColors.baseWhite);
+
+    final textColor = isDark ? AppColors.baseWhite : AppColors.neutral900;
 
     return Align(
       alignment: isMe ? Alignment.centerRight : Alignment.centerLeft,
@@ -338,18 +343,21 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
           alignment: WrapAlignment.end,
           crossAxisAlignment: WrapCrossAlignment.end,
           children: [
-            Text(message, style: TextStyle(color: textColor, fontSize: 14)),
-            const SizedBox(width: 8), 
+            Text(message, style: AppTypography.bodyMedium(AppTypography.regular, textColor)),
+            const SizedBox(width: 8),
             Row(
               mainAxisSize: MainAxisSize.min,
               children: [
                 Text(
                   time,
-                  style: TextStyle(color: isDark ? Colors.grey[400] : const Color(0xFF6B7280), fontSize: 10),
+                  style: AppTypography.bodyExtraSmall(
+                    AppTypography.regular,
+                    isDark ? AppColors.neutral400 : AppColors.neutral500,
+                  ),
                 ),
                 if (isMe) ...[
                   const SizedBox(width: 4),
-                  Icon(Icons.done_all, size: 14, color: isRead ? primaryBlue : Colors.grey[400]),
+                  Icon(Icons.done_all, size: 14, color: isRead ? primaryBlue : AppColors.neutral300),
                 ]
               ],
             ),
@@ -370,17 +378,17 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
+                  color: isDark ? AppTheme.darkSurface : AppColors.baseWhite,
                   borderRadius: BorderRadius.circular(30),
-                  border: _isRecording ? Border.all(color: Colors.redAccent) : null,
+                  border: _isRecording ? Border.all(color: AppColors.error400) : null,
                 ),
                 child: Row(
                   children: [
                     GestureDetector(
                       onTap: _toggleRecording,
                       child: Icon(
-                        _isRecording ? Icons.stop_circle : Icons.mic_none, 
-                        color: _isRecording ? Colors.red : primaryBlue, 
+                        _isRecording ? Icons.stop_circle : Icons.mic_none,
+                        color: _isRecording ? AppColors.error500 : primaryBlue,
                         size: 24
                       ),
                     ),
@@ -388,13 +396,16 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
                     Expanded(
                       child: TextField(
                         controller: _messageController,
-                        style: TextStyle(color: isDark ? Colors.white : Colors.black),
+                        style: AppTypography.bodyMedium(
+                          AppTypography.regular,
+                          isDark ? AppColors.baseWhite : AppColors.baseBlack,
+                        ),
                         decoration: InputDecoration(
                           hintText: _isRecording ? "Recording..." : "Message",
-                          hintStyle: TextStyle(
-                            color: _isRecording ? Colors.redAccent : (isDark ? Colors.grey[600] : const Color(0xFF9CA3AF)), 
-                            fontSize: 15
-                          ),
+                          hintStyle: AppTypography.bodyLarge(
+                            AppTypography.regular,
+                            _isRecording ? AppColors.error400 : (isDark ? AppColors.neutral400 : AppColors.neutral300),
+                          ).copyWith(fontSize: 15),
                           border: InputBorder.none,
                           isDense: true,
                           contentPadding: const EdgeInsets.symmetric(vertical: 4),
@@ -417,10 +428,10 @@ class _ChatDetailScreenState extends State<ChatDetailScreen> {
               child: Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: primaryBlue, 
+                  color: primaryBlue,
                   shape: BoxShape.circle
                 ),
-                child: const Icon(Icons.send_outlined, color: Colors.white, size: 20),
+                child: const Icon(Icons.send_outlined, color: AppColors.baseWhite, size: 20),
               ),
             ),
           ],

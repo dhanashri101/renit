@@ -178,6 +178,10 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDark = theme.brightness == Brightness.dark;
+    final primaryBlue  = const Color(0xFF2563EB);
+    final textColor = isDark ? Colors.white : const Color(0xFF111827);
+    final subTextColor = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
+    final cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
     final Color primaryBlue = const Color(0xFF2563EB);
     final Color backgroundColor =
@@ -363,18 +367,30 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                   color: statsBg,
                   borderRadius: BorderRadius.circular(16),
                 ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    _buildStat('${widget.adsCount}', 'Ads', textColor,
-                        subTextColor),
-                    Container(width: 1, height: 36, color: dividerColor),
-                    _buildStat('${widget.followersCount}', 'Followers',
-                        textColor, subTextColor),
-                    Container(width: 1, height: 36, color: dividerColor),
-                    _buildStat('${widget.followingCount}', 'Following',
-                        textColor, subTextColor),
-                  ],
+              ),
+            ),
+            const SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                _buildStat('${widget.adsCount}', 'Ads', textColor, subTextColor),
+                _buildStat('${widget.followersCount}', 'Followers', textColor, subTextColor),
+                _buildStat('${widget.followingCount}', 'Following', textColor, subTextColor),
+              ],
+            ),
+            const SizedBox(height: 20),
+            SizedBox(
+              width: double.infinity,
+              height: 46,
+              child: ElevatedButton(
+                onPressed: () => setState(() => _isFollowing = !_isFollowing),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: _isFollowing
+                      ? (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB))
+                      : primaryBlue ,
+                  foregroundColor: _isFollowing ? textColor : Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 ),
               ),
               const SizedBox(height: 20),
@@ -401,53 +417,39 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                   ),
                 ),
               ),
-              const SizedBox(height: 28),
-
-              Text(
-                'Ads posted',
-                style: TextStyle(
-                    color: textColor,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w800),
-              ),
-              const SizedBox(height: 16),
-              Row(
-                children: [
-                  _buildTabChip('All', primaryBlue, chipUnselectedBg,
-                      chipBorder, chipUnselectedText),
-                  const SizedBox(width: 8),
-                  _buildTabChip('Products', primaryBlue, chipUnselectedBg,
-                      chipBorder, chipUnselectedText),
-                  const SizedBox(width: 8),
-                  _buildTabChip('Services', primaryBlue, chipUnselectedBg,
-                      chipBorder, chipUnselectedText),
-                ],
-              ),
-              const SizedBox(height: 20),
-
-              _filteredAds.isEmpty
-                  ? Padding(
-                      padding: const EdgeInsets.symmetric(vertical: 40),
-                      child: Center(
-                        child: Text('No ads in this category',
-                            style: TextStyle(color: subTextColor)),
-                      ),
-                    )
-                  : GridView.builder(
-                      shrinkWrap: true,
-                      physics: const NeverScrollableScrollPhysics(),
-                      itemCount: _filteredAds.length,
-                      gridDelegate:
-                          SliverGridDelegateWithFixedCrossAxisCount(
-                        crossAxisCount: 2,
-                        crossAxisSpacing: gridSpacing,
-                        mainAxisSpacing: gridSpacing,
-                        childAspectRatio: childAspectRatio,
-                      ),
-                      itemBuilder: (context, index) {
-                        return _buildAdCard(
-                            _filteredAds[index], theme, isDark);
-                      },
+            ),
+            const SizedBox(height: 24),
+            Text(
+              'Ads posted',
+              style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                _buildTabChip('All', textColor, subTextColor, primaryBlue , isDark),
+                const SizedBox(width: 8),
+                _buildTabChip('Products', textColor, subTextColor, primaryBlue , isDark),
+                const SizedBox(width: 8),
+                _buildTabChip('Services', textColor, subTextColor, primaryBlue , isDark),
+              ],
+            ),
+            const SizedBox(height: 16),
+            _filteredAds.isEmpty
+                ? Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 40),
+                    child: Center(
+                      child: Text('No ads in this category', style: TextStyle(color: subTextColor)),
+                    ),
+                  )
+                : GridView.builder(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: _filteredAds.length,
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 12,
+                      childAspectRatio: 0.72,
                     ),
               const SizedBox(height: 24),
             ],
@@ -474,8 +476,7 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
     );
   }
 
-  Widget _buildTabChip(String label, Color primaryBlue, Color unselectedBg,
-      Color borderColor, Color unselectedText) {
+  Widget _buildTabChip(String label, Color textColor, Color? subTextColor, Color primaryBlue , bool isDark) {
     final isSelected = _selectedTab == label;
     return GestureDetector(
       onTap: () => setState(() => _selectedTab = label),
@@ -483,17 +484,8 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
         duration: const Duration(milliseconds: 150),
         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? primaryBlue : unselectedBg,
-          borderRadius: BorderRadius.circular(24),
-          border: isSelected ? null : Border.all(color: borderColor, width: 1),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                      color: primaryBlue.withOpacity(0.3),
-                      blurRadius: 8,
-                      offset: const Offset(0, 4))
-                ]
-              : [],
+          color: isSelected ? primaryBlue  : (isDark ? const Color(0xFF2A2A2A) : const Color(0xFFF3F4F6)),
+          borderRadius: BorderRadius.circular(20),
         ),
         child: Text(
           label,

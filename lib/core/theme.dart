@@ -2,23 +2,20 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 
-
 class AppColors {
   AppColors._();
 
-  // ---- Primary (Blue) ----
   static const Color primary50 = Color(0xFFEAF1FD);
   static const Color primary100 = Color(0xFFC1D4F8);
   static const Color primary200 = Color(0xFF98B7F1);
   static const Color primary300 = Color(0xFF719AE9);
   static const Color primary400 = Color(0xFF4A7CE0);
-  static const Color primary500 = Color(0xFF235BD6); // default
+  static const Color primary500 = Color(0xFF235BD6);
   static const Color primary600 = Color(0xFF1844A3);
   static const Color primary700 = Color(0xFF13398B);
   static const Color primary800 = Color(0xFF09235D);
   static const Color primary900 = Color(0xFF031032);
 
-  // ---- Secondary (Lime) ----
   static const Color secondary50 = Color(0xFFF8FCEF);
   static const Color secondary100 = Color(0xFFEAF5CF);
   static const Color secondary200 = Color(0xFFDCEEAD);
@@ -145,17 +142,14 @@ class ActivityColors {
   static const Color inactiveText = AppColors.neutral700;
 }
 
-// =============================================================================
-// TYPOGRAPHY
-// Font family: Outfit. Base value: 14, Scale: 1.125 (Major Second).
-// Sizes below are the modular scale (14 * 1.125^n), rounded to the nearest px.
-// =============================================================================
+
 
 class AppTypography {
   AppTypography._();
 
   static const String fontFamily = 'Outfit';
 
+  // Modular scale sizes (base 14, ratio 1.125)
   static const double bodyXS = 11;
   static const double bodySM = 12;
   static const double bodyMD = 14; // base
@@ -194,14 +188,12 @@ class AppTypography {
   static TextStyle h5Style(Color c) => headingStyle(h5, c);
   static TextStyle h6Style(Color c) => headingStyle(h6, c);
 
-  // ---- Body text, parametrized by size + weight ----
   static TextStyle bodyLarge(FontWeight w, Color c) => _style(bodyLG, w, c);
   static TextStyle bodyMedium(FontWeight w, Color c) => _style(bodyMD, w, c);
   static TextStyle bodySmall(FontWeight w, Color c) => _style(bodySM, w, c);
   static TextStyle bodyExtraSmall(FontWeight w, Color c) =>
       _style(bodyXS, w, c);
 
-  // ---- Link variants (underlined, primary color by default) ----
   static TextStyle linkLarge(Color c) =>
       _style(bodyLG, regular, c, decoration: TextDecoration.underline);
   static TextStyle linkMedium(Color c) =>
@@ -229,15 +221,13 @@ class AppTypography {
   }
 }
 
-
-
 class AppTheme {
   AppTheme._();
-  static const Color primaryBlue = Color(0xFF235BD6);
 
   static const Color lightBackground = AppColors.primary50;
   static const Color darkBackground = Color(0xFF121212);
   static const Color darkSurface = Color(0xFF1E1E1E);
+  static const Color primaryBlue = Color(0xFF235BD6);
 
   static ThemeData get lightTheme {
     const onSurface = AppColors.neutral900;

@@ -148,7 +148,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                             const SizedBox(width: 8),
                             const Icon(
                               Icons.keyboard_arrow_down_rounded,
-                              color: AppTheme.primaryBlue,
+                              color: AppTheme.primaryBlue ,
                               size: 22,
                             ),
                           ],
