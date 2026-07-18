@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:rentit24/core/network/api_exception.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/main.dart';
 import 'package:rentit24/model/category_model.dart';
@@ -358,7 +359,6 @@ class _HomeScreenState extends State<HomeScreen> {
         top: false,
         child: Column(
           children: [
-            // Fixed app bar — stays pinned, not part of scroll view
             Center(
               child: ConstrainedBox(
                 constraints: BoxConstraints(
@@ -368,7 +368,6 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Scrollable content below the app bar
             Expanded(
               child: Center(
                 child: ConstrainedBox(
@@ -427,6 +426,12 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
     );
+  }
+
+  void _retryCategories() {
+    setState(() {
+      _categoriesFuture = _categoryService.getCategories();
+    });
   }
 
   Widget _buildCustomAppBar(
@@ -750,209 +755,214 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildCategories(ThemeData theme, double width, double scale) {
-    final isDark = theme.brightness == Brightness.dark;
+    final bool isDark = theme.brightness == Brightness.dark;
 
     final double itemWidth = 76.0 * scale;
 
-    final List<Map<String, String>> fallbackCategories = [
-      {
-        'name': 'Agriculture & Farming',
-        'image': 'assets/images/categories/agriculture-farming.png',
-      },
-      {
-        'name': 'Appliances',
-        'image': 'assets/images/categories/appliances.png',
-      },
-      {
-        'name': 'Baby & Kids',
-        'image': 'assets/images/categories/baby-kids.png',
-      },
-      {
-        'name': 'Beauty & Grooming',
-        'image': 'assets/images/categories/beauty-grooming.png',
-      },
-      {
-        'name': 'Books & Stationery',
-        'image': 'assets/images/categories/books-stationery.png',
-      },
-      {
-        'name': 'Community & NGO',
-        'image': 'assets/images/categories/community-ngo.png',
-      },
-      {
-        'name': 'Construction',
-        'image': 'assets/images/categories/construction-heavy-machinery.png',
-      },
-      {
-        'name': 'Coworking',
-        'image': 'assets/images/categories/coworking-business.png',
-      },
-      {
-        'name': 'Delivery & Logistics',
-        'image': 'assets/images/categories/delivery-logistics.png',
-      },
-      {
-        'name': 'Digital & Tech',
-        'image': 'assets/images/categories/digital-tech-services.png',
-      },
-      {'name': 'Education', 'image': 'assets/images/categories/education.png'},
-      {
-        'name': 'Electronics',
-        'image': 'assets/images/categories/electronics.png',
-      },
-      {
-        'name': 'Event Professionals',
-        'image': 'assets/images/categories/event-professionals.png',
-      },
-      {
-        'name': 'Events & Parties',
-        'image': 'assets/images/categories/events-parties.png',
-      },
-      {
-        'name': 'Fashion & Dress',
-        'image': 'assets/images/categories/fashion-dress.png',
-      },
-      {
-        'name': 'Pets & Animals',
-        'image': 'assets/images/categories/pets-animals.png',
-      },
-      {
-        'name': 'Professional Services',
-        'image': 'assets/images/categories/professional-services.png',
-      },
-      {
-        'name': 'Real Estate',
-        'image': 'assets/images/categories/real-estate.png',
-      },
-      {
-        'name': 'Security Services',
-        'image': 'assets/images/categories/security-services.png',
-      },
-      {
-        'name': 'Seasonal Needs',
-        'image': 'assets/images/categories/sesonal-needs.png',
-      },
-      {
-        'name': 'Sports & Fitness',
-        'image': 'assets/images/categories/sports-fitness.png',
-      },
-      {
-        'name': 'Tools & Machinery',
-        'image': 'assets/images/categories/tools-machinery.png',
-      },
-      {
-        'name': 'Transportation',
-        'image': 'assets/images/categories/transportation-services.png',
-      },
-      {
-        'name': 'Travel & Hospitality',
-        'image': 'assets/images/categories/travel-hospitality.png',
-      },
-      {
-        'name': 'Travel & Outdoors',
-        'image': 'assets/images/categories/travel-outdoors.png',
-      },
-      {'name': 'Vehicles', 'image': 'assets/images/categories/vehicles.png'},
-      {
-        'name': 'Wedding Photography',
-        'image': 'assets/images/categories/wedding-photography.png',
-      },
-    ];
-
     return SizedBox(
-      height: 120 * scale,
+      height: 125 * scale,
       child: FutureBuilder<List<CategoryModel>>(
         future: _categoriesFuture,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return Center(
-              child: CircularProgressIndicator(color: theme.primaryColor),
-            );
-          }
+        builder:
+            (
+              BuildContext context,
+              AsyncSnapshot<List<CategoryModel>> snapshot,
+            ) {
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return Center(
+                  child: SizedBox(
+                    width: 26 * scale,
+                    height: 26 * scale,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.5,
+                      color: theme.primaryColor,
+                    ),
+                  ),
+                );
+              }
 
-          final bool useFallback =
-              snapshot.hasError || (snapshot.data?.isEmpty ?? true);
-          final categories = snapshot.data ?? [];
-          final int itemCount = useFallback
-              ? fallbackCategories.length
-              : categories.length;
+              if (snapshot.hasError) {
+                final Object error = snapshot.error!;
+                final String errorMessage = error is ApiException
+                    ? error.userMessage
+                    : 'Unable to load categories. Please retry.';
 
-          return ListView.separated(
-            scrollDirection: Axis.horizontal,
-            clipBehavior: Clip.none,
-            padding: EdgeInsets.symmetric(horizontal: 16 * scale),
-            itemCount: itemCount,
-            separatorBuilder: (context, index) => SizedBox(width: 8 * scale),
-            itemBuilder: (context, index) {
-              final String categoryName = useFallback
-                  ? fallbackCategories[index]['name']!
-                  : categories[index].name;
+                debugPrint('FutureBuilder category error: $error');
 
-              final String? imageAssetPath = useFallback
-                  ? fallbackCategories[index]['image']
-                  : null;
-
-              return SizedBox(
-                width: itemWidth,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    Container(
-                      padding: EdgeInsets.all(12 * scale),
-                      decoration: ShapeDecoration(
-                        color: isDark
-                            ? AppColors.darkSurface
-                            : AppColors.baseWhite,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16 * scale),
+                return Padding(
+                  padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+                  child: Center(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          Icons.error_outline_rounded,
+                          color: Colors.redAccent,
+                          size: 22 * scale,
                         ),
-                        shadows: [
-                          BoxShadow(
-                            color: AppColors.baseBlack.withOpacity(
-                              isDark ? 0.3 : 0.04,
+                        SizedBox(height: 6 * scale),
+                        Text(
+                          errorMessage,
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            fontSize: 11 * scale,
+                            color: isDark
+                                ? AppColors.baseWhite
+                                : AppColors.neutral700,
+                          ),
+                        ),
+                        SizedBox(height: 4 * scale),
+                        TextButton(
+                          onPressed: () {
+                            setState(() {
+                              _categoriesFuture = _categoryService
+                                  .getCategories();
+                            });
+                          },
+                          child: const Text('Retry'),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              final List<CategoryModel> categories =
+                  (snapshot.data ?? <CategoryModel>[])
+                      .where(
+                        (CategoryModel category) =>
+                            category.isActive != false &&
+                            category.name.trim().isNotEmpty,
+                      )
+                      .toList();
+
+              if (categories.isEmpty) {
+                return Center(
+                  child: Text(
+                    'No active categories available',
+                    style: AppTypography.bodySmall(
+                      AppTypography.medium,
+                      isDark
+                          ? AppColors.baseWhite.withOpacity(0.7)
+                          : AppColors.neutral600,
+                    ).copyWith(fontSize: 13 * scale),
+                  ),
+                );
+              }
+
+              return ListView.separated(
+                scrollDirection: Axis.horizontal,
+                clipBehavior: Clip.none,
+                padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+                itemCount: categories.length,
+                separatorBuilder: (BuildContext context, int index) {
+                  return SizedBox(width: 8 * scale);
+                },
+                itemBuilder: (BuildContext context, int index) {
+                  final CategoryModel category = categories[index];
+
+                  return SizedBox(
+                    width: itemWidth,
+                    child: InkWell(
+                      borderRadius: BorderRadius.circular(16 * scale),
+                      onTap: () {
+                        debugPrint(
+                          'Selected category: '
+                          '${category.id} - ${category.name}',
+                        );
+
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute<void>(
+                            builder: (BuildContext context) =>
+                                const CategoryListScreen(),
+                          ),
+                        );
+                      },
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.center,
+                        children: [
+                          Container(
+                            padding: EdgeInsets.all(12 * scale),
+                            decoration: ShapeDecoration(
+                              color: isDark
+                                  ? AppColors.darkSurface
+                                  : AppColors.baseWhite,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16 * scale),
+                              ),
+                              shadows: [
+                                BoxShadow(
+                                  color: AppColors.baseBlack.withOpacity(
+                                    isDark ? 0.30 : 0.04,
+                                  ),
+                                  blurRadius: 8,
+                                  offset: const Offset(0, 2),
+                                ),
+                              ],
                             ),
-                            blurRadius: 8,
-                            offset: const Offset(0, 2),
+                            child: SizedBox(
+                              width: 40 * scale,
+                              height: 40 * scale,
+                              child: Icon(
+                                _getCategoryIcon(category.type),
+                                color: AppColors.primary500,
+                                size: 26 * scale,
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 8 * scale),
+                          Text(
+                            category.name,
+                            textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style:
+                                AppTypography.bodyExtraSmall(
+                                  AppTypography.semibold,
+                                  isDark
+                                      ? AppColors.baseWhite.withOpacity(0.7)
+                                      : AppColors.neutral800,
+                                ).copyWith(
+                                  fontSize: AppTypography.bodyXS * scale,
+                                  height: 1.2,
+                                ),
                           ),
                         ],
                       ),
-                      child: SizedBox(
-                        width: 40 * scale,
-                        height: 40 * scale,
-                        child: imageAssetPath != null
-                            ? Image.asset(imageAssetPath, fit: BoxFit.contain)
-                            : Icon(
-                                Icons.category_outlined,
-                                color: AppColors.primary500,
-                                size: 24 * scale,
-                              ),
-                      ),
                     ),
-                    SizedBox(height: 8 * scale),
-                    Text(
-                      categoryName,
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      style:
-                          AppTypography.bodyExtraSmall(
-                            AppTypography.semibold,
-                            isDark
-                                ? AppColors.baseWhite.withOpacity(0.7)
-                                : AppColors.neutral800,
-                          ).copyWith(
-                            fontSize: AppTypography.bodyXS * scale,
-                            height: 1.2,
-                          ),
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
             },
-          );
-        },
       ),
     );
+  }
+
+  IconData _getCategoryIcon(String? type) {
+    switch ((type ?? '').trim().toLowerCase()) {
+      case 'service':
+      case 'professional':
+        return Icons.home_repair_service_outlined;
+
+      case 'product':
+      case 'item':
+      case 'rental':
+        return Icons.inventory_2_outlined;
+
+      case 'vehicle':
+      case 'transport':
+        return Icons.directions_car_outlined;
+
+      case 'property':
+      case 'real estate':
+        return Icons.apartment_outlined;
+
+      default:
+        return Icons.category_outlined;
+    }
   }
 
   Widget _buildProfessionalList(
@@ -1253,7 +1263,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 child: Text(
                   filter,
                   style: AppTypography.bodyMedium(
-                     AppTypography.medium,
+                    AppTypography.medium,
                     isActive
                         ? AppColors.baseWhite
                         : (isDark
@@ -1370,8 +1380,7 @@ class _HomeScreenState extends State<HomeScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           AspectRatio(
-            aspectRatio:
-                1.15, 
+            aspectRatio: 1.15,
             child: Stack(
               children: [
                 Positioned.fill(

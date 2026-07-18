@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rentit24/pages/homescreen.dart';
+import 'package:rentit24/core/storage/auth_storage.dart';
+import 'package:rentit24/pages/welcomescreen.dart';
 import 'package:rentit24/wrapper/navbar.dart';
 
 class CongratulationsScreen extends StatelessWidget {
@@ -71,14 +72,7 @@ class CongratulationsScreen extends StatelessWidget {
                   width: double.infinity,
                   height: 50,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => const NavigationWrapper(),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openHome(context),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: primaryBlue ,
                       foregroundColor: Colors.white,
@@ -115,4 +109,31 @@ class CongratulationsScreen extends StatelessWidget {
       ),
     );
   }
+
+  Future<void> _openHome(BuildContext context) async {
+    final bool hasSession = await AuthStorage().hasUsableSession();
+    if (!context.mounted) return;
+
+    final Widget destination = hasSession
+        ? const NavigationWrapper()
+        : const MainLoginScreen();
+
+    if (!hasSession) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text(
+            'No verified backend session is available. Please sign in first.',
+          ),
+        ),
+      );
+    }
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => destination,
+      ),
+      (Route<dynamic> route) => false,
+    );
+  }
+
 }

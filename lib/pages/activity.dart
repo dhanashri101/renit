@@ -11,19 +11,20 @@ class MyActivityPage extends StatefulWidget {
 
 class _MyActivityPageState extends State<MyActivityPage>
     with SingleTickerProviderStateMixin {
-  late TabController _mainTabController;
-  int _selectedFilterIndex = 0;
+  late final TabController _mainTabController;
 
-  final List<String> _filters = [
+  int _selectedFilterIndex = 0;
+  int _currentMainTabIndex = 0;
+
+  final List<String> _filters = const [
     'All',
     'Active Ads',
     'Inactive Ads',
     'Pending Ads',
     'Moderated Ads',
   ];
-  final List<int> _filterCounts = [4, 1, 1, 1, 1];
 
-  final List<AdModel> _allAds = [
+  final List<AdModel> _allAds = const [
     AdModel(
       title: 'Physio Therapy',
       category: 'Doctor',
@@ -32,7 +33,7 @@ class _MyActivityPageState extends State<MyActivityPage>
       views: 0,
       saves: 0,
       imageUrl:
-          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=200',
+          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400',
       status: AdStatus.pending,
       type: AdType.service,
     ),
@@ -44,10 +45,10 @@ class _MyActivityPageState extends State<MyActivityPage>
       views: 0,
       saves: 0,
       imageUrl:
-          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=200',
+          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
       status: AdStatus.rejected,
       rejectionReason:
-          'Remove phone number or unrelated text from AD Description that doesn\'t match the product or service',
+          'Remove phone number or unrelated text from AD Description that does not match the product or service.',
       type: AdType.product,
     ),
     AdModel(
@@ -59,7 +60,7 @@ class _MyActivityPageState extends State<MyActivityPage>
       saves: 122,
       rating: 4.5,
       imageUrl:
-          'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=200',
+          'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=400',
       status: AdStatus.approved,
       type: AdType.service,
     ),
@@ -72,7 +73,7 @@ class _MyActivityPageState extends State<MyActivityPage>
       saves: 52,
       rating: 4.2,
       imageUrl:
-          'https://images.unsplash.com/photo-1581090122319-8fab9528eaaa?w=200',
+          'https://images.unsplash.com/photo-1581090122319-8fab9528eaaa?w=400',
       status: AdStatus.inactive,
       type: AdType.product,
     ),
@@ -82,193 +83,167 @@ class _MyActivityPageState extends State<MyActivityPage>
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 3, vsync: this);
+    _mainTabController.addListener(_handleMainTabChange);
+  }
+
+  void _handleMainTabChange() {
+    if (_currentMainTabIndex == _mainTabController.index) return;
+
+    setState(() {
+      _currentMainTabIndex = _mainTabController.index;
+    });
   }
 
   @override
   void dispose() {
-    _mainTabController.dispose();
+    _mainTabController
+      ..removeListener(_handleMainTabChange)
+      ..dispose();
     super.dispose();
   }
 
-  List<AdModel> _getFilteredAds(int mainTabIndex, int subFilterIndex) {
-    List<AdModel> filtered = _allAds;
+  List<AdModel> _getFilteredAds(int mainTabIndex, int filterIndex) {
+    Iterable<AdModel> filtered = _allAds;
 
     if (mainTabIndex == 1) {
-      filtered = filtered.where((ad) => ad.type == AdType.product).toList();
+      filtered = filtered.where((ad) => ad.type == AdType.product);
     } else if (mainTabIndex == 2) {
-      filtered = filtered.where((ad) => ad.type == AdType.service).toList();
+      filtered = filtered.where((ad) => ad.type == AdType.service);
     }
 
-    switch (subFilterIndex) {
+    switch (filterIndex) {
       case 1:
-        filtered = filtered
-            .where((ad) => ad.status == AdStatus.approved)
-            .toList();
+        filtered = filtered.where((ad) => ad.status == AdStatus.approved);
         break;
       case 2:
-        filtered = filtered
-            .where((ad) => ad.status == AdStatus.inactive)
-            .toList();
+        filtered = filtered.where((ad) => ad.status == AdStatus.inactive);
         break;
       case 3:
-        filtered = filtered
-            .where((ad) => ad.status == AdStatus.pending)
-            .toList();
+        filtered = filtered.where((ad) => ad.status == AdStatus.pending);
         break;
       case 4:
-        filtered = filtered
-            .where((ad) => ad.status == AdStatus.rejected)
-            .toList();
+        filtered = filtered.where((ad) => ad.status == AdStatus.rejected);
         break;
     }
-    return filtered;
+
+    return filtered.toList();
+  }
+
+  int _filterCount(int filterIndex) {
+    return _getFilteredAds(_currentMainTabIndex, filterIndex).length;
+  }
+
+  void _goBack() {
+    final navigator = Navigator.of(context);
+
+    if (navigator.canPop()) {
+      navigator.pop();
+      return;
+    }
+
+    navigator.pushReplacement(
+      MaterialPageRoute<void>(
+        builder: (_) => const NavigationWrapper(),
+      ),
+    );
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final isDark = theme.brightness == Brightness.dark;
-    final textColor = isDark ? Colors.white : const Color(0xFF111827);
-    final textSecondary = isDark ? Colors.grey[400] : const Color(0xFF6B7280);
+    final colorScheme = theme.colorScheme;
 
     return Scaffold(
-      backgroundColor: isDark
-          ? AppTheme.darkBackground
-          : const Color(0xFFEFF6FF),
       appBar: AppBar(
-        backgroundColor: isDark
-            ? AppTheme.darkSurface
-            : const Color(0xFFEFF6FF),
+        backgroundColor: theme.scaffoldBackgroundColor,
+        foregroundColor: colorScheme.onSurface,
         elevation: 0,
         surfaceTintColor: Colors.transparent,
-        shape: Border(
-   
-  ),
         leading: IconButton(
-        icon: Icon(Icons.arrow_back, color: textColor),
-        onPressed: () {
-          Navigator.pushAndRemoveUntil(
-            context,
-            MaterialPageRoute(builder: (_) => const NavigationWrapper()),
-            (route) => false,
-          );
-        },
-      ),
+          onPressed: _goBack,
+          tooltip: MaterialLocalizations.of(context).backButtonTooltip,
+          icon: const Icon(Icons.arrow_back_rounded),
+        ),
         titleSpacing: 0,
         title: Text(
           'My Activity',
-          style: TextStyle(
-            color: textColor,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: AppTypography.bold,
           ),
         ),
-        
         bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(100),
+          preferredSize: const Size.fromHeight(108),
           child: Column(
             children: [
-              SizedBox(
-                width: double.infinity,
-                child: TabBar(
-                  controller: _mainTabController,
-                  indicatorSize: TabBarIndicatorSize.label,
-                  dividerColor: Colors.transparent,
-                  indicator: UnderlineTabIndicator(
-                    borderSide: BorderSide(
-                      color: AppTheme.primaryBlue ,
-                      width: 4.0,
-                    ),
-                    borderRadius: const BorderRadius.only(
-                      topLeft: Radius.circular(8),
-                      topRight: Radius.circular(8),
-                    ),
+              TabBar(
+                controller: _mainTabController,
+                indicatorSize: TabBarIndicatorSize.label,
+                dividerColor: Colors.transparent,
+                indicator: UnderlineTabIndicator(
+                  borderSide: BorderSide(
+                    color: colorScheme.primary,
+                    width: 4,
                   ),
-                  labelColor: isDark ? Colors.white : const Color(0xFF1F2937),
-                  unselectedLabelColor: isDark
-                      ? Colors.grey[500]
-                      : const Color(0xFF9CA3AF),
-                  labelStyle: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
                   ),
-                  unselectedLabelStyle: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 16,
-                  ),
-                  splashFactory: NoSplash.splashFactory,
-                  overlayColor: WidgetStateProperty.all(Colors.transparent),
-                  tabs: const [
-                    Tab(
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Text('All'),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Text('Products'),
-                      ),
-                    ),
-                    Tab(
-                      child: Padding(
-                        padding: EdgeInsets.only(bottom: 4.0),
-                        child: Text('Services'),
-                      ),
-                    ),
-                  ],
-                  onTap: (index) => setState(() {}),
                 ),
+                labelColor: colorScheme.onSurface,
+                unselectedLabelColor: colorScheme.onSurfaceVariant,
+                labelStyle: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: AppTypography.semibold,
+                ),
+                unselectedLabelStyle: theme.textTheme.bodyLarge?.copyWith(
+                  fontWeight: AppTypography.medium,
+                ),
+                splashFactory: NoSplash.splashFactory,
+                overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+                tabs: const [
+                  Tab(text: 'All'),
+                  Tab(text: 'Products'),
+                  Tab(text: 'Services'),
+                ],
               ),
               const SizedBox(height: 12),
               SizedBox(
-                height: 32,
-                child: ListView.builder(
+                height: 36,
+                child: ListView.separated(
                   scrollDirection: Axis.horizontal,
                   padding: const EdgeInsets.symmetric(horizontal: 16),
                   itemCount: _filters.length,
+                  separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, index) {
                     final isSelected = _selectedFilterIndex == index;
-                    return Padding(
-                      padding: const EdgeInsets.only(right: 8),
-                      child: ChoiceChip(
-                        showCheckmark: false,
-                        label: Text(
-                          '${_filters[index]} (${_filterCounts[index]})',
-                          style: TextStyle(
-                            color: isSelected ? Colors.white : textSecondary,
-                            fontSize: 12,
-                            fontWeight: isSelected
-                                ? FontWeight.w600
-                                : FontWeight.w500,
-                          ),
-                        ),
-                        selected: isSelected,
-                        onSelected: (selected) {
-                          if (selected) {
-                            setState(() => _selectedFilterIndex = index);
-                          }
-                        },
-                        backgroundColor: isDark
-                            ? const Color(0xFF2A2A2A)
-                            : Colors.transparent,
-                        selectedColor: AppTheme.primaryBlue ,
-                        side: BorderSide(
-                          color: isSelected
-                              ? AppTheme.primaryBlue 
-                              : (isDark
-                                  ? Colors.transparent
-                                  : const Color(0xFFE5E7EB)),
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(20),
-                        ),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 4,
-                          vertical: 0,
-                        ),
+
+                    return ChoiceChip(
+                      showCheckmark: false,
+                      selected: isSelected,
+                      onSelected: (selected) {
+                        if (!selected) return;
+                        setState(() => _selectedFilterIndex = index);
+                      },
+                      label: Text('${_filters[index]} (${_filterCount(index)})'),
+                      labelStyle: theme.textTheme.labelMedium?.copyWith(
+                        color: isSelected
+                            ? colorScheme.onPrimary
+                            : colorScheme.onSurfaceVariant,
+                        fontWeight: isSelected
+                            ? AppTypography.semibold
+                            : AppTypography.medium,
                       ),
+                      backgroundColor: colorScheme.surface,
+                      selectedColor: colorScheme.primary,
+                      side: BorderSide(
+                        color: isSelected
+                            ? colorScheme.primary
+                            : colorScheme.outlineVariant,
+                      ),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      padding: const EdgeInsets.symmetric(horizontal: 6),
+                      materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                     );
                   },
                 ),
@@ -281,32 +256,34 @@ class _MyActivityPageState extends State<MyActivityPage>
       body: TabBarView(
         controller: _mainTabController,
         children: [
-          _buildAdList(context, isDark, 0),
-          _buildAdList(context, isDark, 1),
-          _buildAdList(context, isDark, 2),
+          _buildAdList(mainTabIndex: 0),
+          _buildAdList(mainTabIndex: 1),
+          _buildAdList(mainTabIndex: 2),
         ],
       ),
     );
   }
 
-  Widget _buildAdList(BuildContext context, bool isDark, int mainTabIndex) {
+  Widget _buildAdList({required int mainTabIndex}) {
+    final theme = Theme.of(context);
     final ads = _getFilteredAds(mainTabIndex, _selectedFilterIndex);
 
     if (ads.isEmpty) {
       return Center(
         child: Text(
           'No ads found',
-          style: TextStyle(color: isDark ? Colors.grey[400] : Colors.grey[600]),
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
         ),
       );
     }
 
-    return ListView.builder(
+    return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: ads.length,
-      itemBuilder: (context, index) {
-        return AdCard(ad: ads[index], isDark: isDark);
-      },
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) => AdCard(ad: ads[index]),
     );
   }
 }
@@ -328,7 +305,7 @@ class AdModel {
   final String? rejectionReason;
   final AdType type;
 
-  AdModel({
+  const AdModel({
     required this.title,
     required this.category,
     required this.date,
@@ -345,422 +322,377 @@ class AdModel {
 
 class AdCard extends StatelessWidget {
   final AdModel ad;
-  final bool isDark;
 
-  const AdCard({super.key, required this.ad, required this.isDark});
+  const AdCard({
+    super.key,
+    required this.ad,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(12),
-      decoration: ShapeDecoration(
-        color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(24),
-        ),
-        shadows: [
-          if (!isDark)
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-        ],
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Card(
+      margin: EdgeInsets.zero,
+      color: theme.cardTheme.color ?? colorScheme.surface,
+      elevation: theme.cardTheme.elevation ?? 0,
+      shadowColor: colorScheme.shadow.withValues(alpha: 0.08),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(24),
       ),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Row(
-            mainAxisSize: MainAxisSize.min,
-            mainAxisAlignment: MainAxisAlignment.start,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Container(
-                width: 100,
-                height: 120,
-                clipBehavior: Clip.antiAlias,
-                decoration: ShapeDecoration(
-                  color: const Color(0xFFBAB9B9),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                ),
-                child: Image.network(
-                  ad.imageUrl,
-                  fit: BoxFit.cover,
-                  width: double.infinity,
-                  height: double.infinity,
-                ),
-              ),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  mainAxisAlignment: MainAxisAlignment.start,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Posted on ${ad.date}',
-                            style: TextStyle(
-                              color: isDark
-                                  ? Colors.grey[400]
-                                  : const Color(0xFF090726),
-                              fontSize: 10,
-                              fontFamily: 'Outfit',
-                              fontWeight: FontWeight.w300,
-                              height: 1.20,
-                              letterSpacing: 0.20,
-                            ),
-                          ),
-                          _buildMenuButton(context, isDark),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      width: double.infinity,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildStatusBadge(ad.status),
-                          if (ad.status == AdStatus.inactive) ...[
-                            const SizedBox(width: 4),
-                            _buildInactiveBadge(),
-                          ],
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    if (ad.category.isNotEmpty)
-                      SizedBox(
-                        width: 196,
-                        child: Text(
-                          ad.category,
-                          style: TextStyle(
-                            color: isDark
-                                ? Colors.grey[500]
-                                : const Color(0x66090726),
-                            fontSize: 10,
-                            fontFamily: 'Outfit',
-                            fontWeight: FontWeight.w300,
-                            height: 1.20,
-                            letterSpacing: 0.20,
-                          ),
-                        ),
-                      ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      width: 196,
-                      child: Text(
-                        ad.title,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          color:
-                              isDark ? Colors.white : const Color(0xFF2F314D),
-                          fontSize: 12,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w400,
-                          height: 1.42,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    SizedBox(
-                      width: 196,
-                      child: Text(
-                        ad.price,
-                        style: TextStyle(
-                          color:
-                              isDark ? Colors.white : const Color(0xFF090726),
-                          fontSize: 14,
-                          fontFamily: 'Outfit',
-                          fontWeight: FontWeight.w600,
-                          height: 1.43,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 8),
-                    SizedBox(
-                      height: 12,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        mainAxisAlignment: MainAxisAlignment.start,
-                        crossAxisAlignment: CrossAxisAlignment.center,
-                        children: [
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.star,
-                                color: Color(0xFFF59E0B),
-                                size: 10,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${ad.rating ?? 0}',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.grey[300]
-                                      : const Color(0xFF2F314D),
-                                  fontSize: 11,
-                                  fontFamily: 'Outfit',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.18,
-                                ),
-                              ),
-                              Text(
-                                ' (${ad.saves})',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.grey[500]
-                                      : const Color(0x66090726),
-                                  fontSize: 10,
-                                  fontFamily: 'Outfit',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.20,
-                                  letterSpacing: 0.20,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(width: 8),
-                          Row(
-                            mainAxisSize: MainAxisSize.min,
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            crossAxisAlignment: CrossAxisAlignment.center,
-                            children: [
-                              Icon(
-                                Icons.visibility_outlined,
-                                size: 10,
-                                color: isDark
-                                    ? Colors.grey[400]
-                                    : const Color(0xFF6B7280),
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                'Views',
-                                textAlign: TextAlign.right,
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.grey[300]
-                                      : const Color(0xFF2F314D),
-                                  fontSize: 11,
-                                  fontFamily: 'Outfit',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.18,
-                                ),
-                              ),
-                              Text(
-                                ' (${ad.views})',
-                                style: TextStyle(
-                                  color: isDark
-                                      ? Colors.grey[500]
-                                      : const Color(0x66090726),
-                                  fontSize: 10,
-                                  fontFamily: 'Outfit',
-                                  fontWeight: FontWeight.w400,
-                                  height: 1.20,
-                                  letterSpacing: 0.20,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildImage(context),
+                const SizedBox(width: 10),
+                Expanded(child: _buildDetails(context)),
+              ],
+            ),
+            if (ad.status == AdStatus.rejected &&
+                ad.rejectionReason != null) ...[
+              const SizedBox(height: 12),
+              _buildRejectionSection(context, ad.rejectionReason!),
             ],
-          ),
-          if (ad.status == AdStatus.rejected && ad.rejectionReason != null)
-            _buildRejectionSection(ad.rejectionReason!, isDark),
-        ],
+          ],
+        ),
       ),
     );
   }
 
-  Widget _buildStatusBadge(AdStatus status) {
-    Color statusBgColor;
-    String statusText;
+  Widget _buildImage(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(16),
+      child: SizedBox(
+        width: 100,
+        height: 120,
+        child: Image.network(
+          ad.imageUrl,
+          fit: BoxFit.cover,
+          loadingBuilder: (context, child, progress) {
+            if (progress == null) return child;
+
+            return ColoredBox(
+              color: colorScheme.surfaceContainerHighest,
+              child: Center(
+                child: SizedBox.square(
+                  dimension: 22,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: colorScheme.primary,
+                  ),
+                ),
+              ),
+            );
+          },
+          errorBuilder: (_, __, ___) {
+            return ColoredBox(
+              color: colorScheme.surfaceContainerHighest,
+              child: Icon(
+                Icons.image_not_supported_outlined,
+                color: colorScheme.onSurfaceVariant,
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDetails(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: Text(
+                'Posted on ${ad.date}',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: colorScheme.onSurfaceVariant,
+                  fontWeight: AppTypography.light,
+                ),
+              ),
+            ),
+            _buildMenuButton(context),
+          ],
+        ),
+        const SizedBox(height: 4),
+        Wrap(
+          spacing: 4,
+          runSpacing: 4,
+          children: [
+            _buildStatusBadge(context, ad.status),
+            if (ad.status == AdStatus.inactive)
+              _buildInactiveBadge(context),
+          ],
+        ),
+        const SizedBox(height: 8),
+        if (ad.category.isNotEmpty) ...[
+          Text(
+            ad.category,
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: theme.textTheme.labelSmall?.copyWith(
+              color: colorScheme.onSurfaceVariant,
+              fontWeight: AppTypography.light,
+            ),
+          ),
+          const SizedBox(height: 4),
+        ],
+        Text(
+          ad.title,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: AppTypography.regular,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          ad.price,
+          style: theme.textTheme.bodyMedium?.copyWith(
+            color: colorScheme.onSurface,
+            fontWeight: AppTypography.semibold,
+          ),
+        ),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 10,
+          runSpacing: 4,
+          crossAxisAlignment: WrapCrossAlignment.center,
+          children: [
+            _buildMetric(
+              context,
+              icon: Icons.star_rounded,
+              iconColor: AppColors.warning500,
+              label: '${ad.rating ?? 0} (${ad.saves})',
+            ),
+            _buildMetric(
+              context,
+              icon: Icons.visibility_outlined,
+              label: 'Views (${ad.views})',
+            ),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildMetric(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    Color? iconColor,
+  }) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 13,
+          color: iconColor ?? colorScheme.onSurfaceVariant,
+        ),
+        const SizedBox(width: 3),
+        Text(
+          label,
+          style: theme.textTheme.labelSmall?.copyWith(
+            color: colorScheme.onSurfaceVariant,
+            fontWeight: AppTypography.regular,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildStatusBadge(BuildContext context, AdStatus status) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    late final Color backgroundColor;
+    late final Color textColor;
+    late final String text;
 
     switch (status) {
       case AdStatus.pending:
-        statusBgColor = const Color(0xFFEF6C00);
-        statusText = 'Pending';
+        backgroundColor = isDark
+            ? AppColors.warning900.withValues(alpha: 0.65)
+            : ActivityColors.pendingBg;
+        textColor = isDark
+            ? AppColors.warning200
+            : ActivityColors.pendingText;
+        text = 'Pending';
         break;
       case AdStatus.approved:
-        statusBgColor = const Color(0xFF2E7D32);
-        statusText = 'Approved';
+      case AdStatus.inactive:
+        backgroundColor = isDark
+            ? AppColors.success900.withValues(alpha: 0.65)
+            : ActivityColors.approvedBg;
+        textColor = isDark
+            ? AppColors.success200
+            : ActivityColors.approvedText;
+        text = 'Approved';
         break;
       case AdStatus.rejected:
-        statusBgColor = const Color(0xFFD32F2F);
-        statusText = 'Rejected';
-        break;
-      case AdStatus.inactive:
-        statusBgColor = const Color(0xFF2E7D32);
-        statusText = 'Approved';
+        backgroundColor = isDark
+            ? AppColors.error900.withValues(alpha: 0.65)
+            : ActivityColors.rejectedBg;
+        textColor = isDark
+            ? AppColors.error200
+            : ActivityColors.rejectedText;
+        text = 'Rejected';
         break;
     }
 
+    return _badge(
+      context,
+      text: text,
+      backgroundColor: backgroundColor,
+      textColor: textColor,
+    );
+  }
+
+  Widget _buildInactiveBadge(BuildContext context) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
+    return _badge(
+      context,
+      text: 'Inactive',
+      backgroundColor: isDark
+          ? AppColors.neutral800
+          : ActivityColors.inactiveBg,
+      textColor: isDark
+          ? AppColors.neutral100
+          : ActivityColors.inactiveText,
+    );
+  }
+
+  Widget _badge(
+    BuildContext context, {
+    required String text,
+    required Color backgroundColor,
+    required Color textColor,
+  }) {
+    final theme = Theme.of(context);
+
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: ShapeDecoration(
-        color: statusBgColor,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
+      decoration: BoxDecoration(
+        color: backgroundColor,
+        borderRadius: BorderRadius.circular(4),
       ),
       child: Text(
-        statusText,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontFamily: 'Outfit',
-          fontWeight: FontWeight.w400,
-          height: 1.20,
-          letterSpacing: 0.20,
+        text,
+        style: theme.textTheme.labelSmall?.copyWith(
+          color: textColor,
+          fontWeight: AppTypography.medium,
+          height: 1,
         ),
       ),
     );
   }
 
-  Widget _buildInactiveBadge() {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      decoration: ShapeDecoration(
-        color: const Color(0xFF8E8E93),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(2)),
-      ),
-      child: const Text(
-        'Inactive',
-        style: TextStyle(
-          color: Colors.white,
-          fontSize: 10,
-          fontFamily: 'Outfit',
-          fontWeight: FontWeight.w400,
-          height: 1.20,
-          letterSpacing: 0.20,
-        ),
-      ),
-    );
-  }
+  Widget _buildMenuButton(BuildContext context) {
+    final colorScheme = Theme.of(context).colorScheme;
 
-  Widget _buildMenuButton(BuildContext context, bool isDark) {
-    return SizedBox(
-      width: 16,
-      height: 16,
+    return SizedBox.square(
+      dimension: 28,
       child: PopupMenuButton<String>(
         padding: EdgeInsets.zero,
-        icon: Container(
+        tooltip: 'Ad options',
+        icon: DecoratedBox(
           decoration: BoxDecoration(
             shape: BoxShape.circle,
-            border: Border.all(
-              color: isDark ? Colors.grey[600]! : const Color(0xFF090726),
-              width: 1.0,
-            ),
+            border: Border.all(color: colorScheme.outlineVariant),
           ),
-          child: Center(
-            child: Icon(
-              Icons.more_horiz,
-              size: 10,
-              color: isDark ? Colors.grey[400] : const Color(0xFF090726),
-            ),
+          child: Icon(
+            Icons.more_horiz_rounded,
+            size: 16,
+            color: colorScheme.onSurfaceVariant,
           ),
         ),
-        color: isDark ? const Color(0xFF2A2A2A) : Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-        itemBuilder: (BuildContext context) => <PopupMenuEntry<String>>[
-          const PopupMenuItem<String>(
-            value: 'edit',
-            child: Text('Edit', style: TextStyle(fontSize: 14)),
+        onSelected: (value) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('$value selected for ${ad.title}')),
+          );
+        },
+        itemBuilder: (_) => const [
+          PopupMenuItem<String>(
+            value: 'Edit',
+            child: Text('Edit'),
           ),
-          const PopupMenuItem<String>(
-            value: 'inactive',
-            child: Text('Inactive', style: TextStyle(fontSize: 14)),
+          PopupMenuItem<String>(
+            value: 'Inactive',
+            child: Text('Inactive'),
           ),
-          const PopupMenuItem<String>(
-            value: 'remove',
-            child: Text('Remove', style: TextStyle(fontSize: 14)),
+          PopupMenuItem<String>(
+            value: 'Remove',
+            child: Text('Remove'),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildRejectionSection(String reason, bool isDark) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 12),
-      child: Column(
-        children: [
-          Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: isDark ? const Color(0xFF3F1D1D) : const Color(0xFFFCE8E8),
-              borderRadius: BorderRadius.circular(8),
+  Widget _buildRejectionSection(BuildContext context, String reason) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDark = theme.brightness == Brightness.dark;
+
+    return Column(
+      children: [
+        Container(
+          width: double.infinity,
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            color: isDark
+                ? AppColors.error900.withValues(alpha: 0.55)
+                : AppColors.error50,
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Text(
+            reason,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: isDark ? AppColors.error200 : colorScheme.onSurface,
+              height: 1.4,
             ),
-            child: Text(
-              reason,
-              style: TextStyle(
-                color: isDark
-                    ? const Color(0xFFFCA5A5)
-                    : const Color(0xFF374151),
-                fontSize: 11,
-                fontFamily: 'Outfit',
-                height: 1.4,
+          ),
+        ),
+        const SizedBox(height: 12),
+        SizedBox(
+          width: double.infinity,
+          height: 44,
+          child: ElevatedButton.icon(
+            onPressed: () {},
+            iconAlignment: IconAlignment.end,
+            icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+            label: const Text('Edit Now'),
+            style: ElevatedButton.styleFrom(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(22),
               ),
             ),
           ),
-          const SizedBox(height: 12),
-          SizedBox(
-            width: double.infinity,
-            height: 40,
-            child: ElevatedButton(
-              onPressed: () {},
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF2563EB),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                elevation: 0,
-              ),
-              child: const Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    'Edit Now',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontFamily: 'Outfit',
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                  SizedBox(width: 8),
-                  Icon(
-                    Icons.arrow_forward,
-                    color: Colors.white,
-                    size: 16,
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
+        ),
+      ],
     );
   }
 }

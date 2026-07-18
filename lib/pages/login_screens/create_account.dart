@@ -1,7 +1,6 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
-import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
@@ -50,6 +49,19 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
           _passwordController.text.isNotEmpty &&
           _confirmPasswordController.text.isNotEmpty;
     });
+  }
+
+
+  void _showRegistrationContractBlocker() {
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Registration was not sent because the backend registration/OTP req encoding and reqType contract is not documented.',
+        ),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
 
   @override
@@ -304,17 +316,7 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isFormValid
-                      ? () {
-                          print("Logging in with: ${_emailController.text}");
-
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const CongratulationsScreen(),
-                            ),
-                          );
-                        }
+                      ? _showRegistrationContractBlocker
                       : null,
 
                   style: ElevatedButton.styleFrom(

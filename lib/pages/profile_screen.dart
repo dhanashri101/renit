@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:rentit24/core/storage/auth_storage.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/form/product_listing_form.dart';
 import 'package:rentit24/pages/form/service_upload_form.dart';
+import 'package:rentit24/pages/welcomescreen.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -375,6 +377,18 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+  Future<void> _logout() async {
+    await AuthStorage().clear();
+    if (!mounted) return;
+
+    Navigator.of(context).pushAndRemoveUntil(
+      MaterialPageRoute<void>(
+        builder: (BuildContext context) => const MainLoginScreen(),
+      ),
+      (Route<dynamic> route) => false,
+    );
+  }
+
   Widget _buildMenuSection(ThemeData theme, bool isDark) {
     final menuItems = [
       {
@@ -486,6 +500,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       iconColor: item['color'] as Color,
                       isDark: isDark,
                       isLast: index == menuItems.length - 1,
+                      onTap: index == menuItems.length - 1 ? _logout : null,
                     ),
                   ),
                 );
@@ -503,11 +518,12 @@ class _ProfileScreenState extends State<ProfileScreen>
     required Color iconColor,
     required bool isDark,
     required bool isLast,
+    VoidCallback? onTap,
   }) {
     return Material(
       color: Colors.transparent,
       child: InkWell(
-        onTap: () {},
+        onTap: onTap,
         borderRadius: BorderRadius.only(
           bottomLeft: Radius.circular(isLast ? 20 : 0),
           bottomRight: Radius.circular(isLast ? 20 : 0),

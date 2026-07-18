@@ -2,7 +2,6 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
-import 'package:rentit24/wrapper/navbar.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -68,17 +67,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         timer.cancel();
       }
     });
-  }
-
-  void _goToHome() {
-    _timer?.cancel();
-
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (_) => const NavigationWrapper(),
-      ),
-    );
   }
 
   void _goToLogin() {
@@ -150,7 +138,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _goToHome,
+                      onPressed: _goToLogin,
                       style: TextButton.styleFrom(
                         foregroundColor:
                             colorScheme.onSurface.withOpacity(0.65),

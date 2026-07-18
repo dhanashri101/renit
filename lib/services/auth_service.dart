@@ -1,44 +1,78 @@
-// lib/services/auth_services.dart
 import 'package:dio/dio.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:rentit24/core/network/api_endpoints.dart';
+import 'package:rentit24/core/network/api_exception.dart';
+import 'package:rentit24/core/network/api_response.dart';
+import 'package:rentit24/core/storage/auth_storage.dart';
+import 'package:rentit24/services/api_services.dart';
 
 class AuthService {
-  final String baseUrl = 'https://rentit24.com'; 
-  final Dio _dio = Dio();
+  AuthService({
+    ApiService? apiService,
+    AuthStorage? authStorage,
+  })  : _apiService = apiService ?? ApiService(),
+        _authStorage = authStorage ?? AuthStorage();
 
-  Future<bool> loginWithEmail(String email, String password) async {
-    try {
-final response = await _dio.post(
-  '$baseUrl/auth/login',
-  data: {
-    "email": email,
-    "password": password,
-  },
-);
+  final ApiService _apiService;
+  final AuthStorage _authStorage;
 
-print("Status Code: ${response.statusCode}");
-print("Response Data: ${response.data}");
-
-      if (response.statusCode == 200 && response.data['token'] != null) {
-        final String token = response.data['token'];
-        
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('auth_token', token);
-        
-        return true;
-      }
-      return false;
-    } on DioException catch (e) {
-      print('Login Error: ${e.response?.data}');
-      return false;
-    } catch (e) {
-      print('Unexpected Error: $e');
-      return false;
-    }
+  /// Sends the exact backend fields documented for auth/getOTP.
+  ///
+  /// The caller must provide the already-prepared `req` and exact `reqType`.
+  /// No encryption, phone formatting, or reqType value is guessed here.
+  Future<ApiEnvelope> requestOtp({
+    required String req,
+    required Object reqType,
+    CancelToken? cancelToken,
+  }) async {
+    return _postAuthRequest(
+      endpoint: ApiEndpoints.requestOtp,
+      req: req,
+      reqType: reqType,
+      cancelToken: cancelToken,
+    );
   }
 
-  Future<void> logout() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('auth_token');
+  /// Sends the exact backend fields documented for auth/login.
+  /// Token extraction is deliberately not performed until the backend defines
+  /// the response payload and Authorization header scheme.
+  Future<ApiEnvelope> login({
+    required String req,
+    required Object reqType,
+    CancelToken? cancelToken,
+  }) async {
+    return _postAuthRequest(
+      endpoint: ApiEndpoints.login,
+      req: req,
+      reqType: reqType,
+      cancelToken: cancelToken,
+    );
+  }
+
+  Future<void> logoutLocal() => _authStorage.clear();
+
+  Future<ApiEnvelope> _postAuthRequest({
+    required String endpoint,
+    required String req,
+    required Object reqType,
+    CancelToken? cancelToken,
+  }) async {
+    final String cleanReq = req.trim();
+    if (cleanReq.isEmpty) {
+      throw ArgumentError.value(req, 'req', 'Must not be empty.');
+    }
+
+    try {
+      final Response<dynamic> response = await _apiService.dio.post<dynamic>(
+        endpoint,
+        data: <String, dynamic>{
+          'req': cleanReq,
+          'reqType': reqType,
+        },
+        cancelToken: cancelToken,
+      );
+      return ApiEnvelope.fromDynamic(response.data);
+    } on DioException catch (error) {
+      throw ApiException.fromDio(error);
+    }
   }
 }

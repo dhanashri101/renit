@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rentit24/pages/login_screens/create_new_screen.dart';
 
 class ForgotPasswordScreen extends StatefulWidget {
   const ForgotPasswordScreen({super.key});
@@ -80,10 +79,12 @@ class _ForgotPasswordScreenState extends State<ForgotPasswordScreen> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => const CreateNewPasswordScreen(),
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(
+                        content: Text(
+                          'Password recovery was not sent because the backend reset/OTP contract is not documented.',
+                        ),
+                        backgroundColor: Colors.orange,
                       ),
                     );
                   },

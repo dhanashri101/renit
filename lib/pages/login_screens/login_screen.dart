@@ -1,9 +1,7 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/email_loginscreen.dart';
-import 'package:rentit24/pages/login_screens/otp_verificationscreen.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
@@ -26,6 +24,19 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
         _isPhoneFilled = _phoneController.text.length >= 10;
       });
     });
+  }
+
+
+  void _showOtpContractBlocker() {
+    FocusScope.of(context).unfocus();
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'OTP request is not sent because the backend has not documented the required req encoding/encryption and reqType value.',
+        ),
+        backgroundColor: Colors.orange,
+      ),
+    );
   }
 
   @override
@@ -200,17 +211,8 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _isPhoneFilled
-                      ? () {
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) =>
-                                  const OtpVerificationScreen(),
-                            ),
-                          );
-                        }
-                      : null,
+                  onPressed:
+                      _isPhoneFilled ? _showOtpContractBlocker : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
                     disabledBackgroundColor: isDark

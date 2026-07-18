@@ -1,135 +1,169 @@
-class ListingModel {
-  final int id;
-  final int ownerId;
-  final String listingType;
-  final String title;
-  final String description;
-  final int categoryId;
-  final int subcategoryId;
-  final double rentalPrice;
-  final String priceUnit;
-  final double securityDeposit;
-  final String brand;
-  final String modelName;
-  final String color;
-  final String additionalDetails;
-  final String profession;
-  final String experience;
-  final String skills;
-  final int localAreaId;
-  final String address;
-  final double latitude;
-  final double longitude;
-  final String status;
-  final String rejectionReason;
-  final bool isFeatured;
-  final bool isTopChoice;
-  final bool isVerified;
-  final int viewCount;
-  final double rating;
-  final int reviewCount;
-  final DateTime postedAt;
+import 'package:rentit24/core/utils/json_converters.dart';
 
-  ListingModel({
-    required this.id,
-    required this.ownerId,
-    required this.listingType,
-    required this.title,
-    required this.description,
-    required this.categoryId,
-    required this.subcategoryId,
-    required this.rentalPrice,
-    required this.priceUnit,
-    required this.securityDeposit,
-    required this.brand,
-    required this.modelName,
-    required this.color,
-    required this.additionalDetails,
-    required this.profession,
-    required this.experience,
-    required this.skills,
-    required this.localAreaId,
-    required this.address,
-    required this.latitude,
-    required this.longitude,
-    required this.status,
-    required this.rejectionReason,
-    required this.isFeatured,
-    required this.isTopChoice,
-    required this.isVerified,
-    required this.viewCount,
-    required this.rating,
-    required this.reviewCount,
-    required this.postedAt,
+class ListingModel {
+  const ListingModel({
+    this.id,
+    this.ownerId,
+    this.listingType,
+    this.title,
+    this.description,
+    this.categoryId,
+    this.subcategoryId,
+    this.rentalPrice,
+    this.priceUnit,
+    this.securityDeposit,
+    this.brand,
+    this.modelName,
+    this.color,
+    this.additionalDetails,
+    this.profession,
+    this.experience,
+    this.skills,
+    this.localAreaId,
+    this.address,
+    this.latitude,
+    this.longitude,
+    this.status,
+    this.rejectionReason,
+    this.isFeatured,
+    this.isTopChoice,
+    this.isVerified,
+    this.viewCount,
+    this.rating,
+    this.reviewCount,
+    this.postedAt,
   });
+
+  final int? id;
+  final int? ownerId;
+  final String? listingType;
+  final String? title;
+  final String? description;
+  final int? categoryId;
+  final int? subcategoryId;
+  final double? rentalPrice;
+  final String? priceUnit;
+  final double? securityDeposit;
+  final String? brand;
+  final String? modelName;
+  final String? color;
+  final String? additionalDetails;
+  final String? profession;
+  final String? experience;
+  final String? skills;
+  final int? localAreaId;
+  final String? address;
+  final double? latitude;
+  final double? longitude;
+  final String? status;
+  final String? rejectionReason;
+  final bool? isFeatured;
+  final bool? isTopChoice;
+  final bool? isVerified;
+  final int? viewCount;
+  final double? rating;
+  final int? reviewCount;
+  final DateTime? postedAt;
 
   factory ListingModel.fromJson(Map<String, dynamic> json) {
     return ListingModel(
-      id: json['id'] ?? 0,
-      ownerId: json['ownerId'] ?? 0,
-      listingType: json['listingType'] ?? '',
-      title: json['title'] ?? '',
-      description: json['description'] ?? '',
-      categoryId: json['categoryId'] ?? 0,
-      subcategoryId: json['subcategoryId'] ?? 0,
-      rentalPrice: (json['rentalPrice'] ?? 0).toDouble(),
-      priceUnit: json['priceUnit'] ?? '',
-      securityDeposit: (json['securityDeposit'] ?? 0).toDouble(),
-      brand: json['brand'] ?? '',
-      modelName: json['modelName'] ?? '',
-      color: json['color'] ?? '',
-      additionalDetails: json['additionalDetails'] ?? '',
-      profession: json['profession'] ?? '',
-      experience: json['experience'] ?? '',
-      skills: json['skills'] ?? '',
-      localAreaId: json['localAreaId'] ?? 0,
-      address: json['address'] ?? '',
-      latitude: (json['latitude'] ?? 0).toDouble(),
-      longitude: (json['longitude'] ?? 0).toDouble(),
-      status: json['status'] ?? '',
-      rejectionReason: json['rejectionReason'] ?? '',
-      isFeatured: json['isFeatured'] ?? false,
-      isTopChoice: json['isTopChoice'] ?? false,
-      isVerified: json['isVerified'] ?? false,
-      viewCount: json['viewCount'] ?? 0,
-      rating: (json['rating'] ?? 0).toDouble(),
-      reviewCount: json['reviewCount'] ?? 0,
-      postedAt: DateTime.tryParse(json['postedAt'] ?? '') ?? DateTime.now(),
+      id: JsonConverters.intValue(json['id']),
+      ownerId: JsonConverters.intValue(json['ownerId'] ?? json['owner_id']),
+      listingType: JsonConverters.stringValue(
+        json['listingType'] ?? json['listing_type'],
+      ),
+      title: JsonConverters.stringValue(json['title']),
+      description: JsonConverters.stringValue(json['description']),
+      categoryId: JsonConverters.intValue(
+        json['categoryId'] ?? json['category_id'],
+      ),
+      subcategoryId: JsonConverters.intValue(
+        json['subcategoryId'] ?? json['subcategory_id'],
+      ),
+      rentalPrice: JsonConverters.doubleValue(
+        json['rentalPrice'] ?? json['rental_price'],
+      ),
+      priceUnit: JsonConverters.stringValue(
+        json['priceUnit'] ?? json['price_unit'],
+      ),
+      securityDeposit: JsonConverters.doubleValue(
+        json['securityDeposit'] ?? json['security_deposit'],
+      ),
+      brand: JsonConverters.stringValue(json['brand']),
+      modelName: JsonConverters.stringValue(
+        json['modelName'] ?? json['model_name'],
+      ),
+      color: JsonConverters.stringValue(json['color']),
+      additionalDetails: JsonConverters.stringValue(
+        json['additionalDetails'] ?? json['additional_details'],
+      ),
+      profession: JsonConverters.stringValue(json['profession']),
+      experience: JsonConverters.stringValue(json['experience']),
+      skills: JsonConverters.stringValue(json['skills']),
+      localAreaId: JsonConverters.intValue(
+        json['localAreaId'] ?? json['local_area_id'],
+      ),
+      address: JsonConverters.stringValue(json['address']),
+      latitude: JsonConverters.doubleValue(json['latitude']),
+      longitude: JsonConverters.doubleValue(json['longitude']),
+      status: JsonConverters.stringValue(json['status']),
+      rejectionReason: JsonConverters.stringValue(
+        json['rejectionReason'] ?? json['rejection_reason'],
+      ),
+      isFeatured: JsonConverters.boolValue(
+        json['isFeatured'] ?? json['is_featured'],
+      ),
+      isTopChoice: JsonConverters.boolValue(
+        json['isTopChoice'] ?? json['is_top_choice'],
+      ),
+      isVerified: JsonConverters.boolValue(
+        json['isVerified'] ?? json['is_verified'],
+      ),
+      viewCount: JsonConverters.intValue(
+        json['viewCount'] ?? json['view_count'],
+      ),
+      rating: JsonConverters.doubleValue(json['rating']),
+      reviewCount: JsonConverters.intValue(
+        json['reviewCount'] ?? json['review_count'],
+      ),
+      postedAt: JsonConverters.dateTimeValue(
+        json['postedAt'] ?? json['posted_at'],
+      ),
     );
   }
 
   Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'ownerId': ownerId,
-      'listingType': listingType,
-      'title': title,
-      'description': description,
-      'categoryId': categoryId,
-      'subcategoryId': subcategoryId,
-      'rentalPrice': rentalPrice,
-      'priceUnit': priceUnit,
-      'securityDeposit': securityDeposit,
-      'brand': brand,
-      'modelName': modelName,
-      'color': color,
-      'additionalDetails': additionalDetails,
-      'profession': profession,
-      'experience': experience,
-      'skills': skills,
-      'localAreaId': localAreaId,
-      'address': address,
-      'latitude': latitude,
-      'longitude': longitude,
-      'status': status,
-      'rejectionReason': rejectionReason,
-      'isFeatured': isFeatured,
-      'isTopChoice': isTopChoice,
-      'isVerified': isVerified,
-      'viewCount': viewCount,
-      'rating': rating,
-      'reviewCount': reviewCount,
-      'postedAt': postedAt.toIso8601String(),
+    return <String, dynamic>{
+      if (id != null) 'id': id,
+      if (ownerId != null) 'ownerId': ownerId,
+      if (listingType != null) 'listingType': listingType,
+      if (title != null) 'title': title,
+      if (description != null) 'description': description,
+      if (categoryId != null) 'categoryId': categoryId,
+      if (subcategoryId != null) 'subcategoryId': subcategoryId,
+      if (rentalPrice != null) 'rentalPrice': rentalPrice,
+      if (priceUnit != null) 'priceUnit': priceUnit,
+      if (securityDeposit != null) 'securityDeposit': securityDeposit,
+      if (brand != null) 'brand': brand,
+      if (modelName != null) 'modelName': modelName,
+      if (color != null) 'color': color,
+      if (additionalDetails != null) 'additionalDetails': additionalDetails,
+      if (profession != null) 'profession': profession,
+      if (experience != null) 'experience': experience,
+      if (skills != null) 'skills': skills,
+      if (localAreaId != null) 'localAreaId': localAreaId,
+      if (address != null) 'address': address,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (status != null) 'status': status,
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
+      if (isFeatured != null) 'isFeatured': isFeatured,
+      if (isTopChoice != null) 'isTopChoice': isTopChoice,
+      if (isVerified != null) 'isVerified': isVerified,
+      if (viewCount != null) 'viewCount': viewCount,
+      if (rating != null) 'rating': rating,
+      if (reviewCount != null) 'reviewCount': reviewCount,
+      if (postedAt != null) 'postedAt': postedAt!.toIso8601String(),
     };
   }
 }

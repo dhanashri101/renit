@@ -52,7 +52,12 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Service listed successfully!')),
+      const SnackBar(
+        content: Text(
+          'Service was not submitted because no verified professional-service/create-listing request schema and multipart contract is available.',
+        ),
+        backgroundColor: Colors.orange,
+      ),
     );
   }
 
