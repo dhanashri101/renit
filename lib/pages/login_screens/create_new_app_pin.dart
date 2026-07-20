@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rentit24/pages/login_screens/biometric_screen.dart';
 
 class CreateAppPinScreen extends StatefulWidget {
   const CreateAppPinScreen({super.key});
@@ -45,7 +46,7 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
         ),
         actions: [
           TextButton(
-            onPressed: () => _showBackendPending(context),
+            onPressed: () {},
             child: Text(
               'SKIP',
               style: TextStyle(color: theme.primaryColor, fontWeight: FontWeight.w600, fontSize: 14),
@@ -106,9 +107,8 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _pinController.text.length == 4
-                      ? () => _showBackendPending(context)
-                      : null,
+                  onPressed: _pinController.text.length == 4 ? () {   Navigator.push(context, MaterialPageRoute(builder: (_) => BiometricAuthScreen(authType: BiometricType.faceId)));
+} : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
                     disabledBackgroundColor: theme.primaryColor.withOpacity(0.5),
@@ -158,15 +158,4 @@ class _CreateAppPinScreenState extends State<CreateAppPinScreen> {
       ),
     );
   }
-
-  void _showBackendPending(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'App PIN storage and biometric binding are not enabled until a verified backend session exists.',
-        ),
-      ),
-    );
-  }
-
 }

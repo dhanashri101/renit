@@ -1,78 +1,49 @@
-import 'package:dio/dio.dart';
-import 'package:rentit24/core/network/api_endpoints.dart';
-import 'package:rentit24/core/network/api_exception.dart';
-import 'package:rentit24/core/network/api_response.dart';
-import 'package:rentit24/core/storage/auth_storage.dart';
+import 'dart:convert';
+
+import 'package:rentit24/services/api_exception.dart';
 import 'package:rentit24/services/api_services.dart';
+import 'package:rentit24/services/session_service.dart';
 
 class AuthService {
-  AuthService({
-    ApiService? apiService,
-    AuthStorage? authStorage,
-  })  : _apiService = apiService ?? ApiService(),
-        _authStorage = authStorage ?? AuthStorage();
+  AuthService({ApiService? apiService}) : _api = apiService ?? ApiService();
 
-  final ApiService _apiService;
-  final AuthStorage _authStorage;
+  final ApiService _api;
+  String? lastError;
 
-  /// Sends the exact backend fields documented for auth/getOTP.
-  ///
-  /// The caller must provide the already-prepared `req` and exact `reqType`.
-  /// No encryption, phone formatting, or reqType value is guessed here.
-  Future<ApiEnvelope> requestOtp({
-    required String req,
-    required Object reqType,
-    CancelToken? cancelToken,
-  }) async {
-    return _postAuthRequest(
-      endpoint: ApiEndpoints.requestOtp,
-      req: req,
-      reqType: reqType,
-      cancelToken: cancelToken,
-    );
-  }
-
-  /// Sends the exact backend fields documented for auth/login.
-  /// Token extraction is deliberately not performed until the backend defines
-  /// the response payload and Authorization header scheme.
-  Future<ApiEnvelope> login({
-    required String req,
-    required Object reqType,
-    CancelToken? cancelToken,
-  }) async {
-    return _postAuthRequest(
-      endpoint: ApiEndpoints.login,
-      req: req,
-      reqType: reqType,
-      cancelToken: cancelToken,
-    );
-  }
-
-  Future<void> logoutLocal() => _authStorage.clear();
-
-  Future<ApiEnvelope> _postAuthRequest({
-    required String endpoint,
-    required String req,
-    required Object reqType,
-    CancelToken? cancelToken,
-  }) async {
-    final String cleanReq = req.trim();
-    if (cleanReq.isEmpty) {
-      throw ArgumentError.value(req, 'req', 'Must not be empty.');
-    }
-
+  Future<bool> requestLoginOtp(String mobile) async {
+    lastError = null;
     try {
-      final Response<dynamic> response = await _apiService.dio.post<dynamic>(
-        endpoint,
-        data: <String, dynamic>{
-          'req': cleanReq,
-          'reqType': reqType,
-        },
-        cancelToken: cancelToken,
+      final inner = jsonEncode({'mobile': _normalizeMobile(mobile)});
+      final request = jsonEncode({'responseType': 0, 'req': inner});
+      await _api.post(
+        '/auth/getloginOTP',
+        data: {'req': request, 'reqType': 'json'},
       );
-      return ApiEnvelope.fromDynamic(response.data);
-    } on DioException catch (error) {
-      throw ApiException.fromDio(error);
+      return true;
+    } on ApiException catch (error) {
+      lastError = error.userMessage;
+      return false;
     }
   }
+
+  Future<bool> requestSignupOtp(String mobile) async {
+    lastError =
+        'Account creation and signup OTP verification are not available from the backend yet.';
+    return false;
+  }
+
+  /// Email/password authentication is not included in the backend contract.
+  Future<bool> loginWithEmail(String email, String password) async {
+    lastError =
+        'Email login is not available from the backend yet. Please use the phone OTP test flow.';
+    return false;
+  }
+
+  String _normalizeMobile(String value) {
+    final digits = value.replaceAll(RegExp(r'\D'), '');
+    // The backend contract currently documents a 10-digit mobile value.
+    return digits.length > 10 ? digits.substring(digits.length - 10) : digits;
+  }
+
+  Future<void> logout() => SessionService.clear();
 }

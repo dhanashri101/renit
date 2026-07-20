@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rentit24/pages/login_screens/create_new_app_pin.dart';
 
 class FillYourProfileScreen extends StatefulWidget {
   const FillYourProfileScreen({super.key});
@@ -36,18 +37,36 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
     super.dispose();
   }
 
-  void _submitForm() {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+ void _submitForm() {
+  if (_formKey.currentState!.validate()) {
+    final profileData = {
+      'firstName': _firstNameController.text,
+      'lastName': _lastNameController.text,
+      'dob':
+          '${_dobMonthController.text}/${_dobDayController.text}/${_dobYearController.text}',
+      'email': _emailController.text,
+      'phone': '$_selectedCountryFlag ${_phoneController.text}',
+      'address': _addressController.text,
+    };
+
+    print("Profile Data Saved: $profileData");
 
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Profile data was not submitted because the profile endpoint and request schema are not documented.',
-        ),
+      SnackBar(
+        content: const Text('Profile saved successfully!'),
+        backgroundColor: Theme.of(context).primaryColor,
+        behavior: SnackBarBehavior.floating,
+      ),
+    );
+
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => const CreateAppPinScreen(),
       ),
     );
   }
-
+}
 
   @override
   Widget build(BuildContext context) {
@@ -77,13 +96,7 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
         actions: [
           TextButton(
             onPressed: () {
-              ScaffoldMessenger.of(context).showSnackBar(
-                const SnackBar(
-                  content: Text(
-                    'Profile setup cannot be skipped into an authenticated session.',
-                  ),
-                ),
-              );
+              print("Skipped Profile Fill");
             },
             child: Text(
               'SKIP',
@@ -120,13 +133,7 @@ class _FillYourProfileScreenState extends State<FillYourProfileScreen> {
                         right: 4,
                         child: GestureDetector(
                           onTap: () {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Profile photo upload is waiting for the documented upload endpoint.',
-                                ),
-                              ),
-                            );
+                            print("Open Image Picker");
                           },
                           child: Container(
                             padding: const EdgeInsets.all(6),

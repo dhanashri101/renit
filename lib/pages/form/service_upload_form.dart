@@ -2,6 +2,14 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/model/category_model.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/services/api_exception.dart';
+import 'package:rentit24/services/category_services.dart';
+import 'package:rentit24/services/listing_services.dart';
+import 'package:rentit24/services/local_area_service.dart';
+import 'package:rentit24/services/media_service.dart';
+import 'package:rentit24/services/session_service.dart';
 class ServiceUploadFlow extends StatefulWidget {
   const ServiceUploadFlow({super.key});
 
@@ -29,6 +37,7 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
   String _rentalUnit = 'per day';
   bool _agreedToTerms = true;
   bool _agreedToPrivacy = true;
+  bool _isSubmitting = false;
 
   void _nextStep() {
     if (_currentStep < _totalSteps - 1) {
@@ -44,21 +53,104 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
     }
   }
 
-  void _onSubmit() {
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
     if (!_agreedToTerms || !_agreedToPrivacy) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Please agree to all terms and policies.')),
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Service was not submitted because no verified professional-service/create-listing request schema and multipart contract is available.',
+    if (_productTitle.trim().isEmpty ||
+        _rentalPrice.trim().isEmpty ||
+        _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete the required service details.')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final categories = await CategoryService().getAllCategories();
+      final parent = _resolveBackendCategory(
+        categories,
+        _selectedCategory!,
+      );
+      final child = parent == null
+          ? null
+          : _firstWhereOrNull(
+              categories,
+              (item) =>
+                  item.parentId == parent.id &&
+                  _normaliseCategory(item.name) ==
+                      _normaliseCategory(_selectedSubCategory ?? ''),
+            );
+      if (parent == null) {
+        throw const ApiException(
+          type: ApiErrorType.validation,
+          message: 'Selected service category is not available on the backend.',
+        );
+      }
+
+      final ownerId = await SessionService.getUserId();
+      final areaId = await SessionService.getAreaId();
+      final area = await LocalAreaService().getById(areaId);
+      final uploaded = await MediaService().uploadFiles(
+        _imagePaths,
+        category: 'user',
+        userId: ownerId,
+      );
+      final details = <String>[
+        _additionalDetails.trim(),
+        if (uploaded.isNotEmpty) 'Uploaded media: ${uploaded.join(', ')}',
+      ].where((item) => item.isNotEmpty).join('\n');
+
+      final listingId = await ListingService().createListing(
+        ListingModel(
+          ownerId: ownerId,
+          listingType: 'service',
+          title: _productTitle.trim(),
+          description: _description.trim(),
+          categoryId: parent.id,
+          subcategoryId: child?.id ?? 0,
+          rentalPrice: double.tryParse(_rentalPrice.trim()) ?? 0,
+          priceUnit: _rentalUnit.replaceFirst('per ', '').trim(),
+          profession: _profession.trim(),
+          experience: _experience.trim(),
+          skills: _skills.trim(),
+          additionalDetails: details,
+          localAreaId: area.id,
+          address: area.displayName,
+          latitude: area.latitude,
+          longitude: area.longitude,
         ),
-        backgroundColor: Colors.orange,
-      ),
-    );
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            listingId > 0
+                ? 'Service submitted successfully. Listing #$listingId is pending approval.'
+                : 'Service submitted successfully and is pending approval.',
+          ),
+        ),
+      );
+      Navigator.pop(context, true);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.userMessage)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to submit service: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -192,7 +284,7 @@ class _ServiceUploadFlowState extends State<ServiceUploadFlow> {
             ),
           ),
           _BottomButton(
-            label: isLastStep ? 'Submit' : 'Continue',
+            label: isLastStep && _isSubmitting ? 'Submitting...' : (isLastStep ? 'Submit' : 'Continue'),
             onPressed: isLastStep ? _onSubmit : _nextStep,
           ),
         ],
@@ -1067,4 +1159,52 @@ class _AgreementCheckbox extends StatelessWidget {
       ],
     );
   }
+}
+
+
+String _normaliseCategory(String value) {
+  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+}
+
+CategoryModel? _resolveBackendCategory(
+  List<CategoryModel> categories,
+  String selectedLabel,
+) {
+  final normalized = _normaliseCategory(selectedLabel);
+  const aliases = <String, String>{
+    'babykids': 'Baby & Kids',
+    'beautygrooming': 'Beauty & Grooming',
+    'petsanimals': 'Pets Care Services',
+    'toolsmachinery': 'Tools & Machinery',
+    'constructionheavymachinery': 'Tools & Machinery',
+    'transportationservices': 'Transport Services',
+    'deliverylogistics': 'Transport Services',
+    'fashiondress': 'Fashion Services',
+    'weddingphotography': 'Event Professionals',
+    'eventsparties': 'Event Professionals',
+    'foodcatering': 'Event Professionals',
+    'education': 'Professional Services',
+    'digitaltechservices': 'Professional Services',
+    'securityservices': 'Professional Services',
+    'healthwellness': 'Professional Services',
+    'sportsfitness': 'Professional Services',
+    'agriculturefarming': 'Tools & Machinery',
+    'gardeningoutdoor': 'Tools & Machinery',
+    'householditems': 'Furniture',
+    'officeworkequipment': 'Furniture',
+    'gamingconsoles': 'Electronics',
+    'musicalinstruments': 'Electronics',
+  };
+  final expected = _normaliseCategory(aliases[normalized] ?? selectedLabel);
+  return _firstWhereOrNull(
+    categories,
+    (item) => item.parentId == null && _normaliseCategory(item.name) == expected,
+  );
+}
+
+T? _firstWhereOrNull<T>(Iterable<T> items, bool Function(T item) test) {
+  for (final item in items) {
+    if (test(item)) return item;
+  }
+  return null;
 }

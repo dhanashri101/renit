@@ -51,19 +51,6 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     });
   }
 
-
-  void _showRegistrationContractBlocker() {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Registration was not sent because the backend registration/OTP req encoding and reqType contract is not documented.',
-        ),
-        backgroundColor: Colors.orange,
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _nameController.dispose();
@@ -316,7 +303,15 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
                 height: 50,
                 child: ElevatedButton(
                   onPressed: _isFormValid
-                      ? _showRegistrationContractBlocker
+                      ? () {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Account creation is not available from the backend yet. Please use the test login flow.',
+                              ),
+                            ),
+                          );
+                        }
                       : null,
 
                   style: ElevatedButton.styleFrom(

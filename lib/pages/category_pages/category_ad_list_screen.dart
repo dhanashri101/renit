@@ -1,9 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
 import 'package:rentit24/pages/chat_screens/profile.dart'; // for AdItem
+import 'package:rentit24/services/listing_services.dart';
 
 class CategoryAdListScreen extends StatefulWidget {
-  const CategoryAdListScreen({super.key});
+  final int? categoryId;
+  final String categoryName;
+
+  const CategoryAdListScreen({
+    super.key,
+    this.categoryId,
+    this.categoryName = 'Listings',
+  });
 
   @override
   State<CategoryAdListScreen> createState() => _CategoryAdListScreenState();
@@ -17,113 +25,65 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
 
-  final List<AdItem> _adsData = [
-    AdItem(
-      title: 'Go Pro 12',
-      price: '₹1300/day',
-      distance: '2.5 km',
-      owner: 'Wade Warren',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 3.5,
-      reviews: 110,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Canon EOS R6',
-      price: '₹2000/day',
-      distance: '3 km',
-      owner: 'Cody Fisher',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 5.0,
-      reviews: 48,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Nikon DSLR with lense',
-      price: '₹1200/day',
-      distance: '0.5 km',
-      owner: 'Robert Fox',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.0,
-      reviews: 22,
-      isFeatured: false,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Canon EOS M50 Mark II...',
-      price: '₹1500/day',
-      distance: '2 km',
-      owner: 'Hamza',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.0,
-      reviews: 10,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Sony A7 III Body Only',
-      price: '₹1800/day',
-      distance: '1.2 km',
-      owner: 'Arjun Mehta',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.8,
-      reviews: 85,
-      isFeatured: true,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'DJI Mavic 3 Drone',
-      price: '₹3500/day',
-      distance: '4.5 km',
-      owner: 'Priya Singh',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.9,
-      reviews: 132,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Insta360 X3 Action Cam',
-      price: '₹900/day',
-      distance: '0.8 km',
-      owner: 'Rahul K',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.5,
-      reviews: 41,
-      isFeatured: false,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Godox Studio Light Kit',
-      price: '₹600/day',
-      distance: '3.2 km',
-      owner: 'Wade Warren',
-      ownerAvatar: 'https://i.pravatar.cc/100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.2,
-      reviews: 18,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-  ];
+  final ListingService _listingService = ListingService();
+  final List<AdItem> _adsData = <AdItem>[];
+  bool _isLoading = true;
+  String? _loadError;
 
   @override
   void initState() {
     super.initState();
+    _loadListings();
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text;
       });
     });
+  }
+
+  Future<void> _loadListings() async {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+
+    try {
+      final listings = await _listingService.searchListings(
+        categoryId: widget.categoryId,
+        sortBy: _sortApiValue,
+        limit: 100,
+      );
+      if (!mounted) return;
+      setState(() {
+        _adsData
+          ..clear()
+          ..addAll(listings.map(AdItem.fromListing));
+        _isLoading = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Category listing error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _loadError = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  String get _sortApiValue {
+    switch (_sortOption) {
+      case 1:
+        return 'rating';
+      case 2:
+        return 'price_asc';
+      case 3:
+        return 'price_desc';
+      case 4:
+        return 'newest';
+      default:
+        return 'relevance';
+    }
   }
 
   @override
@@ -133,10 +93,30 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
   }
 
   List<AdItem> get _filteredAds {
-    if (_searchQuery.isEmpty) return _adsData;
-    return _adsData
-        .where((ad) => ad.title.toLowerCase().contains(_searchQuery.toLowerCase()))
-        .toList();
+    Iterable<AdItem> result = _adsData;
+    final query = _searchQuery.trim().toLowerCase();
+    if (query.isNotEmpty) {
+      result = result.where(
+        (ad) => ad.title.toLowerCase().contains(query) ||
+            ad.category.toLowerCase().contains(query),
+      );
+    }
+    if (_selectedFilter == 'Top rated') {
+      result = result.where((ad) => ad.rating >= 4);
+    } else if (_selectedFilter == 'Featured') {
+      result = result.where((ad) => ad.isFeatured);
+    } else if (_selectedFilter == 'Top Choice') {
+      result = result.where((ad) => ad.isTopChoice);
+    }
+    final list = result.toList();
+    if (_sortOption == 1) list.sort((a, b) => b.reviews.compareTo(a.reviews));
+    if (_sortOption == 2) list.sort((a, b) => _price(a).compareTo(_price(b)));
+    if (_sortOption == 3) list.sort((a, b) => _price(b).compareTo(_price(a)));
+    return list;
+  }
+
+  double _price(AdItem ad) {
+    return double.tryParse(ad.price.replaceAll(RegExp(r'[^0-9.]'), '')) ?? 0;
   }
 
   void _showSortBottomSheet() {
@@ -203,7 +183,8 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                         setModalState(() => _sortOption = value!);
                         setState(() => _sortOption = value!.toInt());
                         Future.delayed(const Duration(milliseconds: 200), () {
-                          Navigator.pop(context);
+                          if (mounted) Navigator.pop(context);
+                          _loadListings();
                         });
                       },
                     );
@@ -223,6 +204,26 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
     final isDark = theme.brightness == Brightness.dark;
     final bgColor = isDark ? const Color(0xFF121212) : const Color(0xFFF4F6FB);
     final currentAds = _filteredAds;
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: bgColor,
+        body: const Center(child: CircularProgressIndicator()),
+      );
+    }
+
+    if (_loadError != null && _adsData.isEmpty) {
+      return Scaffold(
+        backgroundColor: bgColor,
+        body: Center(
+          child: TextButton.icon(
+            onPressed: _loadListings,
+            icon: const Icon(Icons.refresh),
+            label: Text(_loadError!),
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       backgroundColor: bgColor,
@@ -493,17 +494,29 @@ class _CategoryAdListScreenState extends State<CategoryAdListScreen> {
                   topLeft: Radius.circular(12),
                   topRight: Radius.circular(12),
                 ),
-                child: Image.asset(
-                  ad.image,
-                  height: 110,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => Container(
-                    height: 110,
-                    color: Colors.grey[800],
-                    child: const Icon(Icons.camera_alt, color: Colors.grey),
-                  ),
-                ),
+                child: ad.image.startsWith('http')
+                    ? Image.network(
+                        ad.image,
+                        height: 110,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 110,
+                          color: Colors.grey[800],
+                          child: const Icon(Icons.camera_alt, color: Colors.grey),
+                        ),
+                      )
+                    : Image.asset(
+                        ad.image,
+                        height: 110,
+                        width: double.infinity,
+                        fit: BoxFit.cover,
+                        errorBuilder: (_, __, ___) => Container(
+                          height: 110,
+                          color: Colors.grey[800],
+                          child: const Icon(Icons.camera_alt, color: Colors.grey),
+                        ),
+                      ),
               ),
               if (ad.isFeatured)
                 Positioned(

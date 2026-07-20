@@ -1,20 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/model/user_profile_model.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
+import 'package:rentit24/services/listing_services.dart';
+import 'package:rentit24/services/user_profile_service.dart';
 
 class AdItem {
-  final String image;
-  final String title;
-  final String price;
-  final double rating;
-  final int reviews;
-  final String distance;
-  final String owner;
-  final String ownerAvatar;
-  final bool isFeatured;
-  final bool isTopChoice;
-  final String category;
-
   const AdItem({
+    this.id = 0,
     required this.image,
     required this.title,
     required this.price,
@@ -25,11 +18,89 @@ class AdItem {
     required this.ownerAvatar,
     this.isFeatured = false,
     this.isTopChoice = false,
+    this.isVerified = false,
     this.category = 'Products',
+    this.listingType = 'product',
+    this.description = '',
+    this.address = '',
+    this.phone = '',
   });
+
+  final int id;
+  final String image;
+  final String title;
+  final String price;
+  final double rating;
+  final int reviews;
+  final String distance;
+  final String owner;
+  final String ownerAvatar;
+  final bool isFeatured;
+  final bool isTopChoice;
+  final bool isVerified;
+  final String category;
+  final String listingType;
+  final String description;
+  final String address;
+  final String phone;
+
+  factory AdItem.fromListing(ListingModel listing) {
+    String fallbackImage() {
+      final String text =
+          '${listing.title} ${listing.categoryName}'.toLowerCase();
+      if (text.contains('wheelchair') || text.contains('medical')) {
+        return 'assets/images/wheelchair.jpg';
+      }
+      if (text.contains('camera') || text.contains('electronics')) {
+        return 'assets/images/camera.jpg';
+      }
+      return 'assets/images/carpainter.jpg';
+    }
+
+    return AdItem(
+      id: listing.id,
+      image: listing.imageUrl.isNotEmpty
+          ? listing.imageUrl
+          : fallbackImage(),
+      title: listing.title,
+      price: listing.displayPrice,
+      rating: listing.rating,
+      reviews: listing.reviewCount,
+      distance: listing.distanceKm == null
+          ? listing.address
+          : '${listing.distanceKm!.toStringAsFixed(1)} km',
+      owner: listing.ownerName.isEmpty
+          ? 'RentIt24 User'
+          : listing.ownerName,
+      ownerAvatar: listing.ownerProfileUrl,
+      isFeatured: listing.isFeatured,
+      isTopChoice: listing.isTopChoice,
+      isVerified: listing.isVerified,
+      category: listing.categoryName.isEmpty
+          ? listing.listingType
+          : listing.categoryName,
+      listingType: listing.listingType,
+      description: listing.description,
+      address: listing.address,
+    );
+  }
 }
 
 class ProfileScreenchat extends StatefulWidget {
+  const ProfileScreenchat({
+    super.key,
+    this.ownerId = 0,
+    this.userName = 'RentIt24 User',
+    this.avatar = '',
+    this.isVerified = false,
+    this.joinedLabel = 'Joined RentIt24',
+    this.adsCount = 0,
+    this.followersCount = 0,
+    this.followingCount = 0,
+    this.bio = 'No profile description provided.',
+  });
+
+  final int ownerId;
   final String userName;
   final String avatar;
   final bool isVerified;
@@ -39,152 +110,133 @@ class ProfileScreenchat extends StatefulWidget {
   final int followingCount;
   final String bio;
 
-  const ProfileScreenchat({
-    super.key,
-    this.userName = 'Floyd Miles',
-    this.avatar =
-        'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200',
-    this.isVerified = true,
-    this.joinedLabel = 'Joined in Nov 2025',
-    this.adsCount = 24,
-    this.followersCount = 110,
-    this.followingCount = 0,
-    this.bio =
-        'Discover our groundbreaking range of products and services designed '
-        'specifically for the photography industry, elevating your creative '
-        'potential and transforming your workflow!',
-  });
-
   @override
   State<ProfileScreenchat> createState() => _ProfileScreenchatState();
 }
 
 class _ProfileScreenchatState extends State<ProfileScreenchat> {
+  static const Color _primaryBlue = Color(0xFF2563EB);
+
+  final ListingService _listingService = ListingService();
+  final UserProfileService _profileService = UserProfileService();
+  final List<AdItem> _ads = <AdItem>[];
+
+  UserProfileModel? _profile;
   bool _isFollowing = false;
+  bool _isLoading = false;
   String _selectedTab = 'All';
 
-  final List<AdItem> _ads = const [
-    AdItem(
-      image:
-          'https://images.unsplash.com/photo-1526170375885-4d8ecf77b99f?w=400',
-      title: 'Go Pro 12',
-      price: '₹1300/day',
-      rating: 3.5,
-      reviews: 110,
-      distance: '2.5 km',
-      owner: 'Floyd Miles',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-      isFeatured: true,
-      isTopChoice: true,
-      category: 'Products',
-    ),
-    AdItem(
-      image:
-          'https://images.unsplash.com/photo-1502920917128-1aa500764cbd?w=400',
-      title: 'Canon EOS R6',
-      price: '₹2000/day',
-      rating: 5.0,
-      reviews: 48,
-      distance: '3 km',
-      owner: 'Floyd Miles',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-      isFeatured: true,
-      isTopChoice: true,
-      category: 'Products',
-    ),
-    AdItem(
-      image:
-          'https://images.unsplash.com/photo-1516035069371-29a1b244cc32?w=400',
-      title: 'Sony Alpha A7 III',
-      price: '₹1800/day',
-      rating: 4.8,
-      reviews: 89,
-      distance: '4.1 km',
-      owner: 'Floyd Miles',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-      isFeatured: false,
-      isTopChoice: true,
-      category: 'Products',
-    ),
-    AdItem(
-      image:
-          'https://images.unsplash.com/photo-1519183071298-a2962be96f83?w=400',
-      title: 'Studio Light Kit',
-      price: '₹900/day',
-      rating: 4.2,
-      reviews: 34,
-      distance: '1.8 km',
-      owner: 'Floyd Miles',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=100',
-      category: 'Services',
-    ),
-  ];
+  @override
+  void initState() {
+    super.initState();
+    _loadOwnerData();
+  }
+
+  Future<void> _loadOwnerData() async {
+    if (widget.ownerId <= 0) return;
+
+    setState(() => _isLoading = true);
+
+    try {
+      final List<dynamic> results = await Future.wait<dynamic>(<Future<dynamic>>[
+        _profileService.getProfile(userId: widget.ownerId),
+        _listingService.getMyListings(ownerId: widget.ownerId, limit: 100),
+      ]);
+
+      if (!mounted) return;
+      setState(() {
+        _profile = results[0] as UserProfileModel;
+        _ads
+          ..clear()
+          ..addAll(
+            List<ListingModel>.from(results[1] as List<dynamic>)
+                .map(AdItem.fromListing),
+          );
+        _isLoading = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Owner profile load error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+      setState(() => _isLoading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(error.toString().replaceFirst('Exception: ', '')),
+        ),
+      );
+    }
+  }
+
+  String get _displayName => _profile?.username.isNotEmpty == true
+      ? _profile!.username
+      : widget.userName;
+
+  String get _displayAvatar => _profile?.profileUrl.isNotEmpty == true
+      ? _profile!.profileUrl
+      : widget.avatar;
+
+  bool get _displayVerified => _profile?.isVerified ?? widget.isVerified;
+
+  int get _displayAdsCount => _ads.isNotEmpty ? _ads.length : widget.adsCount;
+
+  int get _displayFollowers =>
+      _profile?.followersCount ?? widget.followersCount;
+
+  int get _displayFollowing =>
+      _profile?.followingCount ?? widget.followingCount;
+
+  String get _displayBio => _profile?.about.isNotEmpty == true
+      ? _profile!.about
+      : widget.bio;
+
+  String get _displayJoinedLabel {
+    final DateTime? joined = _profile?.joinedAt;
+    if (joined == null) return widget.joinedLabel;
+    return 'Joined in ${joined.month.toString().padLeft(2, '0')}/${joined.year}';
+  }
 
   List<AdItem> get _filteredAds {
-    if (_selectedTab == 'All') {
-      return _ads;
-    }
+    if (_selectedTab == 'All') return _ads;
 
-    return _ads
-        .where((ad) => ad.category == _selectedTab)
-        .toList();
+    return _ads.where((ad) {
+      final String category = ad.category.toLowerCase();
+      final String type = ad.listingType.toLowerCase();
+
+      if (_selectedTab == 'Products') {
+        return category.contains('product') || type.contains('product');
+      }
+      return category.contains('service') || type.contains('service');
+    }).toList();
   }
 
   void _handleMenuSelection(String value) {
     switch (value) {
       case 'share':
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Profile link copied'),
-          ),
-        );
+        _showMessage('Profile link copied');
         break;
-
       case 'report':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('${widget.userName} reported'),
-          ),
-        );
+        _showMessage('$_displayName reported');
         break;
-
       case 'block':
         _confirmBlockUser();
         break;
     }
   }
 
-  void _confirmBlockUser() {
-    final bool isDark =
-        Theme.of(context).brightness == Brightness.dark;
-
-    showDialog<void>(
+  Future<void> _confirmBlockUser() async {
+    await showDialog<void>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          backgroundColor:
-              isDark ? const Color(0xFF1E1E1E) : Colors.white,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(18),
           ),
-          title: Text(
-            'Block ${widget.userName}',
-            style: TextStyle(
-              color: isDark ? Colors.white : Colors.black,
-              fontWeight: FontWeight.w700,
-            ),
-          ),
-          content: Text(
+          title: Text('Block $_displayName?'),
+          content: const Text(
             "Blocked users won't be able to message you or view your ads.",
-            style: TextStyle(
-              color: isDark ? Colors.white70 : Colors.black87,
-            ),
           ),
-          actions: [
+          actions: <Widget>[
             TextButton(
               onPressed: () => Navigator.pop(dialogContext),
               child: const Text('Cancel'),
@@ -192,19 +244,11 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
             TextButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text('${widget.userName} blocked'),
-                  ),
-                );
+                _showMessage('$_displayName blocked');
               },
               child: const Text(
                 'Block',
-                style: TextStyle(
-                  color: Colors.red,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: Colors.red),
               ),
             ),
           ],
@@ -213,379 +257,200 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
     );
   }
 
+  void _showMessage(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final ThemeData theme = Theme.of(context);
-    final bool isDark = theme.brightness == Brightness.dark;
-
-    const Color primaryBlue = Color(0xFF2563EB);
-
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final Color backgroundColor =
-        isDark ? const Color(0xFF121212) : const Color(0xFFF3F4F6);
-
-    final Color surfaceColor =
-        isDark ? const Color(0xFF1E1E1E) : Colors.white;
-
+        isDark ? const Color(0xFF121212) : const Color(0xFFF4F7FF);
     final Color textColor =
-        isDark ? Colors.white : const Color(0xFF111827);
-
-    final Color subTextColor =
-        isDark ? Colors.white60 : const Color(0xFF6B7280);
-
-    final Color statsBackgroundColor =
-        isDark ? const Color(0xFF1E2A4A) : const Color(0xFFE0E7FF);
-
-    final Color followingBackgroundColor =
-        isDark ? const Color(0xFF2A2A2A) : const Color(0xFFE5E7EB);
-
-    final double screenWidth = MediaQuery.sizeOf(context).width;
-
-    const double horizontalPadding = 20;
-    const double gridSpacing = 12;
-
-    final double usableWidth =
-        screenWidth - (horizontalPadding * 2);
-
-    final double cardWidth =
-        (usableWidth - gridSpacing) / 2;
-
-    const double imageHeight = 104;
-    const double cardInformationHeight = 132;
-
-    final double cardHeight =
-        imageHeight + cardInformationHeight;
-
-    final double childAspectRatio =
-        cardWidth / cardHeight;
+        isDark ? Colors.white : const Color(0xFF101828);
+    final Color secondaryTextColor =
+        isDark ? Colors.white60 : const Color(0xFF667085);
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
+      appBar: _buildAppBar(
+        isDark: isDark,
         backgroundColor: backgroundColor,
-        surfaceTintColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: Icon(
-            Icons.arrow_back,
-            color: textColor,
-            size: 22,
-          ),
-          onPressed: () => Navigator.pop(context),
-        ),
-        actions: [
-          Container(
-            width: 34,
-            height: 34,
-            margin: const EdgeInsets.only(right: 16),
-            decoration: BoxDecoration(
-              shape: BoxShape.circle,
-              border: Border.all(
-                color: isDark
-                    ? Colors.white38
-                    : Colors.grey.shade400,
-              ),
-            ),
-            child: PopupMenuButton<String>(
-              padding: EdgeInsets.zero,
-              icon: Icon(
-                Icons.more_horiz,
-                color: textColor,
-                size: 19,
-              ),
-              color: surfaceColor,
-              elevation: 4,
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
-              ),
-              onSelected: _handleMenuSelection,
-              itemBuilder: (context) {
-                return [
-                  PopupMenuItem<String>(
-                    value: 'share',
-                    height: 44,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.share_outlined,
-                          color: textColor,
-                          size: 19,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Share profile',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'report',
-                    height: 44,
-                    child: Row(
-                      children: [
-                        Icon(
-                          Icons.flag_outlined,
-                          color: textColor,
-                          size: 19,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Report user',
-                          style: TextStyle(
-                            color: textColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  PopupMenuItem<String>(
-                    value: 'block',
-                    height: 44,
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.block,
-                          color: Colors.red,
-                          size: 19,
-                        ),
-                        const SizedBox(width: 10),
-                        Text(
-                          'Block user',
-                          style: TextStyle(
-                            color: isDark
-                                ? Colors.red.shade300
-                                : Colors.red,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ];
-              },
-            ),
-          ),
-        ],
+        textColor: textColor,
       ),
       body: SafeArea(
         top: false,
-        bottom: false,
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(
-            horizontal: horizontalPadding,
+        child: RefreshIndicator(
+          color: _primaryBlue,
+          onRefresh: _loadOwnerData,
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(18, 4, 18, 30),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                _buildProfileHeader(
+                  isDark: isDark,
+                  textColor: textColor,
+                  secondaryTextColor: secondaryTextColor,
+                  backgroundColor: backgroundColor,
+                ),
+                const SizedBox(height: 16),
+                Text(
+                  _displayBio,
+                  style: TextStyle(
+                    color: textColor,
+                    fontSize: 13,
+                    height: 1.55,
+                  ),
+                ),
+                const SizedBox(height: 18),
+                _buildStatsCard(
+                  isDark: isDark,
+                  textColor: textColor,
+                  secondaryTextColor: secondaryTextColor,
+                ),
+                const SizedBox(height: 16),
+                _buildFollowButton(
+                  isDark: isDark,
+                  textColor: textColor,
+                ),
+                const SizedBox(height: 26),
+                Row(
+                  children: <Widget>[
+                    Text(
+                      'Ads posted',
+                      style: TextStyle(
+                        color: textColor,
+                        fontSize: 17,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const Spacer(),
+                    if (_isLoading)
+                      const SizedBox(
+                        width: 17,
+                        height: 17,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: _primaryBlue,
+                        ),
+                      ),
+                  ],
+                ),
+                const SizedBox(height: 14),
+                _buildCategoryTabs(isDark),
+                const SizedBox(height: 16),
+                _buildAdsSection(
+                  isDark: isDark,
+                  textColor: textColor,
+                  secondaryTextColor: secondaryTextColor,
+                ),
+              ],
+            ),
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _buildProfileHeader(
-                isDark: isDark,
-                textColor: textColor,
-                subTextColor: subTextColor,
+        ),
+      ),
+    );
+  }
+
+  PreferredSizeWidget _buildAppBar({
+    required bool isDark,
+    required Color backgroundColor,
+    required Color textColor,
+  }) {
+    return AppBar(
+      toolbarHeight: 58,
+      backgroundColor: backgroundColor,
+      surfaceTintColor: Colors.transparent,
+      elevation: 0,
+      leadingWidth: 48,
+      leading: IconButton(
+        onPressed: () => Navigator.pop(context),
+        icon: Icon(
+          Icons.arrow_back_ios_new_rounded,
+          color: textColor,
+          size: 19,
+        ),
+      ),
+      actions: <Widget>[
+        Container(
+          width: 36,
+          height: 36,
+          margin: const EdgeInsets.only(right: 14),
+          decoration: BoxDecoration(
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: isDark
+                  ? Colors.white12
+                  : const Color(0xFFE4E7EC),
+            ),
+          ),
+          child: PopupMenuButton<String>(
+            padding: EdgeInsets.zero,
+            color: isDark ? const Color(0xFF1E1E1E) : Colors.white,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(14),
+            ),
+            icon: Icon(
+              Icons.more_horiz_rounded,
+              color: textColor,
+              size: 20,
+            ),
+            onSelected: _handleMenuSelection,
+            itemBuilder: (_) => <PopupMenuEntry<String>>[
+              _profileMenuItem(
+                value: 'share',
+                icon: Icons.share_outlined,
+                label: 'Share profile',
               ),
-
-              const SizedBox(height: 20),
-
-              Text(
-                widget.bio,
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 13.5,
-                  height: 1.5,
-                  fontWeight: FontWeight.w500,
-                ),
+              _profileMenuItem(
+                value: 'report',
+                icon: Icons.flag_outlined,
+                label: 'Report user',
               ),
-
-              const SizedBox(height: 20),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 16,
-                ),
-                decoration: BoxDecoration(
-                  color: statsBackgroundColor,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildStat(
-                        value: '${widget.adsCount}',
-                        label: 'Ads',
-                        textColor: textColor,
-                        subTextColor: subTextColor,
-                      ),
-                    ),
-                    _buildVerticalDivider(isDark),
-                    Expanded(
-                      child: _buildStat(
-                        value: '${widget.followersCount}',
-                        label: 'Followers',
-                        textColor: textColor,
-                        subTextColor: subTextColor,
-                      ),
-                    ),
-                    _buildVerticalDivider(isDark),
-                    Expanded(
-                      child: _buildStat(
-                        value: '${widget.followingCount}',
-                        label: 'Following',
-                        textColor: textColor,
-                        subTextColor: subTextColor,
-                      ),
-                    ),
-                  ],
-                ),
+              _profileMenuItem(
+                value: 'block',
+                icon: Icons.block_rounded,
+                label: 'Block user',
+                destructive: true,
               ),
-
-              const SizedBox(height: 20),
-
-              SizedBox(
-                width: double.infinity,
-                height: 48,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      _isFollowing = !_isFollowing;
-                    });
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isFollowing
-                        ? followingBackgroundColor
-                        : primaryBlue,
-                    foregroundColor:
-                        _isFollowing ? textColor : Colors.white,
-                    elevation: _isFollowing ? 0 : 4,
-                    shadowColor: primaryBlue.withOpacity(0.35),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                  ),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(milliseconds: 180),
-                    child: Row(
-                      key: ValueKey<bool>(_isFollowing),
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          _isFollowing
-                              ? Icons.check
-                              : Icons.person_add_alt_1,
-                          size: 18,
-                        ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _isFollowing ? 'Following' : 'Follow',
-                          style: const TextStyle(
-                            fontSize: 15,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              ),
-
-              const SizedBox(height: 26),
-
-              Text(
-                'Ads posted',
-                style: TextStyle(
-                  color: textColor,
-                  fontSize: 17,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-
-              const SizedBox(height: 14),
-
-              SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                child: Row(
-                  children: [
-                    _buildTabChip(
-                      label: 'All',
-                      primaryBlue: primaryBlue,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildTabChip(
-                      label: 'Products',
-                      primaryBlue: primaryBlue,
-                      isDark: isDark,
-                    ),
-                    const SizedBox(width: 8),
-                    _buildTabChip(
-                      label: 'Services',
-                      primaryBlue: primaryBlue,
-                      isDark: isDark,
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 16),
-
-              if (_filteredAds.isEmpty)
-                Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 50),
-                  child: Center(
-                    child: Column(
-                      children: [
-                        Icon(
-                          Icons.inventory_2_outlined,
-                          color: subTextColor,
-                          size: 44,
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          'No ads in this category',
-                          style: TextStyle(
-                            color: subTextColor,
-                            fontSize: 14,
-                            fontWeight: FontWeight.w500,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                )
-              else
-                GridView.builder(
-                  shrinkWrap: true,
-                  padding: EdgeInsets.zero,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: _filteredAds.length,
-                  gridDelegate:
-                      SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: gridSpacing,
-                    mainAxisSpacing: gridSpacing,
-                    childAspectRatio: childAspectRatio,
-                  ),
-                  itemBuilder: (context, index) {
-                    final AdItem ad = _filteredAds[index];
-
-                    return _buildAdCard(
-                      ad: ad,
-                      isDark: isDark,
-                    );
-                  },
-                ),
-
-              const SizedBox(height: 30),
             ],
           ),
         ),
+      ],
+    );
+  }
+
+  PopupMenuItem<String> _profileMenuItem({
+    required String value,
+    required IconData icon,
+    required String label,
+    bool destructive = false,
+  }) {
+    return PopupMenuItem<String>(
+      value: value,
+      child: Row(
+        children: <Widget>[
+          Icon(
+            icon,
+            size: 19,
+            color: destructive ? Colors.red : null,
+          ),
+          const SizedBox(width: 10),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 14,
+              color: destructive ? Colors.red : null,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -593,20 +458,18 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
   Widget _buildProfileHeader({
     required bool isDark,
     required Color textColor,
-    required Color subTextColor,
+    required Color secondaryTextColor,
+    required Color backgroundColor,
   }) {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
+      children: <Widget>[
         Stack(
           clipBehavior: Clip.none,
-          children: [
-            CircleAvatar(
-              radius: 38,
-              backgroundColor:
-                  isDark ? Colors.grey.shade800 : Colors.grey.shade200,
-              backgroundImage: NetworkImage(widget.avatar),
-              onBackgroundImageError: (_, __) {},
+          children: <Widget>[
+            _ProfileAvatar(
+              imageUrl: _displayAvatar,
+              isDark: isDark,
             ),
             Positioned(
               right: 1,
@@ -617,81 +480,68 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                 decoration: BoxDecoration(
                   color: const Color(0xFF22C55E),
                   shape: BoxShape.circle,
-                  border: Border.all(
-                    color: isDark
-                        ? const Color(0xFF121212)
-                        : const Color(0xFFF3F4F6),
-                    width: 2,
-                  ),
+                  border: Border.all(color: backgroundColor, width: 2),
                 ),
               ),
             ),
           ],
         ),
-
-        const SizedBox(width: 16),
-
+        const SizedBox(width: 14),
         Expanded(
           child: Padding(
-            padding: const EdgeInsets.only(top: 3),
+            padding: const EdgeInsets.only(top: 4),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
+              children: <Widget>[
                 Row(
-                  children: [
+                  children: <Widget>[
                     Flexible(
                       child: Text(
-                        widget.userName,
+                        _displayName,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           color: textColor,
-                          fontSize: 20,
-                          fontWeight: FontWeight.w800,
+                          fontSize: 19,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                     ),
-                    if (widget.isVerified) ...[
-                      const SizedBox(width: 6),
+                    if (_displayVerified) ...<Widget>[
+                      const SizedBox(width: 5),
                       const Icon(
-                        Icons.verified,
-                        color: Color(0xFF2563EB),
-                        size: 19,
+                        Icons.verified_rounded,
+                        color: _primaryBlue,
+                        size: 18,
                       ),
                     ],
                   ],
                 ),
-
                 const SizedBox(height: 6),
-
-                if (widget.isVerified)
+                if (_displayVerified)
                   Row(
-                    children: [
+                    children: <Widget>[
                       Icon(
                         Icons.workspace_premium_outlined,
-                        size: 15,
-                        color: textColor.withOpacity(0.75),
+                        size: 14,
+                        color: secondaryTextColor,
                       ),
                       const SizedBox(width: 5),
                       Text(
                         'Verified',
                         style: TextStyle(
-                          color: textColor.withOpacity(0.75),
-                          fontSize: 13,
-                          fontWeight: FontWeight.w500,
+                          color: secondaryTextColor,
+                          fontSize: 12.5,
                         ),
                       ),
                     ],
                   ),
-
                 const SizedBox(height: 5),
-
                 Text(
-                  widget.joinedLabel,
+                  _displayJoinedLabel,
                   style: TextStyle(
-                    color: subTextColor,
+                    color: secondaryTextColor,
                     fontSize: 12,
-                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
@@ -702,13 +552,48 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
     );
   }
 
-  Widget _buildVerticalDivider(bool isDark) {
+  Widget _buildStatsCard({
+    required bool isDark,
+    required Color textColor,
+    required Color secondaryTextColor,
+  }) {
     return Container(
-      width: 1,
-      height: 38,
-      color: isDark
-          ? Colors.white.withOpacity(0.15)
-          : const Color(0xFF2563EB).withOpacity(0.16),
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 15),
+      decoration: BoxDecoration(
+        color: isDark ? const Color(0xFF1D2945) : const Color(0xFFE7EDFF),
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: _buildStat(
+              value: '$_displayAdsCount',
+              label: 'Ads',
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
+            ),
+          ),
+          _buildStatDivider(isDark),
+          Expanded(
+            child: _buildStat(
+              value: '$_displayFollowers',
+              label: 'Followers',
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
+            ),
+          ),
+          _buildStatDivider(isDark),
+          Expanded(
+            child: _buildStat(
+              value: '$_displayFollowing',
+              label: 'Following',
+              textColor: textColor,
+              secondaryTextColor: secondaryTextColor,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -716,262 +601,303 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
     required String value,
     required String label,
     required Color textColor,
-    required Color subTextColor,
+    required Color secondaryTextColor,
   }) {
     return Column(
       mainAxisSize: MainAxisSize.min,
-      children: [
+      children: <Widget>[
         Text(
           value,
           style: TextStyle(
             color: textColor,
-            fontSize: 21,
-            fontWeight: FontWeight.w800,
+            fontSize: 20,
+            fontWeight: FontWeight.w700,
           ),
         ),
         const SizedBox(height: 3),
         Text(
           label,
           style: TextStyle(
-            color: subTextColor,
-            fontSize: 12.5,
-            fontWeight: FontWeight.w500,
+            color: secondaryTextColor,
+            fontSize: 12,
           ),
         ),
       ],
     );
   }
 
-  Widget _buildTabChip({
-    required String label,
-    required Color primaryBlue,
+  Widget _buildStatDivider(bool isDark) {
+    return Container(
+      width: 1,
+      height: 36,
+      color: isDark ? Colors.white12 : _primaryBlue.withValues(alpha: 0.14),
+    );
+  }
+
+  Widget _buildFollowButton({
     required bool isDark,
+    required Color textColor,
   }) {
-    final bool isSelected = _selectedTab == label;
-
-    final Color unselectedBackgroundColor =
-        isDark ? const Color(0xFF242424) : Colors.white;
-
-    final Color unselectedTextColor =
-        isDark ? Colors.white60 : const Color(0xFF6B7280);
-
-    final Color borderColor =
-        isDark ? Colors.white24 : const Color(0xFFD1D5DB);
-
-    return GestureDetector(
-      onTap: () {
-        setState(() {
-          _selectedTab = label;
-        });
-      },
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        padding: const EdgeInsets.symmetric(
-          horizontal: 20,
-          vertical: 10,
-        ),
-        decoration: BoxDecoration(
-          color: isSelected
-              ? primaryBlue
-              : unselectedBackgroundColor,
-          borderRadius: BorderRadius.circular(22),
-          border: Border.all(
-            color: isSelected ? primaryBlue : borderColor,
+    return SizedBox(
+      width: double.infinity,
+      height: 48,
+      child: ElevatedButton(
+        onPressed: () => setState(() => _isFollowing = !_isFollowing),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: _isFollowing
+              ? (isDark ? const Color(0xFF262626) : const Color(0xFFE4E7EC))
+              : _primaryBlue,
+          foregroundColor: _isFollowing ? textColor : Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(24),
           ),
-          boxShadow: isSelected
-              ? [
-                  BoxShadow(
-                    color: primaryBlue.withOpacity(0.22),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ]
-              : null,
         ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected
-                ? Colors.white
-                : unselectedTextColor,
-            fontSize: 13,
-            fontWeight: FontWeight.w600,
+        child: AnimatedSwitcher(
+          duration: const Duration(milliseconds: 180),
+          child: Row(
+            key: ValueKey<bool>(_isFollowing),
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Icon(
+                _isFollowing
+                    ? Icons.check_rounded
+                    : Icons.person_add_alt_1_rounded,
+                size: 18,
+              ),
+              const SizedBox(width: 8),
+              Text(
+                _isFollowing ? 'Following' : 'Follow',
+                style: const TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
           ),
         ),
       ),
     );
   }
 
+  Widget _buildCategoryTabs(bool isDark) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Row(
+        children: <Widget>[
+          _buildTabChip('All', isDark),
+          const SizedBox(width: 8),
+          _buildTabChip('Products', isDark),
+          const SizedBox(width: 8),
+          _buildTabChip('Services', isDark),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabChip(String label, bool isDark) {
+    final bool isSelected = _selectedTab == label;
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(20),
+      onTap: () => setState(() => _selectedTab = label),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? _primaryBlue
+              : (isDark ? const Color(0xFF242424) : Colors.white),
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(
+            color: isSelected
+                ? _primaryBlue
+                : (isDark ? Colors.white12 : const Color(0xFFE4E7EC)),
+          ),
+        ),
+        child: Text(
+          label,
+          style: TextStyle(
+            color: isSelected
+                ? Colors.white
+                : (isDark ? Colors.white60 : const Color(0xFF667085)),
+            fontSize: 12.5,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAdsSection({
+    required bool isDark,
+    required Color textColor,
+    required Color secondaryTextColor,
+  }) {
+    final List<AdItem> ads = _filteredAds;
+
+    if (_isLoading && ads.isEmpty) {
+      return const Padding(
+        padding: EdgeInsets.symmetric(vertical: 60),
+        child: Center(
+          child: CircularProgressIndicator(color: _primaryBlue),
+        ),
+      );
+    }
+
+    if (ads.isEmpty) {
+      return Padding(
+        padding: const EdgeInsets.symmetric(vertical: 50),
+        child: Center(
+          child: Column(
+            children: <Widget>[
+              Icon(
+                Icons.inventory_2_outlined,
+                color: secondaryTextColor,
+                size: 44,
+              ),
+              const SizedBox(height: 10),
+              Text(
+                'No ads in this category',
+                style: TextStyle(
+                  color: secondaryTextColor,
+                  fontSize: 14,
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    final double screenWidth = MediaQuery.sizeOf(context).width;
+    const double pagePadding = 36;
+    const double spacing = 12;
+    final double cardWidth = (screenWidth - pagePadding - spacing) / 2;
+    const double cardHeight = 242;
+
+    return GridView.builder(
+      shrinkWrap: true,
+      padding: EdgeInsets.zero,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: ads.length,
+      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: spacing,
+        mainAxisSpacing: spacing,
+        childAspectRatio: cardWidth / cardHeight,
+      ),
+      itemBuilder: (_, index) {
+        return _buildAdCard(
+          ad: ads[index],
+          isDark: isDark,
+          textColor: textColor,
+          secondaryTextColor: secondaryTextColor,
+        );
+      },
+    );
+  }
+
   Widget _buildAdCard({
     required AdItem ad,
     required bool isDark,
+    required Color textColor,
+    required Color secondaryTextColor,
   }) {
-    final Color cardColor =
-        isDark ? const Color(0xFF1E1E1E) : Colors.white;
+    final Color cardColor = isDark ? const Color(0xFF1E1E1E) : Colors.white;
 
-    final Color textColor =
-        isDark ? Colors.white : const Color(0xFF2F314D);
-
-    final Color priceColor =
-        isDark ? Colors.white : const Color(0xFF090726);
-
-    final Color secondaryTextColor =
-        isDark ? Colors.white60 : const Color(0x99090726);
-
-    return GestureDetector(
-      onTap: () {
-        Navigator.push(
-          context,
-          MaterialPageRoute(
-            builder: (_) {
-              return ProductDetailsScreen(
-                adData: ad,
-              );
-            },
-          ),
-        );
-      },
-      child: Container(
-        clipBehavior: Clip.antiAlias,
-        decoration: BoxDecoration(
-          color: cardColor,
-          borderRadius: BorderRadius.circular(10),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(
-                isDark ? 0.30 : 0.07,
-              ),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
+    return Material(
+      color: cardColor,
+      borderRadius: BorderRadius.circular(11),
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute<void>(
+              builder: (_) => ProductDetailsScreen(adData: ad),
             ),
-          ],
-        ),
+          );
+        },
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
-              children: [
-                Image.network(
-                  ad.image,
-                  height: 104,
-                  width: double.infinity,
-                  fit: BoxFit.cover,
-                  loadingBuilder: (
-                    context,
-                    child,
-                    loadingProgress,
-                  ) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-
-                    return Container(
-                      height: 104,
-                      width: double.infinity,
-                      color: isDark
-                          ? Colors.grey.shade800
-                          : Colors.grey.shade100,
-                      alignment: Alignment.center,
-                      child: const SizedBox(
-                        width: 19,
-                        height: 19,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
+          children: <Widget>[
+            SizedBox(
+              height: 105,
+              width: double.infinity,
+              child: Stack(
+                fit: StackFit.expand,
+                children: <Widget>[
+                  _ListingImage(source: ad.image, isDark: isDark),
+                  if (ad.isFeatured)
+                    Positioned(
+                      left: 0,
+                      top: 10,
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
+                        decoration: const BoxDecoration(
+                          color: _primaryBlue,
+                          borderRadius: BorderRadius.only(
+                            topRight: Radius.circular(4),
+                            bottomRight: Radius.circular(4),
+                          ),
+                        ),
+                        child: const Text(
+                          'Featured',
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: 9.5,
+                          ),
                         ),
                       ),
-                    );
-                  },
-                  errorBuilder: (
-                    context,
-                    error,
-                    stackTrace,
-                  ) {
-                    return Container(
-                      height: 104,
-                      width: double.infinity,
-                      color: isDark
-                          ? Colors.grey.shade800
-                          : Colors.grey.shade300,
-                      alignment: Alignment.center,
-                      child: const Icon(
-                        Icons.image_not_supported_outlined,
-                        color: Colors.grey,
-                      ),
-                    );
-                  },
-                ),
-
-                if (ad.isFeatured)
+                    ),
                   Positioned(
-                    top: 11,
-                    left: 0,
+                    top: 8,
+                    right: 8,
                     child: Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
+                      width: 29,
+                      height: 29,
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.42),
+                        shape: BoxShape.circle,
                       ),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF235BD6),
-                        borderRadius: BorderRadius.only(
-                          topRight: Radius.circular(3),
-                          bottomRight: Radius.circular(3),
-                        ),
-                      ),
-                      child: const Text(
-                        'Featured',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                        ),
+                      child: const Icon(
+                        Icons.favorite_border_rounded,
+                        color: Colors.white,
+                        size: 16,
                       ),
                     ),
                   ),
-
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: Container(
-                    width: 29,
-                    height: 29,
-                    decoration: const BoxDecoration(
-                      color: Color(0x66090726),
-                      shape: BoxShape.circle,
-                    ),
-                    child: const Icon(
-                      Icons.favorite_border,
-                      color: Colors.white,
-                      size: 16,
-                    ),
-                  ),
-                ),
-              ],
+                ],
+              ),
             ),
-
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.all(9),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
+                  children: <Widget>[
                     Row(
-                      children: [
+                      children: <Widget>[
                         Icon(
                           Icons.location_on_outlined,
-                          color: secondaryTextColor,
                           size: 12,
+                          color: secondaryTextColor,
                         ),
                         const SizedBox(width: 2),
                         Expanded(
                           child: Text(
-                            ad.distance,
+                            ad.distance.isEmpty
+                                ? ad.address
+                                : ad.distance,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
                               color: secondaryTextColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w400,
+                              fontSize: 9.5,
                             ),
                           ),
                         ),
@@ -982,25 +908,20 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                               vertical: 3,
                             ),
                             decoration: BoxDecoration(
-                              color: isDark
-                                  ? Colors.grey.shade800
-                                  : const Color(0xFF090726),
+                              color: const Color(0xFF101828),
                               borderRadius: BorderRadius.circular(3),
                             ),
                             child: const Text(
                               'Top Choice',
                               style: TextStyle(
                                 color: Colors.white,
-                                fontSize: 9,
-                                fontWeight: FontWeight.w500,
+                                fontSize: 8.5,
                               ),
                             ),
                           ),
                       ],
                     ),
-
                     const SizedBox(height: 7),
-
                     Text(
                       ad.title,
                       maxLines: 1,
@@ -1011,53 +932,41 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                         fontWeight: FontWeight.w600,
                       ),
                     ),
-
                     const SizedBox(height: 4),
-
                     Text(
                       ad.price,
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: TextStyle(
-                        color: priceColor,
+                        color: textColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-
                     const Spacer(),
-
                     Row(
-                      children: [
-                        CircleAvatar(
-                          radius: 8,
-                          backgroundColor: isDark
-                              ? Colors.grey.shade800
-                              : Colors.grey.shade200,
-                          backgroundImage:
-                              NetworkImage(ad.ownerAvatar),
-                          onBackgroundImageError: (_, __) {},
+                      children: <Widget>[
+                        _OwnerAvatar(
+                          imageUrl: ad.ownerAvatar,
+                          isDark: isDark,
                         ),
-                        const SizedBox(width: 6),
+                        const SizedBox(width: 5),
                         Expanded(
                           child: Text(
                             ad.owner,
                             maxLines: 1,
                             overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              color: priceColor,
-                              fontSize: 10,
-                              fontWeight: FontWeight.w500,
+                              color: textColor,
+                              fontSize: 9.5,
                             ),
                           ),
                         ),
                       ],
                     ),
-
-                    const SizedBox(height: 5),
-
+                    const SizedBox(height: 6),
                     Row(
-                      children: [
+                      children: <Widget>[
                         const Icon(
                           Icons.star_rounded,
                           color: Colors.amber,
@@ -1068,17 +977,16 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
                           ad.rating.toStringAsFixed(1),
                           style: TextStyle(
                             color: textColor,
-                            fontSize: 11,
+                            fontSize: 10.5,
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                        const SizedBox(width: 4),
+                        const SizedBox(width: 3),
                         Text(
                           '(${ad.reviews})',
                           style: TextStyle(
                             color: secondaryTextColor,
-                            fontSize: 10,
-                            fontWeight: FontWeight.w400,
+                            fontSize: 9.5,
                           ),
                         ),
                       ],
@@ -1090,6 +998,101 @@ class _ProfileScreenchatState extends State<ProfileScreenchat> {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _ProfileAvatar extends StatelessWidget {
+  const _ProfileAvatar({required this.imageUrl, required this.isDark});
+
+  final String imageUrl;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasNetworkImage = imageUrl.startsWith('http');
+
+    return CircleAvatar(
+      radius: 37,
+      backgroundColor:
+          isDark ? Colors.grey.shade800 : const Color(0xFFE4E7EC),
+      backgroundImage: hasNetworkImage ? NetworkImage(imageUrl) : null,
+      onBackgroundImageError: hasNetworkImage ? (_, __) {} : null,
+      child: hasNetworkImage
+          ? null
+          : Icon(
+              Icons.person_outline_rounded,
+              color: isDark ? Colors.white60 : const Color(0xFF667085),
+              size: 32,
+            ),
+    );
+  }
+}
+
+class _OwnerAvatar extends StatelessWidget {
+  const _OwnerAvatar({required this.imageUrl, required this.isDark});
+
+  final String imageUrl;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final bool hasNetworkImage = imageUrl.startsWith('http');
+
+    return CircleAvatar(
+      radius: 8,
+      backgroundColor:
+          isDark ? Colors.grey.shade800 : const Color(0xFFE4E7EC),
+      backgroundImage: hasNetworkImage ? NetworkImage(imageUrl) : null,
+      onBackgroundImageError: hasNetworkImage ? (_, __) {} : null,
+      child: hasNetworkImage
+          ? null
+          : const Icon(Icons.person_outline_rounded, size: 10),
+    );
+  }
+}
+
+class _ListingImage extends StatelessWidget {
+  const _ListingImage({required this.source, required this.isDark});
+
+  final String source;
+  final bool isDark;
+
+  @override
+  Widget build(BuildContext context) {
+    final Widget placeholder = Container(
+      color: isDark ? Colors.grey.shade800 : const Color(0xFFE4E7EC),
+      alignment: Alignment.center,
+      child: const Icon(
+        Icons.image_not_supported_outlined,
+        color: Colors.grey,
+      ),
+    );
+
+    if (source.startsWith('http')) {
+      return Image.network(
+        source,
+        fit: BoxFit.cover,
+        loadingBuilder: (context, child, progress) {
+          if (progress == null) return child;
+          return Container(
+            color: isDark ? Colors.grey.shade800 : const Color(0xFFE4E7EC),
+            alignment: Alignment.center,
+            child: const SizedBox(
+              width: 18,
+              height: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
+          );
+        },
+        errorBuilder: (_, __, ___) => placeholder,
+      );
+    }
+
+    return Image.asset(
+      source,
+      fit: BoxFit.cover,
+      errorBuilder: (_, __, ___) => placeholder,
     );
   }
 }

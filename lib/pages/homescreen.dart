@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'package:flutter/material.dart';
-import 'package:rentit24/core/network/api_exception.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/main.dart';
 import 'package:rentit24/model/category_model.dart';
@@ -9,7 +8,14 @@ import 'package:rentit24/pages/chat_screens/profile.dart';
 import 'package:rentit24/wrapper/navbar.dart';
 import 'package:rentit24/pages/product_details_screen.dart';
 import 'package:rentit24/pages/searchscreen.dart';
+import 'package:rentit24/pages/wishlist_screen.dart';
+import 'package:rentit24/pages/notifications_screen.dart';
+import 'package:geolocator/geolocator.dart';
+import 'package:geocoding/geocoding.dart';
 import 'package:rentit24/services/category_services.dart';
+import 'package:rentit24/services/banner_service.dart';
+import 'package:rentit24/services/dashboard_service.dart';
+import 'package:rentit24/services/listing_services.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -18,14 +24,27 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with SingleTickerProviderStateMixin {
   final PageController _pageController = PageController(initialPage: 1000);
   Timer? _timer;
   Timer? _hintTimer;
   int _currentPage = 0;
   final CategoryService _categoryService = CategoryService();
+  final ListingService _listingService = ListingService();
+  final BannerService _bannerService = BannerService();
+  final DashboardService _dashboardService = DashboardService();
+  String _currentLocationText = 'Getting location...';
+  bool _isLoadingLocation = false;
+  bool _isLoadingHomeData = true;
 
+  late final AnimationController _skeletonController;
+  late final Animation<double> _skeletonAnimation;
+
+  final Geocoding _geocoding = Geocoding();
   late Future<List<CategoryModel>> _categoriesFuture;
+  Position? _currentPosition;
+
+  final Map<String, Future<String>> _professionalDistanceCache = {};
   int _currentHintIndex = 0;
 
   String _selectedFilter = 'All';
@@ -39,251 +58,8 @@ class _HomeScreenState extends State<HomeScreen> {
     'Guitar',
   ];
 
-  final List<AdItem> _adsData = [
-    AdItem(
-      title: 'Wheelchair',
-      price: '₹200/day',
-      distance: '0.5 km',
-      owner: 'Sachin Jadhav',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=100',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.2,
-      reviews: 52,
-      isFeatured: true,
-      isTopChoice: true,
-      category: 'Verified',
-    ),
-    AdItem(
-      title: 'Canon EOS M50 Mark II',
-      price: '₹1500/day',
-      distance: '2 km',
-      owner: 'Hamza',
-      ownerAvatar:
-          'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
-      image: 'assets/images/camera.jpg',
-      rating: 4.0,
-      reviews: 10,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Carpenter Tool Kit',
-      price: '₹350/day',
-      distance: '1.2 km',
-      owner: 'Ravi Kumar',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=11',
-      image: 'assets/images/carpainter.jpg',
-      rating: 4.5,
-      reviews: 122,
-      isFeatured: true,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Manual Wheelchair - Foldable',
-      price: '₹180/day',
-      distance: '0.8 km',
-      owner: 'Priya Shah',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=5',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.1,
-      reviews: 34,
-      isFeatured: false,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'DSLR Camera Kit with Lens',
-      price: '₹1200/day',
-      distance: '3.4 km',
-      owner: 'Aditya Rao',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=8',
-      image: 'assets/images/camera.jpg',
-      rating: 4.7,
-      reviews: 88,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Professional Wood Carving Set',
-      price: '₹450/day',
-      distance: '2.1 km',
-      owner: 'Imran Sheikh',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=12',
-      image: 'assets/images/carpainter.jpg',
-      rating: 3.9,
-      reviews: 21,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Electric Wheelchair',
-      price: '₹500/day',
-      distance: '1.9 km',
-      owner: 'Neha Joshi',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=15',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.4,
-      reviews: 60,
-      isFeatured: true,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Mirrorless Camera - Sony A6400',
-      price: '₹1800/day',
-      distance: '4.0 km',
-      owner: 'Farhan Khan',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=18',
-      image: 'assets/images/camera.jpg',
-      rating: 4.3,
-      reviews: 45,
-      isFeatured: false,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Carpentry Power Tools',
-      price: '₹600/day',
-      distance: '2.7 km',
-      owner: 'Suresh Patil',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=20',
-      image: 'assets/images/carpainter.jpg',
-      rating: 4.0,
-      reviews: 15,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Lightweight Travel Wheelchair',
-      price: '₹220/day',
-      distance: '1.1 km',
-      owner: 'Kavita Nair',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=22',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.6,
-      reviews: 77,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Action Camera - GoPro Hero 11',
-      price: '₹700/day',
-      distance: '2.3 km',
-      owner: 'Rohit Verma',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=25',
-      image: 'assets/images/camera.jpg',
-      rating: 4.2,
-      reviews: 33,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Custom Furniture Carving Service',
-      price: '₹900/day',
-      distance: '3.1 km',
-      owner: 'Manoj Deshmukh',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=28',
-      image: 'assets/images/carpainter.jpg',
-      rating: 4.8,
-      reviews: 102,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Pediatric Wheelchair',
-      price: '₹250/day',
-      distance: '0.9 km',
-      owner: 'Anjali Mehta',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=30',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.0,
-      reviews: 19,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Camera Tripod & Lighting Kit',
-      price: '₹300/day',
-      distance: '1.6 km',
-      owner: 'Vikram Singh',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=32',
-      image: 'assets/images/camera.jpg',
-      rating: 3.8,
-      reviews: 12,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Wood Furniture Repair Toolkit',
-      price: '₹400/day',
-      distance: '2.5 km',
-      owner: 'Ganesh Yadav',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=35',
-      image: 'assets/images/carpainter.jpg',
-      rating: 4.3,
-      reviews: 40,
-      isFeatured: true,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Heavy Duty Wheelchair',
-      price: '₹280/day',
-      distance: '1.4 km',
-      owner: 'Sunita Rane',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=38',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 4.5,
-      reviews: 55,
-      isFeatured: false,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Canon 90D DSLR Bundle',
-      price: '₹1600/day',
-      distance: '3.8 km',
-      owner: 'Arjun Malhotra',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=40',
-      image: 'assets/images/camera.jpg',
-      rating: 4.6,
-      reviews: 66,
-      isFeatured: true,
-      isTopChoice: true,
-    ),
-    AdItem(
-      title: 'Wooden Handicraft Making Kit',
-      price: '₹500/day',
-      distance: '2.9 km',
-      owner: 'Deepak Chavan',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=42',
-      image: 'assets/images/carpainter.jpg',
-      rating: 4.1,
-      reviews: 28,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Compact Folding Wheelchair',
-      price: '₹190/day',
-      distance: '0.6 km',
-      owner: 'Meera Iyer',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=45',
-      image: 'assets/images/wheelchair.jpg',
-      rating: 3.9,
-      reviews: 9,
-      isFeatured: false,
-      isTopChoice: false,
-    ),
-    AdItem(
-      title: 'Studio Camera & Backdrop Set',
-      price: '₹1300/day',
-      distance: '3.3 km',
-      owner: 'Sameer Qureshi',
-      ownerAvatar: 'https://i.pravatar.cc/150?img=48',
-      image: 'assets/images/camera.jpg',
-      rating: 4.4,
-      reviews: 51,
-      isFeatured: true,
-      isTopChoice: false,
-    ),
-  ];
+  final List<AdItem> _adsData = <AdItem>[];
+  final List<AdItem> _professionalsData = <AdItem>[];
 
   final List<Map<String, String>> _bannerData = [
     {
@@ -303,13 +79,371 @@ class _HomeScreenState extends State<HomeScreen> {
     },
   ];
 
+  Future<void> _loadHomeData({bool showSkeleton = true}) async {
+    if (showSkeleton && mounted) {
+      setState(() {
+        _isLoadingHomeData = true;
+      });
+    }
+
+    try {
+      final results = await Future.wait<dynamic>([
+        _listingService.getFeed(),
+        _bannerService.getHomeBanners(),
+        _dashboardService.getTopProfessionals(limit: 10),
+      ]);
+
+      if (!mounted) return;
+
+      final listings = results[0] as List<dynamic>;
+      final banners = results[1] as List<dynamic>;
+      final professionals = results[2] as List<dynamic>;
+
+      setState(() {
+        _adsData
+          ..clear()
+          ..addAll(listings.map((item) => AdItem.fromListing(item)));
+        _professionalsData
+          ..clear()
+          ..addAll(professionals.map((item) => AdItem.fromListing(item)));
+
+        if (banners.isNotEmpty) {
+          _bannerData
+            ..clear()
+            ..addAll(
+              banners.map<Map<String, String>>(
+                (item) => <String, String>{
+                  'title': item.title,
+                  'subtitle': item.subtitle,
+                  'image': item.imageUrl,
+                },
+              ),
+            );
+        }
+        _currentPage = 0;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Home data error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    } finally {
+      if (showSkeleton && mounted) {
+        setState(() {
+          _isLoadingHomeData = false;
+        });
+      }
+    }
+  }
+
+  Future<void> _loadCurrentLocation() async {
+    if (_isLoadingLocation) return;
+
+    if (mounted) {
+      setState(() {
+        _isLoadingLocation = true;
+        _currentLocationText = 'Getting location...';
+      });
+    }
+
+    try {
+      // Step 1: Check whether phone location/GPS is enabled.
+      final bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+
+      debugPrint('LOCATION SERVICE ENABLED: $serviceEnabled');
+
+      if (!serviceEnabled) {
+        if (!mounted) return;
+
+        setState(() {
+          _currentLocationText = 'Turn on location';
+        });
+
+        return;
+      }
+
+      // Step 2: Check permission.
+      LocationPermission permission = await Geolocator.checkPermission();
+
+      debugPrint('LOCATION PERMISSION BEFORE: $permission');
+
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+      }
+
+      debugPrint('LOCATION PERMISSION AFTER: $permission');
+
+      if (permission == LocationPermission.denied) {
+        if (!mounted) return;
+
+        setState(() {
+          _currentLocationText = 'Location permission denied';
+        });
+
+        return;
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        if (!mounted) return;
+
+        setState(() {
+          _currentLocationText = 'Enable location permission';
+        });
+
+        return;
+      }
+
+      // Step 3: Try last known position first.
+      Position? position = await Geolocator.getLastKnownPosition();
+
+      debugPrint('LAST KNOWN POSITION: $position');
+
+      // Step 4: Get fresh position if no saved position exists.
+      position ??= await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+          timeLimit: Duration(seconds: 30),
+        ),
+      );
+
+      debugPrint(
+        'CURRENT POSITION: '
+        '${position.latitude}, ${position.longitude}',
+      );
+      if (mounted) {
+        setState(() {
+          _currentPosition = position;
+
+          _professionalDistanceCache.clear();
+        });
+      }
+      try {
+        final List<Placemark> placemarks = await _geocoding
+            .placemarkFromCoordinates(
+              position.latitude,
+              position.longitude,
+              locale: const Locale('en', 'IN'),
+            );
+
+        if (placemarks.isEmpty) {
+          throw Exception('No address found');
+        }
+
+        final Placemark place = placemarks.first;
+
+        debugPrint('NAME: ${place.name}');
+        debugPrint('SUB LOCALITY: ${place.subLocality}');
+        debugPrint('LOCALITY: ${place.locality}');
+        debugPrint('SUB ADMINISTRATIVE AREA: ${place.subAdministrativeArea}');
+
+        final String area = _firstNonEmpty([place.subLocality, place.name]);
+
+        final String city = _firstNonEmpty([
+          place.locality,
+          place.subAdministrativeArea,
+        ]);
+
+        final List<String> locationParts = [];
+
+        if (area.isNotEmpty) {
+          locationParts.add(area);
+        }
+
+        if (city.isNotEmpty && city.toLowerCase() != area.toLowerCase()) {
+          locationParts.add(city);
+        }
+
+        if (!mounted) return;
+
+        setState(() {
+          _currentLocationText = locationParts.isEmpty
+              ? 'Current location'
+              : locationParts.join(', ');
+        });
+      } catch (geocodingError, stackTrace) {
+        debugPrint('GEOCODING ERROR: $geocodingError');
+        debugPrintStack(stackTrace: stackTrace);
+
+        if (!mounted) return;
+
+        // GPS worked, but address conversion failed.
+        setState(() {
+          _currentLocationText = 'Current location';
+        });
+      }
+    } on TimeoutException catch (error, stackTrace) {
+      debugPrint('LOCATION TIMEOUT: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        _currentLocationText = 'Location timed out';
+      });
+    } catch (error, stackTrace) {
+      debugPrint('LOCATION ERROR TYPE: ${error.runtimeType}');
+      debugPrint('LOCATION ERROR: $error');
+      debugPrintStack(stackTrace: stackTrace);
+
+      if (!mounted) return;
+
+      setState(() {
+        _currentLocationText = 'Location unavailable';
+      });
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoadingLocation = false;
+        });
+      }
+    }
+  }
+
+  String _firstNonEmpty(List<String?> values) {
+    for (final String? value in values) {
+      final String text = value?.trim() ?? '';
+
+      if (text.isNotEmpty) {
+        return text;
+      }
+    }
+
+    return '';
+  }
+
+  String _prepareProfessionalAddress(String address) {
+    final String cleanedAddress = address.trim();
+    final String lowerAddress = cleanedAddress.toLowerCase();
+
+    if (lowerAddress.contains('india')) {
+      return cleanedAddress;
+    }
+
+    return '$cleanedAddress, India';
+  }
+
+  String _formatDistance(double distanceInMeters) {
+    if (distanceInMeters < 1000) {
+      return '${distanceInMeters.round()} m away';
+    }
+
+    final double distanceInKilometers = distanceInMeters / 1000;
+
+    if (distanceInKilometers < 10) {
+      return '${distanceInKilometers.toStringAsFixed(1)} km away';
+    }
+
+    return '${distanceInKilometers.round()} km away';
+  }
+
+  Future<String> _calculateProfessionalDistance(String professionalLocation) {
+    final Position? userPosition = _currentPosition;
+    final String locationText = professionalLocation.trim();
+
+    if (userPosition == null) {
+      return Future<String>.value('Getting distance...');
+    }
+
+    if (locationText.isEmpty) {
+      return Future<String>.value('Distance unavailable');
+    }
+
+    final String cacheKey = locationText.toLowerCase();
+
+    return _professionalDistanceCache.putIfAbsent(cacheKey, () async {
+      try {
+        final String searchableAddress = _prepareProfessionalAddress(
+          locationText,
+        );
+
+        debugPrint(
+          'Finding coordinates for professional: '
+          '$searchableAddress',
+        );
+
+        final List<Location> locations = await _geocoding.locationFromAddress(
+          searchableAddress,
+          locale: const Locale('en', 'IN'),
+        );
+
+        if (locations.isEmpty) {
+          return locationText;
+        }
+
+        final Location professionalPosition = locations.first;
+
+        debugPrint(
+          'Professional coordinates: '
+          '${professionalPosition.latitude}, '
+          '${professionalPosition.longitude}',
+        );
+
+        final double distanceInMeters = Geolocator.distanceBetween(
+          userPosition.latitude,
+          userPosition.longitude,
+          professionalPosition.latitude,
+          professionalPosition.longitude,
+        );
+
+        return _formatDistance(distanceInMeters);
+      } catch (error, stackTrace) {
+        debugPrint(
+          'Professional distance calculation error '
+          'for "$locationText": $error',
+        );
+        debugPrintStack(stackTrace: stackTrace);
+
+        // Show the original location when distance cannot be calculated.
+        return locationText;
+      }
+    });
+  }
+
+
+  Future<void> _refreshCategories() async {
+    final Future<List<CategoryModel>> refreshedFuture =
+        _categoryService.getCategories();
+
+    if (mounted) {
+      setState(() {
+        _categoriesFuture = refreshedFuture;
+      });
+    }
+
+    try {
+      await refreshedFuture;
+    } catch (error, stackTrace) {
+      debugPrint('Category refresh error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  Future<void> _refreshHomeScreen() async {
+    await Future.wait<void>([
+      _loadHomeData(showSkeleton: false),
+      _refreshCategories(),
+      _loadCurrentLocation(),
+    ]);
+  }
+
   @override
   void initState() {
     super.initState();
+
+    _skeletonController = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 900),
+    )..repeat(reverse: true);
+    _skeletonAnimation = CurvedAnimation(
+      parent: _skeletonController,
+      curve: Curves.easeInOut,
+    );
+
     _categoriesFuture = _categoryService.getCategories();
 
+    _loadCurrentLocation();
+    _loadHomeData();
+
     _timer = Timer.periodic(const Duration(seconds: 4), (Timer timer) {
-      if (_pageController.hasClients) {
+      if (_pageController.hasClients && _bannerData.isNotEmpty) {
         _pageController.nextPage(
           duration: const Duration(milliseconds: 800),
           curve: Curves.fastOutSlowIn,
@@ -318,6 +452,8 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     _hintTimer = Timer.periodic(const Duration(seconds: 2), (Timer timer) {
+      if (!mounted) return;
+
       setState(() {
         _currentHintIndex = (_currentHintIndex + 1) % _searchHints.length;
       });
@@ -328,6 +464,7 @@ class _HomeScreenState extends State<HomeScreen> {
   void dispose() {
     _timer?.cancel();
     _hintTimer?.cancel();
+    _skeletonController.dispose();
     _pageController.dispose();
     super.dispose();
   }
@@ -374,49 +511,61 @@ class _HomeScreenState extends State<HomeScreen> {
                   constraints: BoxConstraints(
                     maxWidth: maxWidth > 900 ? 900 : double.infinity,
                   ),
-                  child: SingleChildScrollView(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        SizedBox(height: 20 * scale),
-                        _buildBannerCarousel(theme, isDark, maxWidth, scale),
-                        SizedBox(height: 24 * scale),
-                        _buildSectionHeader(
-                          'Browse Categories',
-                          'See all',
-                          theme,
-                          scale,
-                          onSeeAll: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) =>
-                                    const CategoryListScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                        SizedBox(height: 16 * scale),
-                        _buildCategories(theme, maxWidth, scale),
-                        SizedBox(height: 24 * scale),
-                        _buildSectionHeader(
-                          'Hire a Professional',
-                          'See all',
-                          theme,
-                          scale,
-                        ),
-                        SizedBox(height: 16 * scale),
-                        _buildProfessionalList(theme, context, maxWidth, scale),
-                        SizedBox(height: 24 * scale),
-                        _buildSectionHeader('Nearby Ads', '', theme, scale),
-                        SizedBox(height: 16 * scale),
-                        _buildFilterChips(theme, scale),
-                        SizedBox(height: 16 * scale),
-                        _buildNearbyAdsGrid(theme, maxWidth, scale),
-                        SizedBox(height: 16 * scale),
-                        _buildPromoBanner(theme, maxWidth, scale),
-                        SizedBox(height: 30 * scale),
-                      ],
+                  child: RefreshIndicator(
+                    onRefresh: _refreshHomeScreen,
+                    color: theme.primaryColor,
+                    backgroundColor: theme.colorScheme.surface,
+                    displacement: 42 * scale,
+                    child: SingleChildScrollView(
+                      physics: const AlwaysScrollableScrollPhysics(),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          SizedBox(height: 20 * scale),
+                          _buildBannerCarousel(theme, isDark, maxWidth, scale),
+                          SizedBox(height: 24 * scale),
+                          _buildSectionHeader(
+                            'Browse Categories',
+                            'See all',
+                            theme,
+                            scale,
+                            onSeeAll: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) =>
+                                      const CategoryListScreen(),
+                                ),
+                              );
+                            },
+                          ),
+                          SizedBox(height: 16 * scale),
+                          _buildCategories(theme, maxWidth, scale),
+                          SizedBox(height: 24 * scale),
+                          _buildSectionHeader(
+                            'Hire a Professional',
+                            'See all',
+                            theme,
+                            scale,
+                          ),
+                          SizedBox(height: 16 * scale),
+                          _buildProfessionalList(
+                            theme,
+                            context,
+                            maxWidth,
+                            scale,
+                          ),
+                          SizedBox(height: 24 * scale),
+                          _buildSectionHeader('Nearby Ads', '', theme, scale),
+                          SizedBox(height: 16 * scale),
+                          _buildFilterChips(theme, scale),
+                          SizedBox(height: 16 * scale),
+                          _buildNearbyAdsGrid(theme, maxWidth, scale),
+                          SizedBox(height: 16 * scale),
+                          _buildPromoBanner(theme, maxWidth, scale),
+                          SizedBox(height: 30 * scale),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -457,37 +606,72 @@ class _HomeScreenState extends State<HomeScreen> {
       child: Column(
         children: [
           Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                'Rentit24',
-                style: AppTypography.h5Style(
-                  AppColors.baseWhite,
-                ).copyWith(fontSize: AppTypography.h5 * scale),
+              Padding(
+                padding: const EdgeInsets.fromLTRB(0, 4, 8, 4),
+                child: Image.asset(
+                  'assets/images/rentit-logo.png',
+                  height: 28,
+                  width: 84,
+                ),
               ),
-              Row(
-                children: [
-                  Text(
-                    'Mumbra, Maharashtra',
-                    style: AppTypography.bodyExtraSmall(
-                      AppTypography.regular,
-                      AppColors.baseWhite.withOpacity(0.7),
-                    ).copyWith(fontSize: AppTypography.bodySM * scale),
+              SizedBox(width: 8 * scale),
+              Expanded(
+                child: InkWell(
+                  onTap: () async {
+                    if (_currentLocationText == 'Enable location permission') {
+                      await Geolocator.openAppSettings();
+                      return;
+                    }
+
+                    if (_currentLocationText == 'Turn on location') {
+                      await Geolocator.openLocationSettings();
+                      return;
+                    }
+
+                    await _loadCurrentLocation();
+                  },
+                  borderRadius: BorderRadius.circular(8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      Flexible(
+                        child: Text(
+                          _currentLocationText,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          textAlign: TextAlign.right,
+                          style: AppTypography.bodyExtraSmall(
+                            AppTypography.regular,
+                            AppColors.baseWhite.withOpacity(0.7),
+                          ).copyWith(fontSize: AppTypography.bodySM * scale),
+                        ),
+                      ),
+                      SizedBox(width: 4 * scale),
+                      Container(
+                        padding: EdgeInsets.all(4 * scale),
+                        decoration: BoxDecoration(
+                          borderRadius: BorderRadius.circular(8),
+                          color: AppColors.baseWhite.withOpacity(0.2),
+                        ),
+                        child: _isLoadingLocation
+                            ? SizedBox(
+                                width: 16 * scale,
+                                height: 16 * scale,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 1.8,
+                                  color: AppColors.baseWhite,
+                                ),
+                              )
+                            : Icon(
+                                Icons.location_on_outlined,
+                                color: AppColors.baseWhite,
+                                size: 16 * scale,
+                              ),
+                      ),
+                    ],
                   ),
-                  SizedBox(width: 4 * scale),
-                  Container(
-                    padding: EdgeInsets.all(4 * scale),
-                    decoration: BoxDecoration(
-                      borderRadius: const BorderRadius.all(Radius.circular(8)),
-                      color: AppColors.baseWhite.withOpacity(0.2),
-                    ),
-                    child: Icon(
-                      Icons.location_on_outlined,
-                      color: AppColors.baseWhite,
-                      size: 16 * scale,
-                    ),
-                  ),
-                ],
+                ),
               ),
             ],
           ),
@@ -560,9 +744,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               SizedBox(width: 12 * scale),
-              _buildAppBarIcon(Icons.favorite_border, theme, isDark, scale),
+              _buildAppBarIcon(
+                Icons.favorite_border,
+                theme,
+                isDark,
+                scale,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (_) => const WishlistScreen()),
+                ),
+              ),
               SizedBox(width: 12 * scale),
-              _buildAppBarIcon(Icons.notifications_none, theme, isDark, scale),
+              _buildAppBarIcon(
+                Icons.notifications_none,
+                theme,
+                isDark,
+                scale,
+                onTap: () => Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (_) => const NotificationsScreen(),
+                  ),
+                ),
+              ),
             ],
           ),
         ],
@@ -591,12 +795,350 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+
+  Widget _buildSkeletonBox({
+    required ThemeData theme,
+    required double width,
+    required double height,
+    double borderRadius = 12,
+  }) {
+    final bool isDark = theme.brightness == Brightness.dark;
+    final Color baseColor = isDark
+        ? AppColors.neutral800
+        : const Color(0xFFE3E8F0);
+    final Color highlightColor = isDark
+        ? AppColors.neutral700
+        : const Color(0xFFF4F6FA);
+
+    return AnimatedBuilder(
+      animation: _skeletonAnimation,
+      builder: (BuildContext context, Widget? child) {
+        return Container(
+          width: width,
+          height: height,
+          decoration: BoxDecoration(
+            color: Color.lerp(
+              baseColor,
+              highlightColor,
+              _skeletonAnimation.value,
+            ),
+            borderRadius: BorderRadius.circular(borderRadius),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildBannerSkeleton(
+    ThemeData theme,
+    double width,
+    double scale,
+  ) {
+    final double bannerHeight = (width * 0.46).clamp(150.0, 220.0);
+
+    return Column(
+      children: [
+        Container(
+          height: bannerHeight,
+          margin: EdgeInsets.symmetric(horizontal: 16 * scale),
+          padding: EdgeInsets.all(20 * scale),
+          decoration: BoxDecoration(
+            color: theme.colorScheme.surface,
+            borderRadius: BorderRadius.circular(24 * scale),
+          ),
+          child: Row(
+            children: [
+              Expanded(
+                flex: 5,
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildSkeletonBox(
+                      theme: theme,
+                      width: 150 * scale,
+                      height: 20 * scale,
+                      borderRadius: 6 * scale,
+                    ),
+                    SizedBox(height: 10 * scale),
+                    _buildSkeletonBox(
+                      theme: theme,
+                      width: 115 * scale,
+                      height: 20 * scale,
+                      borderRadius: 6 * scale,
+                    ),
+                    SizedBox(height: 16 * scale),
+                    _buildSkeletonBox(
+                      theme: theme,
+                      width: 135 * scale,
+                      height: 10 * scale,
+                      borderRadius: 5 * scale,
+                    ),
+                    SizedBox(height: 8 * scale),
+                    _buildSkeletonBox(
+                      theme: theme,
+                      width: 105 * scale,
+                      height: 10 * scale,
+                      borderRadius: 5 * scale,
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(width: 14 * scale),
+              Expanded(
+                flex: 4,
+                child: _buildSkeletonBox(
+                  theme: theme,
+                  width: double.infinity,
+                  height: bannerHeight - (40 * scale),
+                  borderRadius: 18 * scale,
+                ),
+              ),
+            ],
+          ),
+        ),
+        SizedBox(height: 14 * scale),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: List<Widget>.generate(
+            3,
+            (int index) => Padding(
+              padding: EdgeInsets.symmetric(horizontal: 4 * scale),
+              child: _buildSkeletonBox(
+                theme: theme,
+                width: (index == 0 ? 24 : 8) * scale,
+                height: 8 * scale,
+                borderRadius: 4 * scale,
+              ),
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildCategoriesSkeleton(ThemeData theme, double scale) {
+    return ListView.separated(
+      scrollDirection: Axis.horizontal,
+      physics: const NeverScrollableScrollPhysics(),
+      padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+      itemCount: 5,
+      separatorBuilder: (_, __) => SizedBox(width: 8 * scale),
+      itemBuilder: (_, __) {
+        return SizedBox(
+          width: 76 * scale,
+          child: Column(
+            children: [
+              _buildSkeletonBox(
+                theme: theme,
+                width: 64 * scale,
+                height: 64 * scale,
+                borderRadius: 16 * scale,
+              ),
+              SizedBox(height: 9 * scale),
+              _buildSkeletonBox(
+                theme: theme,
+                width: 58 * scale,
+                height: 9 * scale,
+                borderRadius: 5 * scale,
+              ),
+              SizedBox(height: 6 * scale),
+              _buildSkeletonBox(
+                theme: theme,
+                width: 38 * scale,
+                height: 8 * scale,
+                borderRadius: 4 * scale,
+              ),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildProfessionalSkeleton(ThemeData theme, double scale) {
+    final double cardWidth = 320 * scale;
+    final double cardHeight = 176 * scale;
+
+    return SizedBox(
+      height: cardHeight,
+      child: ListView.separated(
+        scrollDirection: Axis.horizontal,
+        physics: const NeverScrollableScrollPhysics(),
+        padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+        itemCount: 2,
+        separatorBuilder: (_, __) => SizedBox(width: 16 * scale),
+        itemBuilder: (_, __) {
+          return Container(
+            width: cardWidth,
+            padding: EdgeInsets.all(12 * scale),
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(24 * scale),
+            ),
+            child: Row(
+              children: [
+                _buildSkeletonBox(
+                  theme: theme,
+                  width: 105 * scale,
+                  height: double.infinity,
+                  borderRadius: 16 * scale,
+                ),
+                SizedBox(width: 16 * scale),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      _buildSkeletonBox(
+                        theme: theme,
+                        width: 72 * scale,
+                        height: 11 * scale,
+                        borderRadius: 5 * scale,
+                      ),
+                      Row(
+                        children: [
+                          _buildSkeletonBox(
+                            theme: theme,
+                            width: 52 * scale,
+                            height: 17 * scale,
+                            borderRadius: 4 * scale,
+                          ),
+                          SizedBox(width: 8 * scale),
+                          _buildSkeletonBox(
+                            theme: theme,
+                            width: 64 * scale,
+                            height: 17 * scale,
+                            borderRadius: 4 * scale,
+                          ),
+                        ],
+                      ),
+                      _buildSkeletonBox(
+                        theme: theme,
+                        width: 118 * scale,
+                        height: 12 * scale,
+                        borderRadius: 5 * scale,
+                      ),
+                      _buildSkeletonBox(
+                        theme: theme,
+                        width: 82 * scale,
+                        height: 10 * scale,
+                        borderRadius: 5 * scale,
+                      ),
+                      _buildSkeletonBox(
+                        theme: theme,
+                        width: 142 * scale,
+                        height: 12 * scale,
+                        borderRadius: 5 * scale,
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildNearbyAdsSkeleton(
+    ThemeData theme,
+    double width,
+    double scale,
+  ) {
+    final int columns = _gridColumns(width);
+
+    return Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16 * scale),
+      child: GridView.builder(
+        padding: EdgeInsets.zero,
+        shrinkWrap: true,
+        physics: const NeverScrollableScrollPhysics(),
+        itemCount: columns * 2,
+        gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: columns,
+          crossAxisSpacing: 12 * scale,
+          mainAxisSpacing: 14 * scale,
+          childAspectRatio: 160 / 260,
+        ),
+        itemBuilder: (_, __) {
+          return Container(
+            decoration: BoxDecoration(
+              color: theme.colorScheme.surface,
+              borderRadius: BorderRadius.circular(16 * scale),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                AspectRatio(
+                  aspectRatio: 1.15,
+                  child: _buildSkeletonBox(
+                    theme: theme,
+                    width: double.infinity,
+                    height: double.infinity,
+                    borderRadius: 16 * scale,
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: EdgeInsets.all(12 * scale),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        _buildSkeletonBox(
+                          theme: theme,
+                          width: 66 * scale,
+                          height: 9 * scale,
+                          borderRadius: 4 * scale,
+                        ),
+                        _buildSkeletonBox(
+                          theme: theme,
+                          width: double.infinity,
+                          height: 11 * scale,
+                          borderRadius: 5 * scale,
+                        ),
+                        _buildSkeletonBox(
+                          theme: theme,
+                          width: 74 * scale,
+                          height: 13 * scale,
+                          borderRadius: 5 * scale,
+                        ),
+                        _buildSkeletonBox(
+                          theme: theme,
+                          width: 96 * scale,
+                          height: 10 * scale,
+                          borderRadius: 5 * scale,
+                        ),
+                        _buildSkeletonBox(
+                          theme: theme,
+                          width: 58 * scale,
+                          height: 9 * scale,
+                          borderRadius: 4 * scale,
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          );
+        },
+      ),
+    );
+  }
+
   Widget _buildBannerCarousel(
     ThemeData theme,
     bool isDark,
     double width,
     double scale,
   ) {
+    if (_isLoadingHomeData) {
+      return _buildBannerSkeleton(theme, width, scale);
+    }
+
     final bannerHeight = (width * 0.46).clamp(150.0, 220.0);
     return Column(
       children: [
@@ -689,7 +1231,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
           Expanded(
             flex: 4,
-            child: Image.asset(data['image']!, fit: BoxFit.contain),
+            child: _buildMediaImage(
+              data['image'] ?? 'assets/images/slide1-illustration.png',
+              fit: BoxFit.contain,
+            ),
           ),
         ],
       ),
@@ -769,25 +1314,15 @@ class _HomeScreenState extends State<HomeScreen> {
               AsyncSnapshot<List<CategoryModel>> snapshot,
             ) {
               if (snapshot.connectionState == ConnectionState.waiting) {
-                return Center(
-                  child: SizedBox(
-                    width: 26 * scale,
-                    height: 26 * scale,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2.5,
-                      color: theme.primaryColor,
-                    ),
-                  ),
-                );
+                return _buildCategoriesSkeleton(theme, scale);
               }
 
               if (snapshot.hasError) {
-                final Object error = snapshot.error!;
-                final String errorMessage = error is ApiException
-                    ? error.userMessage
-                    : 'Unable to load categories. Please retry.';
+                final String errorMessage = snapshot.error
+                    .toString()
+                    .replaceFirst('Exception: ', '');
 
-                debugPrint('FutureBuilder category error: $error');
+                debugPrint('FutureBuilder category error: $errorMessage');
 
                 return Padding(
                   padding: EdgeInsets.symmetric(horizontal: 16 * scale),
@@ -833,7 +1368,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   (snapshot.data ?? <CategoryModel>[])
                       .where(
                         (CategoryModel category) =>
-                            category.isActive != false &&
+                            category.isActive &&
                             category.name.trim().isNotEmpty,
                       )
                       .toList();
@@ -873,13 +1408,7 @@ class _HomeScreenState extends State<HomeScreen> {
                           '${category.id} - ${category.name}',
                         );
 
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute<void>(
-                            builder: (BuildContext context) =>
-                                const CategoryListScreen(),
-                          ),
-                        );
+                        // Add category navigation here.
                       },
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.center,
@@ -941,8 +1470,8 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  IconData _getCategoryIcon(String? type) {
-    switch ((type ?? '').trim().toLowerCase()) {
+  IconData _getCategoryIcon(String type) {
+    switch (type.trim().toLowerCase()) {
       case 'service':
       case 'professional':
         return Icons.home_repair_service_outlined;
@@ -971,11 +1500,14 @@ class _HomeScreenState extends State<HomeScreen> {
     double width,
     double scale,
   ) {
+    if (_isLoadingHomeData) {
+      return _buildProfessionalSkeleton(theme, scale);
+    }
+
     final isDark = theme.brightness == Brightness.dark;
 
     final double cardWidth = 320.0 * scale;
-    final double cardHeight =
-        176.0 * scale; // Taller card so rows aren't cramped
+    final double cardHeight = 176.0 * scale;
     final double padding = 12.0 * scale;
 
     return SizedBox(
@@ -984,27 +1516,17 @@ class _HomeScreenState extends State<HomeScreen> {
         scrollDirection: Axis.horizontal,
         clipBehavior: Clip.none,
         padding: EdgeInsets.symmetric(horizontal: 16 * scale),
-        itemCount: 2,
+        itemCount: _professionalsData.length,
         separatorBuilder: (context, index) =>
             SizedBox(width: 16 * scale), // Slightly wider gap
         itemBuilder: (context, index) {
+          final ad = _professionalsData[index];
           return GestureDetector(
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (context) => ProductDetailsScreen(
-                    adData: AdItem(
-                      title: 'Wood craft and wood carving',
-                      price: '₹800/day',
-                      rating: 4.5,
-                      reviews: 122,
-                      owner: 'Ravi Kumar R.',
-                      ownerAvatar: 'https://i.pravatar.cc/150?img=11',
-                      image: 'assets/images/carpainter.jpg',
-                      distance: '1.5 km',
-                    ),
-                  ),
+                  builder: (context) => ProductDetailsScreen(adData: ad),
                 ),
               );
             },
@@ -1026,19 +1548,10 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16 * scale),
-                    child: Image.asset(
-                      "assets/images/carpainter.jpg",
+                    child: SizedBox(
                       width: 105 * scale,
                       height: double.infinity,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) => Container(
-                        width: 105 * scale,
-                        color: AppColors.neutral200,
-                        child: const Icon(
-                          Icons.person,
-                          color: AppColors.neutral400,
-                        ),
-                      ),
+                      child: _buildMediaImage(ad.image, fit: BoxFit.cover),
                     ),
                   ),
                   SizedBox(width: 16 * scale),
@@ -1059,7 +1572,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 SizedBox(width: 6 * scale),
                                 Text(
-                                  '4.6',
+                                  ad.rating.toStringAsFixed(1),
                                   style: AppTypography.bodySmall(
                                     AppTypography.bold,
                                     isDark
@@ -1069,7 +1582,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 ),
                                 SizedBox(width: 4 * scale),
                                 Text(
-                                  '(189)',
+                                  '(${ad.reviews})',
                                   style: AppTypography.bodySmall(
                                     AppTypography.regular,
                                     isDark
@@ -1120,9 +1633,13 @@ class _HomeScreenState extends State<HomeScreen> {
                           children: [
                             CircleAvatar(
                               radius: 10 * scale,
-                              backgroundImage: const NetworkImage(
-                                'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=100',
-                              ),
+                              backgroundColor: AppColors.neutral200,
+                              backgroundImage: ad.ownerAvatar.startsWith('http')
+                                  ? NetworkImage(ad.ownerAvatar)
+                                  : null,
+                              child: ad.ownerAvatar.isEmpty
+                                  ? Icon(Icons.person, size: 12 * scale)
+                                  : null,
                             ),
                             SizedBox(width: 8 * scale),
                             Expanded(
@@ -1130,7 +1647,7 @@ class _HomeScreenState extends State<HomeScreen> {
                                 children: [
                                   Flexible(
                                     child: Text(
-                                      'Sadiq Ahmed',
+                                      ad.owner,
                                       style: AppTypography.bodySmall(
                                         AppTypography.bold,
                                         isDark
@@ -1156,7 +1673,7 @@ class _HomeScreenState extends State<HomeScreen> {
                         ),
 
                         Text(
-                          'Plumber',
+                          ad.category.isEmpty ? ad.listingType : ad.category,
                           style: AppTypography.bodyMedium(
                             AppTypography.medium,
                             isDark
@@ -1171,35 +1688,36 @@ class _HomeScreenState extends State<HomeScreen> {
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           crossAxisAlignment: CrossAxisAlignment.end,
                           children: [
-                            Row(
-                              children: [
-                                Icon(
-                                  Icons.location_on_outlined,
-                                  color: isDark
-                                      ? AppColors.baseWhite.withOpacity(0.5)
-                                      : AppColors.neutral500,
-                                  size: 14 * scale,
-                                ),
-                                SizedBox(width: 4 * scale),
-                                Text(
-                                  '4.2 km',
-                                  style: AppTypography.bodySmall(
-                                    AppTypography.regular,
-                                    isDark
+                            Expanded(
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    Icons.location_on_outlined,
+                                    color: isDark
                                         ? AppColors.baseWhite.withOpacity(0.5)
                                         : AppColors.neutral500,
+                                    size: 14 * scale,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 4 * scale),
+                                  Flexible(
+                                    child: _buildProfessionalDistance(
+                                      professionalLocation: ad.distance,
+                                      isDark: isDark,
+                                      scale: scale,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
+                            SizedBox(width: 8 * scale),
                             Text(
-                              '₹1200/day',
+                              ad.price,
                               style: AppTypography.headingStyle(
                                 AppTypography.h6,
                                 isDark
                                     ? AppColors.baseWhite
                                     : AppColors.neutral900,
-                              ).copyWith(fontSize: 16 * scale, height: 1.0),
+                              ).copyWith(fontSize: 16 * scale, height: 1),
                             ),
                           ],
                         ),
@@ -1280,11 +1798,15 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildNearbyAdsGrid(ThemeData theme, double width, double scale) {
+    if (_isLoadingHomeData) {
+      return _buildNearbyAdsSkeleton(theme, width, scale);
+    }
+
     final filteredAds = _adsData.where((ad) {
       if (_selectedFilter == 'All') return true;
       if (_selectedFilter == 'Featured') return ad.isFeatured;
       if (_selectedFilter == 'Top Choice') return ad.isTopChoice;
-      if (_selectedFilter == 'Verified') return ad.isFeatured; // placeholder
+      if (_selectedFilter == 'Verified') return ad.isVerified;
       return true;
     }).toList();
 
@@ -1337,7 +1859,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ad.reviews.toString(),
               ad.isFeatured,
               ad.isTopChoice,
-              false,
+              ad.isVerified,
               theme,
               scale,
             ),
@@ -1393,17 +1915,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: isDark
                           ? AppColors.neutral800
                           : AppColors.neutral100,
-                      child: Image.asset(
-                        imgUrl,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            const Center(
-                              child: Icon(
-                                Icons.image,
-                                color: AppColors.neutral400,
-                              ),
-                            ),
-                      ),
+                      child: _buildMediaImage(imgUrl, fit: BoxFit.cover),
                     ),
                   ),
                 ),
@@ -1541,7 +2053,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     children: [
                       CircleAvatar(
                         radius: 11 * scale,
-                        backgroundImage: NetworkImage(avatarUrl),
+                        backgroundImage: avatarUrl.startsWith('http')
+                            ? NetworkImage(avatarUrl)
+                            : null,
+                        child: avatarUrl.isEmpty
+                            ? Icon(Icons.person, size: 12 * scale)
+                            : null,
                       ),
                       SizedBox(width: 5 * scale),
                       Expanded(
@@ -1610,6 +2127,36 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildMediaImage(String source, {BoxFit fit = BoxFit.cover}) {
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      return Image.network(
+        source,
+        fit: fit,
+        width: double.infinity,
+        height: double.infinity,
+        errorBuilder: (_, __, ___) => const Center(
+          child: Icon(
+            Icons.image_not_supported_outlined,
+            color: AppColors.neutral400,
+          ),
+        ),
+      );
+    }
+
+    return Image.asset(
+      source.isEmpty ? 'assets/images/carpainter.jpg' : source,
+      fit: fit,
+      width: double.infinity,
+      height: double.infinity,
+      errorBuilder: (_, __, ___) => const Center(
+        child: Icon(
+          Icons.image_not_supported_outlined,
+          color: AppColors.neutral400,
+        ),
       ),
     );
   }
@@ -1724,6 +2271,48 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
+  Widget _buildProfessionalDistance({
+    required String professionalLocation,
+    required bool isDark,
+    required double scale,
+  }) {
+    if (_currentPosition == null) {
+      return Text(
+        _isLoadingLocation ? 'Getting distance...' : professionalLocation,
+        maxLines: 1,
+        overflow: TextOverflow.ellipsis,
+        style: AppTypography.bodySmall(
+          AppTypography.regular,
+          isDark ? AppColors.baseWhite.withOpacity(0.5) : AppColors.neutral500,
+        ).copyWith(fontSize: 12 * scale),
+      );
+    }
+
+    return FutureBuilder<String>(
+      future: _calculateProfessionalDistance(professionalLocation),
+      builder: (BuildContext context, AsyncSnapshot<String> snapshot) {
+        String distanceText = professionalLocation;
+
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          distanceText = 'Calculating...';
+        } else if (snapshot.hasData) {
+          distanceText = snapshot.data!;
+        }
+
+        return Text(
+          distanceText,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: AppTypography.bodySmall(
+            AppTypography.regular,
+            isDark
+                ? AppColors.baseWhite.withOpacity(0.5)
+                : AppColors.neutral500,
+          ).copyWith(fontSize: 12 * scale),
+        );
+      },
+    );
+  }
   Widget _buildTag(String text, Color bgColor, Color textColor, double scale) {
     return Container(
       padding: EdgeInsets.symmetric(horizontal: 6 * scale, vertical: 1 * scale),

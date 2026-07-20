@@ -1,9 +1,15 @@
 import 'package:flutter/material.dart';
-import 'package:rentit24/core/storage/auth_storage.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/form/product_listing_form.dart';
 import 'package:rentit24/pages/form/service_upload_form.dart';
+import 'package:rentit24/pages/activity.dart';
+import 'package:rentit24/pages/wishlist_screen.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
+import 'package:rentit24/services/session_service.dart';
+import 'package:rentit24/model/user_profile_model.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/services/user_profile_service.dart';
+import 'package:rentit24/services/listing_services.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -15,6 +21,10 @@ class ProfileScreen extends StatefulWidget {
 class _ProfileScreenState extends State<ProfileScreen>
     with SingleTickerProviderStateMixin {
   late AnimationController _animationController;
+  final UserProfileService _profileService = UserProfileService();
+  final ListingService _listingService = ListingService();
+  UserProfileModel? _profile;
+  List<ListingModel> _myListings = <ListingModel>[];
 
   @override
   void initState() {
@@ -24,6 +34,35 @@ class _ProfileScreenState extends State<ProfileScreen>
       duration: const Duration(milliseconds: 1000),
     );
     _animationController.forward();
+    _loadProfile();
+  }
+
+  Future<void> _loadProfile() async {
+    try {
+      final results = await Future.wait<dynamic>([
+        _profileService.getProfile(),
+        _listingService.getMyListings(limit: 100),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _profile = results[0] as UserProfileModel;
+        _myListings = List<ListingModel>.from(results[1] as List);
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Profile load error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  int get _activeAds => _myListings
+      .where((item) => item.status.toLowerCase() == 'active' || item.status.toLowerCase() == 'approved')
+      .length;
+
+  double get _averageRating {
+    final rated = _myListings.where((item) => item.rating > 0).toList();
+    if (rated.isEmpty) return 0;
+    final total = rated.fold<double>(0, (sum, item) => sum + item.rating);
+    return total / rated.length;
   }
 
   @override
@@ -120,19 +159,25 @@ class _ProfileScreenState extends State<ProfileScreen>
                         ),
                       ],
                     ),
-                    child: const CircleAvatar(
+                    child: CircleAvatar(
                       radius: 40,
-                      backgroundImage: NetworkImage(
-                        'https://images.unsplash.com/photo-1599566150163-29194dcaad36?auto=format&fit=crop&w=200',
-                      ),
+                      backgroundColor: Colors.grey.shade200,
+                      backgroundImage: (_profile?.profileUrl ?? '').startsWith('http')
+                          ? NetworkImage(_profile!.profileUrl)
+                          : null,
+                      child: (_profile?.profileUrl ?? '').isEmpty
+                          ? const Icon(Icons.person_outline, size: 36)
+                          : null,
                     ),
                   ),
                   const SizedBox(width: 16),
                   Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Text(
-                        'Sachin Jadhav',
+                      Text(
+                        _profile?.username.isNotEmpty == true
+                            ? _profile!.username
+                            : 'RentIt24 User',
                         style: TextStyle(
                           color: Colors.white,
                           fontSize: 22,
@@ -142,7 +187,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'sachin.jadhav@rentit24.com',
+                        _profile?.email.isNotEmpty == true ? _profile!.email : 'Email unavailable',
                         style: TextStyle(
                           color: Colors.white.withOpacity(0.8),
                           fontSize: 14,
@@ -159,15 +204,19 @@ class _ProfileScreenState extends State<ProfileScreen>
                           borderRadius: BorderRadius.circular(20),
                         ),
                         child: Row(
-                          children: const [
+                          children: [
                             Icon(
-                              Icons.verified,
+                              _profile?.isVerified == true
+                                  ? Icons.verified
+                                  : Icons.info_outline,
                               color: ActivityColors.approvedText,
                               size: 14,
                             ),
                             SizedBox(width: 4),
                             Text(
-                              'Verified Member',
+                              _profile?.isVerified == true
+                                  ? 'Verified Member'
+                                  : 'Unverified Member',
                               style: TextStyle(
                                 color: ActivityColors.approvedText,
                                 fontSize: 11,
@@ -203,11 +252,11 @@ class _ProfileScreenState extends State<ProfileScreen>
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildStatItem('12', 'Active Ads', isDark),
+                _buildStatItem('$_activeAds', 'Active Ads', isDark),
                 _buildDivider(isDark),
-                _buildStatItem('45', 'Rented', isDark),
+                _buildStatItem('${_profile?.followersCount ?? 0}', 'Rented', isDark),
                 _buildDivider(isDark),
-                _buildStatItem('4.8', 'Rating', isDark, isRating: true),
+                _buildStatItem(_averageRating.toStringAsFixed(1), 'Rating', isDark, isRating: true),
               ],
             ),
           ),
@@ -377,18 +426,6 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
-  Future<void> _logout() async {
-    await AuthStorage().clear();
-    if (!mounted) return;
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => const MainLoginScreen(),
-      ),
-      (Route<dynamic> route) => false,
-    );
-  }
-
   Widget _buildMenuSection(ThemeData theme, bool isDark) {
     final menuItems = [
       {
@@ -500,7 +537,7 @@ class _ProfileScreenState extends State<ProfileScreen>
                       iconColor: item['color'] as Color,
                       isDark: isDark,
                       isLast: index == menuItems.length - 1,
-                      onTap: index == menuItems.length - 1 ? _logout : null,
+                      onTap: () => _handleMenuTap(item['title'] as String),
                     ),
                   ),
                 );
@@ -512,13 +549,45 @@ class _ProfileScreenState extends State<ProfileScreen>
     );
   }
 
+
+  Future<void> _handleMenuTap(String title) async {
+    if (title == 'My Ads') {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const MyActivityPage()),
+      );
+      return;
+    }
+    if (title == 'Saved Items') {
+      await Navigator.push(
+        context,
+        MaterialPageRoute(builder: (_) => const WishlistScreen()),
+      );
+      return;
+    }
+    if (title == 'Log Out') {
+      await SessionService.clear();
+      if (!mounted) return;
+      Navigator.of(context).pushAndRemoveUntil(
+        MaterialPageRoute(builder: (_) => const MainLoginScreen()),
+        (route) => false,
+      );
+      return;
+    }
+
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('$title is not available from the backend yet.')),
+    );
+  }
+
   Widget _buildMenuItem({
     required IconData icon,
     required String title,
     required Color iconColor,
     required bool isDark,
     required bool isLast,
-    VoidCallback? onTap,
+    required VoidCallback onTap,
   }) {
     return Material(
       color: Colors.transparent,

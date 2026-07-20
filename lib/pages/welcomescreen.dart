@@ -2,13 +2,12 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:flutter_facebook_auth/flutter_facebook_auth.dart';
-import 'package:rentit24/pages/homescreen.dart';
-import 'package:rentit24/wrapper/navbar.dart';
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/email_loginscreen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
 
 class MainLoginScreen extends StatefulWidget {
   const MainLoginScreen({super.key});
@@ -61,7 +60,7 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
         final String? idToken = account.authentication.idToken;
 
         if (idToken != null) {
-          _showBackendPending('Google identity was received, but the RentIt24 backend social-session exchange endpoint is not documented.');
+          _showSuccess('Google login successful! (Backend integration pending)');
         } else {
           _showError('Google Sign-In failed: could not retrieve ID token.');
         }
@@ -84,13 +83,9 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
 
       if (result.status == LoginStatus.success) {
         final AccessToken accessToken = result.accessToken!;
-        if (accessToken.tokenString.isEmpty) {
-          _showError('Facebook Sign-In did not return a usable access token.');
-          return;
-        }
-        _showBackendPending(
-          'Facebook identity was received, but the RentIt24 backend social-session exchange endpoint is not documented.',
-        );
+        final String tokenString = accessToken.tokenString;
+        debugPrint('Facebook Token Received: $tokenString');
+        _showSuccess('Facebook login successful! (Backend integration pending)');
       } else if (result.status == LoginStatus.cancelled) {
         _showError('Facebook Sign-In cancelled.');
       } else {
@@ -115,11 +110,8 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
 
       final String? identityToken = credential.identityToken;
       if (identityToken != null) {
-        _showBackendPending(
-          'Apple identity was received, but the RentIt24 backend social-session exchange endpoint is not documented.',
-        );
-      } else {
-        _showError('Apple Sign-In did not return an identity token.');
+        debugPrint('Apple Token Received: $identityToken');
+        _showSuccess('Apple login successful! (Backend integration pending)');
       }
     } catch (error) {
       _showError('Apple Sign-In failed: $error');
@@ -140,12 +132,12 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
     );
   }
 
-  void _showBackendPending(String message) {
+  void _showSuccess(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text(message),
-        backgroundColor: Colors.orange,
+        backgroundColor: AppColors.success500,
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       ),
@@ -197,9 +189,8 @@ class _MainLoginScreenState extends State<MainLoginScreen> {
                               onPressed: () {
                                 Navigator.push(
                                   context,
-                                  MaterialPageRoute<void>(
-                                    builder: (BuildContext context) =>
-                                        const NavigationWrapper(),
+                                  MaterialPageRoute(
+                                    builder: (context) => const NavigationWrapper(),
                                   ),
                                 );
                               },

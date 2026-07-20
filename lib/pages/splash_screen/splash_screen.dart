@@ -1,9 +1,7 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
-import 'package:rentit24/core/storage/auth_storage.dart';
 import 'package:rentit24/pages/on_boarding_screen.dart';
-import 'package:rentit24/wrapper/navbar.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -238,9 +236,7 @@ class _SplashScreenState extends State<SplashScreen>
       ),
     );
 
-    _controller.forward().then((_) async {
-      final bool hasUsableSession =
-          await AuthStorage().hasUsableSession();
+    _controller.forward().then((_) {
       if (!mounted) return;
 
       Navigator.of(context).pushReplacement(
@@ -251,9 +247,7 @@ class _SplashScreenState extends State<SplashScreen>
             animation,
             secondaryAnimation,
           ) {
-            return hasUsableSession
-                ? const NavigationWrapper()
-                : const OnboardingScreen();
+            return const OnboardingScreen();
           },
           transitionsBuilder: (
             context,

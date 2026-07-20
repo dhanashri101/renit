@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:rentit24/core/storage/auth_storage.dart';
-import 'package:rentit24/pages/welcomescreen.dart';
+import 'package:rentit24/pages/homescreen.dart';
 import 'package:rentit24/wrapper/navbar.dart';
 
 enum BiometricType { faceId, fingerprint }
@@ -50,7 +49,7 @@ class BiometricAuthScreen extends StatelessWidget {
         ),
         actions: [
           TextButton(
-            onPressed: () => _openProtectedHome(context),
+            onPressed: () {},
             child: Text(
               'SKIP',
               style: TextStyle(
@@ -100,7 +99,10 @@ class BiometricAuthScreen extends StatelessWidget {
                         ),
                       );
                     } else {
-                      _openProtectedHome(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(builder: (_) => const NavigationWrapper()),
+                      );
                     }
                   },
                   style: ElevatedButton.styleFrom(
@@ -121,36 +123,6 @@ class BiometricAuthScreen extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-
-
-  Future<void> _openProtectedHome(BuildContext context) async {
-    final bool hasSession = await AuthStorage().hasUsableSession();
-    if (!context.mounted) return;
-
-    if (!hasSession) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Biometric setup cannot create a backend session. Sign in successfully first.',
-          ),
-        ),
-      );
-      Navigator.of(context).pushAndRemoveUntil(
-        MaterialPageRoute<void>(
-          builder: (BuildContext context) => const MainLoginScreen(),
-        ),
-        (Route<dynamic> route) => false,
-      );
-      return;
-    }
-
-    Navigator.of(context).pushAndRemoveUntil(
-      MaterialPageRoute<void>(
-        builder: (BuildContext context) => const NavigationWrapper(),
-      ),
-      (Route<dynamic> route) => false,
     );
   }
 

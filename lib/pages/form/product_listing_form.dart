@@ -1,10 +1,15 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:rentit24/core/network/api_exception.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/model/category_model.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/services/api_exception.dart';
 import 'package:rentit24/services/category_services.dart';
+import 'package:rentit24/services/listing_services.dart';
+import 'package:rentit24/services/local_area_service.dart';
+import 'package:rentit24/services/media_service.dart';
+import 'package:rentit24/services/session_service.dart';
 
 class ProductListingFlow extends StatefulWidget {
   const ProductListingFlow({super.key});
@@ -17,9 +22,6 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   int _currentStep = 0;
   final int _totalSteps = 4;
   List<String> _imagePaths = [];
-  final CategoryService _categoryService = CategoryService();
-  late Future<List<CategoryModel>> _categoriesFuture;
-  int? _selectedCategoryId;
   String? _selectedCategory;
   String? _selectedSubCategory;
   String? _brand;
@@ -32,19 +34,7 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   String _rentalUnit = 'per day';
   String _securityDeposit = '';
   DateTime? _availableFrom;
-
-
-  @override
-  void initState() {
-    super.initState();
-    _categoriesFuture = _categoryService.getCategories();
-  }
-
-  void _retryCategories() {
-    setState(() {
-      _categoriesFuture = _categoryService.getCategories();
-    });
-  }
+  bool _isSubmitting = false;
 
   void _nextStep() {
     if (_currentStep < _totalSteps - 1) {
@@ -60,16 +50,101 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
     }
   }
 
-  void _onSubmit() {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Listing was not submitted because Swagger does not expose a verified create-listing request schema, multipart field names, or success response.',
+  Future<void> _onSubmit() async {
+    if (_isSubmitting) return;
+    if (_productName.trim().isEmpty ||
+        _rentalPrice.trim().isEmpty ||
+        _selectedCategory == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Please complete the required product details.')),
+      );
+      return;
+    }
+
+    setState(() => _isSubmitting = true);
+    try {
+      final categories = await CategoryService().getAllCategories();
+      final parent = _resolveBackendCategory(
+        categories,
+        _selectedCategory!,
+      );
+      final child = parent == null
+          ? null
+          : _firstWhereOrNull(
+              categories,
+              (item) =>
+                  item.parentId == parent.id &&
+                  _normaliseCategory(item.name) ==
+                      _normaliseCategory(_selectedSubCategory ?? ''),
+            );
+      if (parent == null) {
+        throw const ApiException(
+          type: ApiErrorType.validation,
+          message: 'Selected category is not available on the backend.',
+        );
+      }
+
+      final ownerId = await SessionService.getUserId();
+      final areaId = await SessionService.getAreaId();
+      final area = await LocalAreaService().getById(areaId);
+      final uploaded = await MediaService().uploadFiles(
+        _imagePaths,
+        category: 'user',
+        userId: ownerId,
+      );
+
+      final details = <String>[
+        _additionalDetails.trim(),
+        if (_availableFrom != null) 'Available from: ${_availableFrom!.toIso8601String()}',
+        if (uploaded.isNotEmpty) 'Uploaded media: ${uploaded.join(', ')}',
+      ].where((item) => item.isNotEmpty).join('\n');
+
+      final listingId = await ListingService().createListing(
+        ListingModel(
+          ownerId: ownerId,
+          listingType: 'product',
+          title: _productName.trim(),
+          description: _description.trim(),
+          categoryId: parent.id,
+          subcategoryId: child?.id ?? 0,
+          rentalPrice: double.tryParse(_rentalPrice.trim()) ?? 0,
+          priceUnit: _rentalUnit.replaceFirst('per ', '').trim(),
+          securityDeposit: double.tryParse(_securityDeposit.trim()) ?? 0,
+          brand: _brand?.trim() ?? '',
+          modelName: _modelName?.trim() ?? '',
+          color: _color?.trim() ?? '',
+          additionalDetails: details,
+          localAreaId: area.id,
+          address: area.displayName,
+          latitude: area.latitude,
+          longitude: area.longitude,
         ),
-        backgroundColor: Colors.orange,
-      ),
-    );
+      );
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            listingId > 0
+                ? 'Product submitted successfully. Listing #$listingId is pending approval.'
+                : 'Product submitted successfully and is pending approval.',
+          ),
+        ),
+      );
+      Navigator.pop(context, true);
+    } on ApiException catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.userMessage)),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Unable to submit product: $error')),
+      );
+    } finally {
+      if (mounted) setState(() => _isSubmitting = false);
+    }
   }
 
   @override
@@ -173,13 +248,9 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
         children: [
           if (_currentStep == 1)
             _MainCategoryBar(
-              categoriesFuture: _categoriesFuture,
-              selectedCategoryId: _selectedCategoryId,
-              selectedCategoryName: _selectedCategory,
-              onRetry: _retryCategories,
-              onCategoryChanged: (CategoryModel? category) => setState(() {
-                _selectedCategoryId = category?.id;
-                _selectedCategory = category?.name;
+              selectedCategory: _selectedCategory,
+              onCategoryChanged: (cat) => setState(() {
+                _selectedCategory = cat;
                 _selectedSubCategory = null;
               }),
             ),
@@ -198,7 +269,7 @@ class _ProductListingFlowState extends State<ProductListingFlow> {
   ),
 ),
           _BottomButton(
-            label: isLastStep ? 'Submit' : 'Continue',
+            label: isLastStep && _isSubmitting ? 'Submitting...' : (isLastStep ? 'Submit' : 'Continue'),
             onPressed: isLastStep ? _onSubmit : _nextStep,
           ),
         ],
@@ -585,197 +656,165 @@ class _UploadImageStepState extends State<_UploadImageStep> {
   }
 }
 
+class _CategoryData {
+  final String label;
+  final String asset;
+  const _CategoryData(this.label, this.asset);
+}
+
 class _MainCategoryBar extends StatelessWidget {
+  final String? selectedCategory;
+  final ValueChanged<String?> onCategoryChanged;
+
   const _MainCategoryBar({
-    required this.categoriesFuture,
-    required this.selectedCategoryId,
-    required this.selectedCategoryName,
+    super.key,
+    required this.selectedCategory,
     required this.onCategoryChanged,
-    required this.onRetry,
   });
 
-  final Future<List<CategoryModel>> categoriesFuture;
-  final int? selectedCategoryId;
-  final String? selectedCategoryName;
-  final ValueChanged<CategoryModel?> onCategoryChanged;
-  final VoidCallback onRetry;
+  static const List<_CategoryData> _mainCategories = [
+    _CategoryData('Agriculture Farming', 'agriculture-farming'),
+    _CategoryData('Appliances', 'appliances'),
+    _CategoryData('Baby Kids', 'baby-kids'),
+    _CategoryData('Beauty Grooming', 'beauty-grooming'),
+    _CategoryData('Books Stationery', 'books-stationery'),
+    _CategoryData('Community NGO', 'community-ngo'),
+    _CategoryData('Construction Heavy Machinery', 'construction-heavy-machinery'),
+    _CategoryData('Coworking Business', 'coworking-business'),
+    _CategoryData('Delivery Logistics', 'delivery-logistics'),
+    _CategoryData('Digital Tech Services', 'digital-tech-services'),
+    _CategoryData('Education', 'education'),
+    _CategoryData('Electronics', 'electronics'),
+    _CategoryData('Event Professionals', 'event-professionals'),
+    _CategoryData('Events Parties', 'events-parties'),
+    _CategoryData('Fashion Dress', 'fashion-dress'),
+    _CategoryData('Fashion Services', 'fashion-services'),
+    _CategoryData('Festivals Celebrations', 'festivals-celebrations'),
+    _CategoryData('Food Catering', 'food-catering'),
+    _CategoryData('Furniture', 'furniture'),
+    _CategoryData('Gaming Consoles', 'gaming-consoles'),
+    _CategoryData('Gardening Outdoor', 'gardening-outdoor'),
+    _CategoryData('Health Wellness', 'health-wellness'),
+    _CategoryData('Household Items', 'household-items'),
+    _CategoryData('Medical Equipment', 'medical-equipment'),
+    _CategoryData('Miscellaneous', 'miscellaneous'),
+    _CategoryData('Musical Instruments', 'musical-instruments'),
+    _CategoryData('Office Work Equipment', 'office-work-equipment'),
+    _CategoryData('Pets Animals', 'pets-animals'),
+    _CategoryData('Professional Services', 'professional-services'),
+    _CategoryData('Real Estate', 'real-estate'),
+    _CategoryData('Security Services', 'security-services'),
+    _CategoryData('Seasonal Needs', 'sesonal-needs'),
+    _CategoryData('Sports Fitness', 'sports-fitness'),
+    _CategoryData('Tools Machinery', 'tools-machinery'),
+    _CategoryData('Transportation Services', 'transportation-services'),
+    _CategoryData('Travel Hospitality', 'travel-hospitality'),
+    _CategoryData('Travel Outdoors', 'travel-outdoors'),
+    _CategoryData('Vehicles', 'vehicles'),
+    _CategoryData('Wedding Photography', 'wedding-photography'),
+  ];
 
   static const List<double> _grayscaleMatrix = <double>[
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    0,
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    0,
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    0,
-    0,
-    0,
-    0,
-    1,
-    0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0.2126, 0.7152, 0.0722, 0, 0,
+    0, 0, 0, 1, 0,
   ];
 
   @override
   Widget build(BuildContext context) {
-    final bool isDark = Theme.of(context).brightness == Brightness.dark;
-    final Color blue = AppTheme.primaryBlue;
-    final Color barBackground =
-        isDark ? const Color(0xFF121212) : Colors.white;
-    final Color selectedBackground = isDark
-        ? blue.withOpacity(0.15)
-        : const Color(0xFFF0F4FF);
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final blue = AppTheme.primaryBlue; 
+    
+    final barBgColor = isDark ? const Color(0xFF121212) : Colors.white;
+    
+    final selectedBgColor = isDark ? blue.withOpacity(0.15) : const Color(0xFFF0F4FF);
 
     return Container(
-      height: 95,
+      height: 95, 
       width: double.infinity,
-      color: barBackground,
-      child: FutureBuilder<List<CategoryModel>>(
-        future: categoriesFuture,
-        builder: (
-          BuildContext context,
-          AsyncSnapshot<List<CategoryModel>> snapshot,
-        ) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
+      color: barBgColor, 
+      child: ListView.builder(
+        scrollDirection: Axis.horizontal,
+        padding: const EdgeInsets.symmetric(horizontal: 12),
+        itemCount: _mainCategories.length,
+        itemBuilder: (context, index) {
+          final cat = _mainCategories[index];
+          final isSelected = selectedCategory == cat.label;
+          final assetPath = 'assets/images/categories/${cat.asset}.png';
 
-          if (snapshot.hasError) {
-            final Object error = snapshot.error!;
-            final String message = error is ApiException
-                ? error.userMessage
-                : 'Unable to load categories.';
-            return Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: <Widget>[
-                Flexible(
-                  child: Text(
-                    message,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
+          final icon = Image.asset(
+            assetPath,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.category_outlined,
+              size: 24,
+              color: isDark ? Colors.grey[500] : Colors.grey[400],
+            ),
+          );
+
+          return GestureDetector(
+            behavior: HitTestBehavior.opaque, 
+            onTap: () => onCategoryChanged(isSelected ? null : cat.label),
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 150),
+              width: 85, 
+              margin: const EdgeInsets.symmetric(horizontal: 2), 
+              decoration: BoxDecoration(
+
+                color: isSelected ? selectedBgColor : Colors.transparent,
+                // borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  SizedBox(
+                    height: 32, 
+                    width: 32,
+                    child: isSelected
+                        ? icon
+                        : ColorFiltered(
+                            colorFilter: const ColorFilter.matrix(_grayscaleMatrix),
+                            child: Opacity(
+                              opacity: 0.7, 
+                              child: icon,
+                            ),
+                          ),
+                  ),
+                  const SizedBox(height: 8),
+                  
+                  Text(
+                    cat.label,
                     textAlign: TextAlign.center,
+                    maxLines: 1, 
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                      fontSize: 12, 
+                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                      color: isSelected
+                          ? (isDark ? Colors.white : const Color(0xFF2C3E50)) 
+                          : (isDark ? Colors.grey[500] : Colors.grey[600]),
+                    ),
                   ),
-                ),
-                TextButton(onPressed: onRetry, child: const Text('Retry')),
-              ],
-            );
-          }
-
-          final List<CategoryModel> categories =
-              (snapshot.data ?? <CategoryModel>[])
-                  .where((CategoryModel item) => item.isActive != false)
-                  .toList(growable: false);
-          if (categories.isEmpty) {
-            return const Center(child: Text('No categories available'));
-          }
-
-          return ListView.builder(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: 12),
-            itemCount: categories.length,
-            itemBuilder: (BuildContext context, int index) {
-              final CategoryModel category = categories[index];
-              final bool isSelected = selectedCategoryId != null
-                  ? selectedCategoryId == category.id
-                  : selectedCategoryName == category.name;
-              final String assetPath =
-                  'assets/images/categories/${_assetSlug(category.name)}.png';
-              final Widget icon = Image.asset(
-                assetPath,
-                fit: BoxFit.contain,
-                errorBuilder: (
-                  BuildContext context,
-                  Object error,
-                  StackTrace? stackTrace,
-                ) => Icon(
-                  Icons.category_outlined,
-                  size: 24,
-                  color: isDark ? Colors.grey[500] : Colors.grey[400],
-                ),
-              );
-
-              return GestureDetector(
-                behavior: HitTestBehavior.opaque,
-                onTap: () => onCategoryChanged(
-                  isSelected ? null : category,
-                ),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  width: 85,
-                  margin: const EdgeInsets.symmetric(horizontal: 2),
-                  color: isSelected ? selectedBackground : Colors.transparent,
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: <Widget>[
-                      SizedBox(
-                        height: 32,
-                        width: 32,
-                        child: isSelected
-                            ? icon
-                            : ColorFiltered(
-                                colorFilter:
-                                    const ColorFilter.matrix(_grayscaleMatrix),
-                                child: Opacity(opacity: 0.7, child: icon),
-                              ),
-                      ),
-                      const SizedBox(height: 8),
-                      Text(
-                        category.name,
-                        textAlign: TextAlign.center,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: isSelected
-                              ? FontWeight.w600
-                              : FontWeight.w400,
-                          color: isSelected
-                              ? (isDark
-                                  ? Colors.white
-                                  : const Color(0xFF2C3E50))
-                              : (isDark
-                                  ? Colors.grey[500]
-                                  : Colors.grey[600]),
-                        ),
-                      ),
-                      const SizedBox(height: 6),
-                      AnimatedContainer(
-                        duration: const Duration(milliseconds: 150),
-                        height: 4,
-                        width: 40,
-                        decoration: BoxDecoration(
-                          color: isSelected ? blue : Colors.transparent,
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 6), 
+                                    AnimatedContainer(
+                    duration: const Duration(milliseconds: 150),
+                    height: 4,
+                    width: 40, 
+                    decoration: BoxDecoration(
+                      color: isSelected ? blue : Colors.transparent, 
+                      borderRadius: BorderRadius.circular(4), 
+                    ),
                   ),
-                ),
-              );
-            },
+                ],
+              ),
+            ),
           );
         },
       ),
     );
   }
-
-  String _assetSlug(String value) {
-    return value
-        .trim()
-        .toLowerCase()
-        .replaceAll('&', '')
-        .replaceAll(RegExp(r'[^a-z0-9]+'), '-')
-        .replaceAll(RegExp(r'^-+|-+$'), '');
-  }
 }
-
 class _SelectCategoryStep extends StatelessWidget {
   final String? selectedCategory;
   final String? selectedSubCategory;
@@ -1241,4 +1280,52 @@ class _ProductDetailsStepState extends State<_ProductDetailsStep> {
     ];
     return months[m];
   }
+}
+
+
+String _normaliseCategory(String value) {
+  return value.toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+}
+
+CategoryModel? _resolveBackendCategory(
+  List<CategoryModel> categories,
+  String selectedLabel,
+) {
+  final normalized = _normaliseCategory(selectedLabel);
+  const aliases = <String, String>{
+    'babykids': 'Baby & Kids',
+    'beautygrooming': 'Beauty & Grooming',
+    'petsanimals': 'Pets Care Services',
+    'toolsmachinery': 'Tools & Machinery',
+    'constructionheavymachinery': 'Tools & Machinery',
+    'transportationservices': 'Transport Services',
+    'deliverylogistics': 'Transport Services',
+    'fashiondress': 'Fashion Services',
+    'weddingphotography': 'Event Professionals',
+    'eventsparties': 'Event Professionals',
+    'foodcatering': 'Event Professionals',
+    'education': 'Professional Services',
+    'digitaltechservices': 'Professional Services',
+    'securityservices': 'Professional Services',
+    'healthwellness': 'Professional Services',
+    'sportsfitness': 'Professional Services',
+    'agriculturefarming': 'Tools & Machinery',
+    'gardeningoutdoor': 'Tools & Machinery',
+    'householditems': 'Furniture',
+    'officeworkequipment': 'Furniture',
+    'gamingconsoles': 'Electronics',
+    'musicalinstruments': 'Electronics',
+  };
+  final expected = _normaliseCategory(aliases[normalized] ?? selectedLabel);
+  return _firstWhereOrNull(
+    categories,
+    (item) => item.parentId == null && _normaliseCategory(item.name) == expected,
+  );
+}
+
+T? _firstWhereOrNull<T>(Iterable<T> items, bool Function(T item) test) {
+  for (final item in items) {
+    if (test(item)) return item;
+  }
+  return null;
 }

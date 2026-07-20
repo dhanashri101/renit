@@ -1,4 +1,15 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:rentit24/model/category_model.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/model/local_area_model.dart';
+import 'package:rentit24/pages/chat_screens/profile.dart';
+import 'package:rentit24/pages/product_details_screen.dart';
+import 'package:rentit24/pages/category_pages/category_ad_list_screen.dart';
+import 'package:rentit24/services/category_services.dart';
+import 'package:rentit24/services/listing_services.dart';
+import 'package:rentit24/services/local_area_service.dart';
+import 'package:rentit24/services/session_service.dart';
 
 class SearchScreen extends StatefulWidget {
   const SearchScreen({super.key});
@@ -15,10 +26,19 @@ class _SearchScreenState extends State<SearchScreen> {
   final FocusNode _locationFocusNode = FocusNode();
 
   bool _isLocationFocused = false;
+  final ListingService _listingService = ListingService();
+  final CategoryService _categoryService = CategoryService();
+  final LocalAreaService _localAreaService = LocalAreaService();
+  Timer? _debounce;
+  List<ListingModel> _results = <ListingModel>[];
+  List<CategoryModel> _categories = <CategoryModel>[];
+  List<LocalAreaModel> _locations = <LocalAreaModel>[];
+  bool _isSearchingBackend = false;
 
   @override
   void initState() {
     super.initState();
+    _loadInitialData();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
@@ -30,8 +50,74 @@ class _SearchScreenState extends State<SearchScreen> {
     });
   }
 
+  Future<void> _loadInitialData() async {
+    try {
+      final results = await Future.wait<dynamic>([
+        _categoryService.getCategories(),
+        _localAreaService.getAll(),
+      ]);
+      if (!mounted) return;
+      setState(() {
+        _categories = List<CategoryModel>.from(results[0] as List);
+        _locations = List<LocalAreaModel>.from(results[1] as List);
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Search bootstrap error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
+  }
+
+  void _scheduleSearch(String value) {
+    setState(() {});
+    _debounce?.cancel();
+    _debounce = Timer(const Duration(milliseconds: 350), () {
+      _runSearch(value);
+    });
+  }
+
+  Future<void> _runSearch(String value) async {
+    final query = value.trim();
+    if (query.isEmpty) {
+      if (mounted) setState(() => _results = <ListingModel>[]);
+      return;
+    }
+    setState(() => _isSearchingBackend = true);
+    try {
+      final listings = await _listingService.searchListings(
+        keyword: query,
+        limit: 30,
+      );
+      if (!mounted) return;
+      setState(() {
+        _results = listings;
+        _isSearchingBackend = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('Search error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (mounted) setState(() => _isSearchingBackend = false);
+    }
+  }
+
+  String _assetForCategory(String name) {
+    final value = name.toLowerCase();
+    if (value.contains('vehicle')) return 'assets/images/categories/vehicles.png';
+    if (value.contains('transport')) return 'assets/images/categories/transportation-services.png';
+    if (value.contains('electronic')) return 'assets/images/categories/electronics.png';
+    if (value.contains('furniture')) return 'assets/images/categories/furniture.png';
+    if (value.contains('pet')) return 'assets/images/categories/pets-animals.png';
+    if (value.contains('beauty')) return 'assets/images/categories/beauty-grooming.png';
+    if (value.contains('fashion')) return 'assets/images/categories/fashion-dress.png';
+    if (value.contains('professional')) return 'assets/images/categories/professional-services.png';
+    if (value.contains('medical')) return 'assets/images/categories/medical-equipment.png';
+    if (value.contains('estate')) return 'assets/images/categories/real-estate.png';
+    if (value.contains('tool') || value.contains('machinery')) return 'assets/images/categories/tools-machinery.png';
+    return 'assets/images/categories/electronics.png';
+  }
+
   @override
   void dispose() {
+    _debounce?.cancel();
     _searchController.dispose();
     _locationController.dispose();
     _searchFocusNode.dispose();
@@ -93,7 +179,7 @@ class _SearchScreenState extends State<SearchScreen> {
                         border: InputBorder.none,
                         contentPadding: const EdgeInsets.symmetric(vertical: 14),
                       ),
-                      onChanged: (value) => setState(() {}),
+                      onChanged: _scheduleSearch,
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -217,54 +303,59 @@ else
   }
 
   Widget _buildAutocompleteList(bool isDark, Color textColor) {
-    final query = _searchController.text.toLowerCase();
+    final query = _searchController.text.trim();
+    if (_isSearchingBackend) {
+      return const Padding(
+        padding: EdgeInsets.all(24),
+        child: CircularProgressIndicator(),
+      );
+    }
+
+    if (_results.isEmpty) {
+      return ListTile(
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: isDark ? Colors.grey[800] : Colors.grey[200],
+            shape: BoxShape.circle,
+          ),
+          child: Icon(Icons.search, color: Colors.grey[500]),
+        ),
+        title: Text(query, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+        subtitle: Text('No backend results found', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
+      );
+    }
+
     return Column(
-      children: [
-        ListTile(
-          leading: Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: isDark ? Colors.grey[800] : Colors.grey[200],
-              shape: BoxShape.circle,
-            ),
-            child: Icon(Icons.search, color: Colors.grey[500]),
+      children: _results.map((listing) {
+        final ad = AdItem.fromListing(listing);
+        return ListTile(
+          leading: CircleAvatar(
+            backgroundColor: isDark ? Colors.grey[800] : Colors.grey[200],
+            backgroundImage: listing.imageUrl.startsWith('http')
+                ? NetworkImage(listing.imageUrl)
+                : null,
+            child: listing.imageUrl.isEmpty ? const Icon(Icons.image_outlined) : null,
           ),
-          title: Text(query, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
-          subtitle: Text('In all categories', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-          onTap: () {},
-        ),
-        ListTile(
-          leading: const CircleAvatar(
-            backgroundImage: NetworkImage('https://images.unsplash.com/photo-1542362567-b07e54358753?auto=format&fit=crop&w=100'),
+          title: Text(listing.title, style: TextStyle(color: textColor, fontWeight: FontWeight.bold)),
+          subtitle: Text(
+            '${listing.categoryName} • ${listing.displayPrice}',
+            style: TextStyle(color: Colors.grey[500], fontSize: 12),
           ),
-          title: RichText(
-            text: TextSpan(
-              children: [
-                TextSpan(text: 'kia ', style: TextStyle(color: Colors.grey[500], fontSize: 16)),
-                TextSpan(text: query, style: TextStyle(color: textColor, fontSize: 16, fontWeight: FontWeight.bold)),
-                TextSpan(text: 'ens', style: TextStyle(color: Colors.grey[500], fontSize: 16)),
-              ],
-            ),
-          ),
-          subtitle: Text('Cars', style: TextStyle(color: Colors.grey[500], fontSize: 12)),
-          onTap: () {},
-        ),
-      ],
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => ProductDetailsScreen(adData: ad)),
+            );
+          },
+        );
+      }).toList(),
     );
   }
 
+
   Widget _buildLocationSuggestions(ThemeData theme, bool isDark, Color textColor) {
-    final locations = [
-      'Thane Station, Thane',
-      'Kausa, Mumbra',
-      'Andheri West, Mumbai',
-      'Govandi, Mumbai',
-      'Jogeshwari West, Mumbai',
-      'Malad East, Mumbai',
-      'Mira Road, Mumbai',
-      'Kurla West, Mumbai',
-      'Byculla, Mumbai'
-    ];
+    final locations = _locations;
 
     return ListView(
       padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -287,10 +378,12 @@ else
         const SizedBox(height: 8),
         ...locations.map((loc) => ListTile(
           leading: Icon(Icons.location_on_outlined, color: theme.primaryColor, size: 20),
-          title: Text(loc, style: TextStyle(color: textColor, fontSize: 14)),
-          onTap: () {
+          title: Text(loc.displayName, style: TextStyle(color: textColor, fontSize: 14)),
+          onTap: () async {
+            await SessionService.setAreaId(loc.id);
+            if (!mounted) return;
             setState(() {
-              _locationController.text = loc;
+              _locationController.text = loc.displayName;
               _locationFocusNode.unfocus();
               _searchFocusNode.requestFocus();
             });
@@ -301,19 +394,15 @@ else
   }
 
   Widget _buildPopularCategoriesGrid(bool isDark, Color textColor, Color? cardColor) {
-    final List<Map<String, String>> popularCategories = [
-      {'name': 'Vehicles', 'img': 'assets/images/categories/vehicles.png'},
-      {'name': 'Transport\nServices', 'img': 'assets/images/categories/transportation-services.png'},
-      {'name': 'Electronics', 'img': 'assets/images/categories/electronics.png'},
-      {'name': 'Furniture', 'img': 'assets/images/categories/furniture.png'},
-      {'name': 'Pets Care\nServices', 'img': 'assets/images/categories/pets-animals.png'},
-      {'name': 'Beauty &\nGrooming', 'img': 'assets/images/categories/beauty-grooming.png'},
-      {'name': 'Fashion\nServices', 'img': 'assets/images/categories/fashion-dress.png'},
-      {'name': 'Professional\nServices', 'img': 'assets/images/categories/professional-services.png'},
-      {'name': 'Medical\nEquipment', 'img': 'assets/images/categories/medical-equipment.png'},
-      {'name': 'Real Estate', 'img': 'assets/images/categories/real-estate.png'},
-      {'name': 'Tools\nMachinery', 'img': 'assets/images/categories/tools-machinery.png'},
-    ];
+    final List<Map<String, dynamic>> popularCategories = _categories
+        .map(
+          (category) => <String, dynamic>{
+            'id': category.id,
+            'name': category.name,
+            'img': _assetForCategory(category.name),
+          },
+        )
+        .toList();
 
     return Container(
       width: double.infinity,
@@ -334,7 +423,19 @@ else
             itemCount: popularCategories.length,
             itemBuilder: (context, index) {
               final category = popularCategories[index];
-              return Column(
+              return GestureDetector(
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (_) => CategoryAdListScreen(
+                        categoryId: category['id'] as int,
+                        categoryName: category['name'] as String,
+                      ),
+                    ),
+                  );
+                },
+                child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.start,
                 crossAxisAlignment: CrossAxisAlignment.center,
@@ -371,6 +472,7 @@ else
                     ),
                   ),
                 ],
+              ),
               );
             },
           ),

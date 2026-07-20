@@ -1,7 +1,10 @@
 import 'package:country_code_picker/country_code_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:intl_phone_field/intl_phone_field.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/pages/login_screens/email_loginscreen.dart';
+import 'package:rentit24/pages/login_screens/otp_verificationscreen.dart';
+import 'package:rentit24/services/auth_service.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class PhoneLoginScreen extends StatefulWidget {
@@ -13,7 +16,9 @@ class PhoneLoginScreen extends StatefulWidget {
 
 class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
   final TextEditingController _phoneController = TextEditingController();
+  final AuthService _authService = AuthService();
   bool _isPhoneFilled = false;
+  bool _isSendingOtp = false;
   String selectedCode = '+91';
   String selectedFlag = '🇮🇳';
   @override
@@ -26,23 +31,32 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
     });
   }
 
-
-  void _showOtpContractBlocker() {
-    FocusScope.of(context).unfocus();
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'OTP request is not sent because the backend has not documented the required req encoding/encryption and reqType value.',
-        ),
-        backgroundColor: Colors.orange,
-      ),
-    );
-  }
-
   @override
   void dispose() {
     _phoneController.dispose();
     super.dispose();
+  }
+
+  Future<void> _requestOtp() async {
+    if (_isSendingOtp) return;
+    final digits = _phoneController.text.replaceAll(RegExp(r'\D'), '');
+    final mobile = '$selectedCode$digits';
+    setState(() => _isSendingOtp = true);
+    final success = await _authService.requestLoginOtp(mobile);
+    if (!mounted) return;
+    setState(() => _isSendingOtp = false);
+    if (!success) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(_authService.lastError ?? 'Unable to request OTP.')),
+      );
+      return;
+    }
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => OtpVerificationScreen(phoneNumber: mobile),
+      ),
+    );
   }
 
   @override
@@ -211,8 +225,7 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed:
-                      _isPhoneFilled ? _showOtpContractBlocker : null,
+                  onPressed: _isPhoneFilled && !_isSendingOtp ? _requestOtp : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: theme.primaryColor,
                     disabledBackgroundColor: isDark
@@ -227,7 +240,9 @@ class _PhoneLoginScreenState extends State<PhoneLoginScreen> {
                       borderRadius: BorderRadius.circular(28),
                     ),
                   ),
-                  child: const Text(
+                  child: _isSendingOtp
+                      ? const SizedBox(width: 20, height: 20, child: CircularProgressIndicator(strokeWidth: 2))
+                      : const Text(
                     'Get OTP',
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:rentit24/pages/login_screens/create_new_app_pin.dart';
+import 'package:rentit24/pages/login_screens/profile_fll_screen.dart';
 
 class CreateNewPasswordScreen extends StatefulWidget {
   const CreateNewPasswordScreen({super.key});
@@ -116,13 +118,7 @@ class _CreateNewPasswordScreenState extends State<CreateNewPasswordScreen> {
                 height: 56,
                 child: ElevatedButton(
                   onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Password reset was not sent because the reset endpoint and request schema are not documented.',
-                        ),
-                      ),
-                    );
+  Navigator.push(context, MaterialPageRoute(builder: (_) => FillYourProfileScreen()));
                   },
                   style: ElevatedButton.styleFrom(
                     backgroundColor: primaryColor,

@@ -2,9 +2,11 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:rentit24/core/theme.dart';
+import 'package:rentit24/pages/login_screens/congratulationscreen.dart';
 import 'package:rentit24/pages/login_screens/create_account.dart';
 import 'package:rentit24/pages/login_screens/forgot_password_screen.dart';
 import 'package:rentit24/pages/login_screens/login_screen.dart';
+import 'package:rentit24/services/auth_service.dart';
 import 'package:rentit24/shared/widgets/Social_icon_button.dart';
 
 class emailLoginScreen extends StatefulWidget {
@@ -18,6 +20,8 @@ class _LoginScreenState extends State<emailLoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   
+  final AuthService _authService = AuthService();
+
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
 
@@ -46,21 +50,36 @@ class _LoginScreenState extends State<emailLoginScreen> {
   }
 
   Future<void> _handleLogin() async {
-    FocusScope.of(context).unfocus();
-    setState(() => _isLoading = true);
+    setState(() {
+      _isLoading = true;
+    });
 
-    await Future<void>.delayed(Duration.zero);
+    final success = await _authService.loginWithEmail(
+      _emailController.text.trim(),
+      _passwordController.text,
+    );
+
     if (!mounted) return;
 
-    setState(() => _isLoading = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Email login was not sent because auth/login requires the exact req encoding and reqType contract from the backend.',
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (success) {
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => const CongratulationsScreen(),
         ),
-        backgroundColor: Colors.orange,
-      ),
-    );
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_authService.lastError ?? 'Login failed.'),
+          backgroundColor: Colors.redAccent,
+        ),
+      );
+    }
   }
 
   @override

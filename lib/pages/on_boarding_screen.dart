@@ -1,7 +1,8 @@
 import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:rentit24/pages/welcomescreen.dart';
+import 'package:rentit24/wrapper/navbar.dart';
+import 'package:rentit24/services/banner_service.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -15,6 +16,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   int _currentPage = 0;
   Timer? _timer;
+
+  final BannerService _bannerService = BannerService();
 
   final List<Map<String, String>> onboardingData = [
     {
@@ -49,7 +52,37 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   void initState() {
     super.initState();
+    // _loadBanners();
     _startAutoScroll();
+  }
+
+  Future<void> _loadBanners() async {
+    try {
+      final banners = await _bannerService.getSplashBanners();
+      if (!mounted || banners.isEmpty) return;
+      setState(() {
+        onboardingData
+          ..clear()
+          ..addAll(
+            banners.map(
+              (banner) => <String, String>{
+                'title': banner.title,
+                'subtitle': banner.subtitle,
+                'bgImage': banner.backgroundImageUrl,
+                'mainImage': banner.imageUrl,
+              },
+            ),
+          );
+        _currentPage = 0;
+      });
+      if (_pageController.hasClients) {
+        _pageController.jumpToPage(0);
+      }
+      _startAutoScroll();
+    } catch (error, stackTrace) {
+      debugPrint('Onboarding banner error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+    }
   }
 
   void _startAutoScroll() {
@@ -67,6 +100,17 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
         timer.cancel();
       }
     });
+  }
+
+  void _goToHome() {
+    _timer?.cancel();
+
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const NavigationWrapper(),
+      ),
+    );
   }
 
   void _goToLogin() {
@@ -138,7 +182,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   child: Align(
                     alignment: Alignment.centerRight,
                     child: TextButton(
-                      onPressed: _goToLogin,
+                      onPressed: _goToHome,
                       style: TextButton.styleFrom(
                         foregroundColor:
                             colorScheme.onSurface.withOpacity(0.65),
@@ -222,6 +266,47 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   }
 }
 
+class _AdaptiveImage extends StatelessWidget {
+  const _AdaptiveImage({
+    required this.source,
+    required this.fit,
+    required this.fallback,
+    this.color,
+    this.colorBlendMode,
+  });
+
+  final String source;
+  final BoxFit fit;
+  final Widget fallback;
+  final Color? color;
+  final BlendMode? colorBlendMode;
+
+  @override
+  Widget build(BuildContext context) {
+    if (source.startsWith('http://') || source.startsWith('https://')) {
+      return Image.network(
+        source,
+        fit: fit,
+        width: double.infinity,
+        height: double.infinity,
+        color: color,
+        colorBlendMode: colorBlendMode,
+        errorBuilder: (_, __, ___) => fallback,
+      );
+    }
+    if (source.isEmpty) return fallback;
+    return Image.asset(
+      source,
+      fit: fit,
+      width: double.infinity,
+      height: double.infinity,
+      color: color,
+      colorBlendMode: colorBlendMode,
+      errorBuilder: (_, __, ___) => fallback,
+    );
+  }
+}
+
 class FullScreenSlide extends StatelessWidget {
   final Map<String, String> data;
 
@@ -244,16 +329,12 @@ class FullScreenSlide extends StatelessWidget {
         fit: StackFit.expand,
         children: [
           // Theme-aware background image
-          Image.asset(
-            data["bgImage"]!,
+          _AdaptiveImage(
+            source: data['bgImage'] ?? '',
             fit: BoxFit.cover,
             color: isDark ? Colors.black.withOpacity(0.30) : null,
             colorBlendMode: isDark ? BlendMode.darken : null,
-            errorBuilder: (context, error, stackTrace) {
-              return ColoredBox(
-                color: theme.scaffoldBackgroundColor,
-              );
-            },
+            fallback: ColoredBox(color: theme.scaffoldBackgroundColor),
           ),
 
           SafeArea(
@@ -265,17 +346,14 @@ class FullScreenSlide extends StatelessWidget {
 
                   Flexible(
                     flex: 6,
-                    child: Image.asset(
-                      data["mainImage"]!,
-                      width: double.infinity,
+                    child: _AdaptiveImage(
+                      source: data['mainImage'] ?? '',
                       fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.image_not_supported_outlined,
-                          size: 80,
-                          color: colorScheme.onSurface.withOpacity(0.35),
-                        );
-                      },
+                      fallback: Icon(
+                        Icons.image_not_supported_outlined,
+                        size: 80,
+                        color: colorScheme.onSurface.withOpacity(0.35),
+                      ),
                     ),
                   ),
 

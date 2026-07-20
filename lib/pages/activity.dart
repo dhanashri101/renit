@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:rentit24/core/theme.dart';
 import 'package:rentit24/wrapper/navbar.dart';
+import 'package:rentit24/model/listing_model.dart';
+import 'package:rentit24/services/listing_services.dart';
 
 class MyActivityPage extends StatefulWidget {
   const MyActivityPage({super.key});
@@ -24,66 +26,103 @@ class _MyActivityPageState extends State<MyActivityPage>
     'Moderated Ads',
   ];
 
-  final List<AdModel> _allAds = const [
-    AdModel(
-      title: 'Physio Therapy',
-      category: 'Doctor',
-      date: '28 Mar 2026',
-      price: '₹700/Visit',
-      views: 0,
-      saves: 0,
-      imageUrl:
-          'https://images.unsplash.com/photo-1576091160550-2173dba999ef?w=400',
-      status: AdStatus.pending,
-      type: AdType.service,
-    ),
-    AdModel(
-      title: 'Treadmill on rent',
-      category: '',
-      date: '15 Mar 2026',
-      price: '₹200/day',
-      views: 0,
-      saves: 0,
-      imageUrl:
-          'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=400',
-      status: AdStatus.rejected,
-      rejectionReason:
-          'Remove phone number or unrelated text from AD Description that does not match the product or service.',
-      type: AdType.product,
-    ),
-    AdModel(
-      title: 'Emergency treatment visit',
-      category: 'Doctor',
-      date: '10 Oct 2025',
-      price: '₹500/visit',
-      views: 542,
-      saves: 122,
-      rating: 4.5,
-      imageUrl:
-          'https://images.unsplash.com/photo-1584982751601-97dcc096659c?w=400',
-      status: AdStatus.approved,
-      type: AdType.service,
-    ),
-    AdModel(
-      title: 'Wheelchair for rent',
-      category: '',
-      date: '21 Sept 2025',
-      price: '₹200/day',
-      views: 440,
-      saves: 52,
-      rating: 4.2,
-      imageUrl:
-          'https://images.unsplash.com/photo-1581090122319-8fab9528eaaa?w=400',
-      status: AdStatus.inactive,
-      type: AdType.product,
-    ),
-  ];
+  final ListingService _listingService = ListingService();
+  final List<AdModel> _allAds = <AdModel>[];
+  bool _isLoading = true;
+  String? _loadError;
 
   @override
   void initState() {
     super.initState();
     _mainTabController = TabController(length: 3, vsync: this);
     _mainTabController.addListener(_handleMainTabChange);
+    _loadMyListings();
+  }
+
+  Future<void> _loadMyListings() async {
+    setState(() {
+      _isLoading = true;
+      _loadError = null;
+    });
+    try {
+      final listings = await _listingService.getMyListings(limit: 100);
+      if (!mounted) return;
+      setState(() {
+        _allAds
+          ..clear()
+          ..addAll(listings.map(_toAdModel));
+        _isLoading = false;
+      });
+    } catch (error, stackTrace) {
+      debugPrint('My Activity error: $error');
+      debugPrintStack(stackTrace: stackTrace);
+      if (!mounted) return;
+      setState(() {
+        _isLoading = false;
+        _loadError = error.toString().replaceFirst('Exception: ', '');
+      });
+    }
+  }
+
+  AdModel _toAdModel(ListingModel listing) {
+    final statusText = listing.status.trim().toLowerCase();
+    final status = switch (statusText) {
+      'active' || 'approved' => AdStatus.approved,
+      'inactive' || 'deleted' => AdStatus.inactive,
+      'rejected' || 'moderated' => AdStatus.rejected,
+      _ => AdStatus.pending,
+    };
+    final date = listing.postedAt;
+    final formattedDate = date == null
+        ? ''
+        : '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+
+    return AdModel(
+      listingId: listing.id,
+      title: listing.title,
+      category: listing.categoryName,
+      date: formattedDate,
+      price: listing.displayPrice,
+      views: listing.viewCount,
+      saves: listing.reviewCount,
+      rating: listing.rating,
+      imageUrl: listing.imageUrl.isNotEmpty
+          ? listing.imageUrl
+          : (listing.isService
+              ? 'assets/images/carpainter.jpg'
+              : 'assets/images/camera.jpg'),
+      status: status,
+      rejectionReason: listing.rejectionReason.isEmpty
+          ? null
+          : listing.rejectionReason,
+      type: listing.isService ? AdType.service : AdType.product,
+    );
+  }
+
+  Future<void> _handleAdAction(AdModel ad, String action) async {
+    if (action == 'Edit') {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('The backend update endpoint is available, but this UI has no edit form yet.'),
+        ),
+      );
+      return;
+    }
+    if (ad.listingId <= 0) return;
+
+    try {
+      await _listingService.deleteListing(ad.listingId);
+      if (!mounted) return;
+      setState(() => _allAds.removeWhere((item) => item.listingId == ad.listingId));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('${ad.title} was deactivated.')),
+      );
+    } catch (error) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(error.toString().replaceFirst('Exception: ', ''))),
+      );
+    }
   }
 
   void _handleMainTabChange() {
@@ -268,6 +307,20 @@ class _MyActivityPageState extends State<MyActivityPage>
     final theme = Theme.of(context);
     final ads = _getFilteredAds(mainTabIndex, _selectedFilterIndex);
 
+    if (_isLoading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
+    if (_loadError != null && _allAds.isEmpty) {
+      return Center(
+        child: TextButton.icon(
+          onPressed: _loadMyListings,
+          icon: const Icon(Icons.refresh),
+          label: Text(_loadError!),
+        ),
+      );
+    }
+
     if (ads.isEmpty) {
       return Center(
         child: Text(
@@ -283,7 +336,10 @@ class _MyActivityPageState extends State<MyActivityPage>
       padding: const EdgeInsets.all(16),
       itemCount: ads.length,
       separatorBuilder: (_, __) => const SizedBox(height: 16),
-      itemBuilder: (context, index) => AdCard(ad: ads[index]),
+      itemBuilder: (context, index) => AdCard(
+        ad: ads[index],
+        onAction: (action) => _handleAdAction(ads[index], action),
+      ),
     );
   }
 }
@@ -293,6 +349,7 @@ enum AdStatus { pending, approved, rejected, inactive }
 enum AdType { product, service }
 
 class AdModel {
+  final int listingId;
   final String title;
   final String category;
   final String date;
@@ -306,6 +363,7 @@ class AdModel {
   final AdType type;
 
   const AdModel({
+    this.listingId = 0,
     required this.title,
     required this.category,
     required this.date,
@@ -322,10 +380,12 @@ class AdModel {
 
 class AdCard extends StatelessWidget {
   final AdModel ad;
+  final ValueChanged<String> onAction;
 
   const AdCard({
     super.key,
     required this.ad,
+    required this.onAction,
   });
 
   @override
@@ -629,11 +689,7 @@ class AdCard extends StatelessWidget {
             color: colorScheme.onSurfaceVariant,
           ),
         ),
-        onSelected: (value) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('$value selected for ${ad.title}')),
-          );
-        },
+        onSelected: onAction,
         itemBuilder: (_) => const [
           PopupMenuItem<String>(
             value: 'Edit',
